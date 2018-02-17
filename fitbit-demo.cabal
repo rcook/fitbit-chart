@@ -41,6 +41,8 @@ executable fitbit-demo-app
                                             -fwarn-unused-imports
   build-depends:                            base >= 4.7 && < 5
                                           , fitbit-demo
+                                          , hoauth2
+                                          , req
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0
