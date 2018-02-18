@@ -24,8 +24,14 @@ library
                                             -Werror=incomplete-patterns
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
-  build-depends:                            base >= 4.7 && < 5
+  build-depends:                            aeson
+                                          , base >= 4.7 && < 5
+                                          , bytestring
+                                          , text
+                                          , yaml
   exposed-modules:                          FitbitDemo
+                                          , FitbitDemo.Config
+                                          , FitbitDemo.IO
 
 executable fitbit-demo-app
   default-language:                         Haskell2010
@@ -39,10 +45,15 @@ executable fitbit-demo-app
                                             -Werror=incomplete-patterns
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
-  build-depends:                            base >= 4.7 && < 5
+  build-depends:                            aeson
+                                          , base >= 4.7 && < 5
+                                          , directory
+                                          , filepath
                                           , fitbit-demo
                                           , hoauth2
                                           , req
+                                          , text
+                                          , yaml
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0
