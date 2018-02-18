@@ -50,6 +50,8 @@ executable fitbit-demo-app
                                           , filepath
                                           , fitbit-demo
                                           , text
+  other-modules:                            FitbitDemoApp
+                                          , FitbitDemoApp.Config
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0

@@ -10,7 +10,6 @@ module FitbitDemo.IO
 import           Data.Aeson (FromJSON, ToJSON)
 import qualified Data.Aeson as Aeson (decodeStrict, encode)
 import           Data.ByteString (ByteString)
-import qualified Data.ByteString as ByteString (writeFile)
 import qualified Data.ByteString.Lazy as ByteString (toStrict)
 import qualified Data.Yaml as Yaml (decode, decodeFile, encode, encodeFile)
 
