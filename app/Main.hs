@@ -18,9 +18,9 @@ foo _ = do
                 Right c -> c
     dumpConfig config
     -}
-    let config = Config (FitbitConfig (ClientId "xyz") (Secret "abc"))
-    print $ encodeYaml config
-    print $ encodeJson config
+    let config = Config (FitbitAPI (ClientId "xyz") (Secret "abc"))
+    print $ encodeYAML config
+    print $ encodeJSON config
 
 main :: IO ()
 main = do

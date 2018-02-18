@@ -68,7 +68,7 @@ test-suite fitbit-demo-test
                                             -Werror=incomplete-patterns
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
-  other-modules:                            FitbitDemoSpec
+  other-modules:                            ConfigSpec
   build-depends:                            base >= 4.7 && < 5
                                           , fitbit-demo
                                           , hspec
