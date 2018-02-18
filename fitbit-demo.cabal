@@ -45,15 +45,11 @@ executable fitbit-demo-app
                                             -Werror=incomplete-patterns
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
-  build-depends:                            aeson
-                                          , base >= 4.7 && < 5
+  build-depends:                            base >= 4.7 && < 5
                                           , directory
                                           , filepath
                                           , fitbit-demo
-                                          , hoauth2
-                                          , req
                                           , text
-                                          , yaml
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0

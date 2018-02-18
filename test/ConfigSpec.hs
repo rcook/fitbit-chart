@@ -9,8 +9,8 @@ spec :: Spec
 spec =
     describe "encodeYAML" $ do
         it "yields pretty YAML" $ do
-            let config = Config (FitbitAPI (ClientId "xyz") (Secret "abc"))
-            encodeYAML config `shouldBe` "fitbit-api:\n  secret: abc\n  client-id: xyz\n"
+            let config = Config (FitbitAPI (ClientId "xyz") (ClientSecret "abc"))
+            encodeYAML config `shouldBe` "fitbit-api:\n  client-secret: abc\n  client-id: xyz\n"
         it "yields original value when decoded" $ do
-            let config = Config (FitbitAPI (ClientId "xyz") (Secret "abc"))
+            let config = Config (FitbitAPI (ClientId "xyz") (ClientSecret "abc"))
             decodeYAML (encodeYAML config) `shouldBe` Just config

@@ -3,9 +3,9 @@
 
 module FitbitDemo.Config
     ( ClientId(..)
+    , ClientSecret(..)
     , Config(..)
     , FitbitAPI(..)
-    , Secret(..)
     ) where
 
 import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withObject)
@@ -16,22 +16,22 @@ newtype ClientId = ClientId Text deriving (Eq, Generic, Show)
 instance FromJSON ClientId
 instance ToJSON ClientId
 
-newtype Secret = Secret Text deriving (Eq, Generic, Show)
-instance FromJSON Secret
-instance ToJSON Secret
+newtype ClientSecret = ClientSecret Text deriving (Eq, Generic, Show)
+instance FromJSON ClientSecret
+instance ToJSON ClientSecret
 
-data FitbitAPI = FitbitAPI ClientId Secret deriving (Eq, Generic, Show)
+data FitbitAPI = FitbitAPI ClientId ClientSecret deriving (Eq, Generic, Show)
 instance FromJSON FitbitAPI where
     parseJSON =
         withObject "FitbitAPI" $ \v -> FitbitAPI
             <$> v .: "client-id"
-            <*> v .: "secret"
+            <*> v .: "client-secret"
 
 instance ToJSON FitbitAPI where
-    toJSON (FitbitAPI (ClientId clientId) (Secret secret)) =
+    toJSON (FitbitAPI (ClientId clientId) (ClientSecret clientSecret)) =
         object
             [ "client-id" .= clientId
-            , "secret" .= secret
+            , "client-secret" .= clientSecret
             ]
 
 data Config = Config FitbitAPI deriving (Eq, Generic, Show)
