@@ -21,23 +21,23 @@ getTokenConfigPath = do
     homeDir <- getHomeDirectory
     return $ homeDir </> configDir </> "token.yaml"
 
-promptForConfig :: IO Config
+promptForConfig :: IO AppConfig
 promptForConfig = do
     putStrLn "No Fitbit API configuration was found."
     putStr "Enter Fitbit client ID: "
     clientId <- ClientId <$> Text.getLine
     putStr "Enter Fitbit client secret: "
     clientSecret <- ClientSecret <$> Text.getLine
-    return $ Config (FitbitAPI clientId clientSecret)
+    return $ AppConfig (FitbitAPI clientId clientSecret)
 
-newConfig :: FilePath -> IO Config
+newConfig :: FilePath -> IO AppConfig
 newConfig p = do
     config <- promptForConfig
     createDirectoryIfMissing True (takeDirectory p)
     encodeYAMLFile p config
     return config
 
-getConfig :: IO (Maybe Config)
+getConfig :: IO (Maybe AppConfig)
 getConfig = do
     configPath <- getConfigPath
     configPathExists <- doesFileExist configPath

@@ -71,8 +71,8 @@ encodeClientAuth :: ClientId -> ClientSecret -> ByteString
 encodeClientAuth (ClientId cId) (ClientSecret s) = Base64.encode $ ByteString.concat [Text.encodeUtf8 cId, ":", Text.encodeUtf8 s]
 
 -- TODO: Move to Config
-readTokenConfig :: Config -> IO TokenConfig
-readTokenConfig (Config (FitbitAPI clientId clientSecret)) = do
+readTokenConfig :: AppConfig -> IO TokenConfig
+readTokenConfig (AppConfig (FitbitAPI clientId clientSecret)) = do
     authCode <- getAuthCode clientId
     let Just (url, _) = toUrlHttps [uri|https://api.fitbit.com/oauth2/token|]
     result <- doIt url authCode clientId clientSecret
@@ -95,7 +95,7 @@ getTokenConfigPath = do
     return $ homeDir </> configDir </> "token.yaml"
 
 -- TODO: Move to Config
-myGetTokenConfig :: Config -> IO TokenConfig
+myGetTokenConfig :: AppConfig -> IO TokenConfig
 myGetTokenConfig config = do
     tokenConfigPath <- getTokenConfigPath
     tokenConfigPathExists <- doesFileExist tokenConfigPath
@@ -154,7 +154,7 @@ getWeightGoal (AccessToken at) = do
 
 main :: IO ()
 main = do
-    Just config@(Config (FitbitAPI clientId clientSecret)) <- getConfig
+    Just config@(AppConfig (FitbitAPI clientId clientSecret)) <- getConfig
     tokenConfig@(TokenConfig accessToken _) <- myGetTokenConfig config
     weightGoal <- withRefresh clientId clientSecret tokenConfig $ getWeightGoal accessToken
     print weightGoal
