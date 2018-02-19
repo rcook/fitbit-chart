@@ -14,6 +14,7 @@ import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
 import qualified Data.Text.Encoding as Text (encodeUtf8)
+import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           FitbitDemoApp
 import           FitbitDemoLib
 import           Network.HTTP.Client (HttpException(..), HttpExceptionContent(..), responseStatus)
@@ -39,6 +40,7 @@ import           Network.HTTP.Req
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
 import           System.Directory (doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>))
+import qualified Text.URI as URI (mkURI, render)
 import           Text.URI.QQ (uri)
 
 data AccessTokenRequest = AccessTokenRequest ClientId AuthCode deriving Show
@@ -74,6 +76,12 @@ encodeClientAuth (ClientId cId) (ClientSecret s) = Base64.encode $ ByteString.co
 readTokenConfig :: AppConfig -> IO TokenConfig
 readTokenConfig (AppConfig (FitbitAPI clientId clientSecret)) = do
     authCode <- getAuthCode clientId
+                    (\authUri -> do
+                        putStrLn "Open following link in browser:"
+                        Text.putStrLn $ URI.render authUri
+                        putStr "Enter callback URI: "
+                        URI.mkURI =<< Text.getLine)
+
     let Just (url, _) = toUrlHttps [uri|https://api.fitbit.com/oauth2/token|]
     result <- doIt url authCode clientId clientSecret
     let (AccessTokenResponse at rt) = case result of
