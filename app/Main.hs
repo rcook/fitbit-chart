@@ -59,7 +59,7 @@ readTokenConfig :: AppConfig -> IO TokenConfig
 readTokenConfig (AppConfig (FitbitAPI clientId clientSecret)) = do
     authCode <- getAuthCode clientId promptForCallbackURI
     let Just (url, _) = toUrlHttps [uri|https://api.fitbit.com/oauth2/token|]
-    result <- doIt url authCode clientId clientSecret
+    result <- sendAccessTokenRequest url authCode clientId clientSecret
     let (AccessTokenResponse at rt) = case result of
                                         Left e -> error e
                                         Right x -> x
