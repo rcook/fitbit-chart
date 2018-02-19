@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module FitbitDemoApp.AuthCode
+module FitbitDemoLib.AuthCode
     ( AuthCode(..)
     , getAuthCode
     ) where
@@ -9,7 +9,7 @@ module FitbitDemoApp.AuthCode
 import           Control.Lens ((^..), (.~), (&))
 import           Data.Text (Text)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
-import           FitbitDemo
+import           FitbitDemoLib.Types
 import           Text.URI (QueryParam(..), URI, mkQueryKey, mkQueryValue, mkURI, render, unRText)
 import           Text.URI.Lens (queryParam, uriQuery)
 import           Text.URI.QQ (uri)

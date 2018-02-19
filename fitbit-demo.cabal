@@ -27,13 +27,18 @@ library
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
                                           , bytestring
+                                          , lens
                                           , modern-uri
                                           , req
                                           , text
                                           , yaml
-  exposed-modules:                          FitbitDemo
-                                          , FitbitDemo.Config
-                                          , FitbitDemo.IO
+  exposed-modules:                          FitbitDemoLib
+                                          , FitbitDemoLib.AppConfig
+                                          , FitbitDemoLib.AuthCode
+                                          , FitbitDemoLib.FitbitAPI
+                                          , FitbitDemoLib.IO
+                                          , FitbitDemoLib.TokenConfig
+                                          , FitbitDemoLib.Types
 
 executable fitbit-demo-app
   default-language:                         Haskell2010
@@ -63,7 +68,6 @@ executable fitbit-demo-app
                                           , req-url-extra
                                           , text
   other-modules:                            FitbitDemoApp
-                                          , FitbitDemoApp.AuthCode
                                           , FitbitDemoApp.Config
 
 test-suite fitbit-demo-test

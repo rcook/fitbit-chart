@@ -4,7 +4,7 @@ module FitbitDemoApp.Config
     ) where
 
 import qualified Data.Text.IO as Text (getLine)
-import           FitbitDemo
+import           FitbitDemoLib
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
 

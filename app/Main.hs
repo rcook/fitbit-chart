@@ -1,33 +1,41 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module Main (main) where
 
-{-
-import           Control.Monad
-import           Data.Maybe
-import           Data.Text (Text)
-import           Text.URI
--}
-import           Control.Exception
-import           Control.Monad.IO.Class
-import           Data.Aeson
+import           Control.Exception (catch, throwIO)
+import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), Value, object, withObject)
 import           Data.Aeson.Types (parseEither)
 import           Data.ByteString (ByteString)
-import qualified Data.ByteString as ByteString (append, concat, putStrLn)
+import qualified Data.ByteString as ByteString (append, concat)
 import qualified Data.ByteString.Base64 as Base64 (encode)
-import           Data.Default.Class
-import           Data.Monoid
+import           Data.Default.Class (def)
+import           Data.Monoid ((<>))
 import           Data.Text (Text)
 import qualified Data.Text.Encoding as Text (encodeUtf8)
-import           FitbitDemo
 import           FitbitDemoApp
-import           GHC.Generics
+import           FitbitDemoLib
 import           Network.HTTP.Client (HttpException(..), HttpExceptionContent(..), responseStatus)
 import           Network.HTTP.Types (unauthorized401)
 import           Network.HTTP.Req
+                    ( (/:)
+                    , (=:)
+                    , GET(..)
+                    , HttpException(..)
+                    , NoReqBody(..)
+                    , POST(..)
+                    , ReqBodyUrlEnc(..)
+                    , Scheme(..)
+                    , Url
+                    , header
+                    , https
+                    , jsonResponse
+                    , oAuth2Bearer
+                    , req
+                    , responseBody
+                    , runReq
+                    )
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
 import           System.Directory (doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>))
@@ -43,8 +51,6 @@ instance ToJSON AccessTokenRequest where
             , "redirect_uri" .= ("http://localhost:8765/callback/" :: Text) -- TODO: Should come from Config!
             ]
 
-
-
 data AccessTokenResponse = AccessTokenResponse AccessToken RefreshToken deriving Show
 
 instance FromJSON AccessTokenResponse where
@@ -55,7 +61,7 @@ instance FromJSON AccessTokenResponse where
 
 
 doIt :: Url 'Https -> AuthCode -> ClientId -> ClientSecret -> IO (Either String AccessTokenResponse)
-doIt url authCode@(AuthCode ac) clientId@(ClientId cid) clientSecret = runReq def $ do
+doIt url (AuthCode ac) clientId@(ClientId cid) clientSecret = runReq def $ do
     let opts = header "Authorization" (ByteString.append "Basic " (encodeClientAuth clientId clientSecret))
         formBody = "code" =: ac <> "grant_type" =: ("authorization_code" :: Text) <> "client_id" =: cid <> "expires_in" =: ("3600" :: Text)
     body <- responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts
@@ -108,22 +114,19 @@ instance FromJSON RefreshTokenResponse where
             <*> (RefreshToken <$> v .: "refresh_token")
 
 refreshAndInvoke :: ClientId -> ClientSecret -> TokenConfig -> IO a -> IO a
-refreshAndInvoke clientId clientSecret tokenConfig@(TokenConfig accessToken (RefreshToken rt)) action = do
+refreshAndInvoke clientId clientSecret (TokenConfig accessToken (RefreshToken rt)) action = do
     let url = https "api.fitbit.com" /: "oauth2" /: "token"
     let opts = header "Authorization" (ByteString.append "Basic " (encodeClientAuth clientId clientSecret))
         formBody = "grant_type" =: ("refresh_token" :: Text) <> "refresh_token" =: rt <> "expires_in" =: ("3600" :: Text)
     body <- runReq def $ responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts
-        {-
-        case parseEither parseJSON body of
-            Left e -> error e
-            Right 
-        -}
     putStrLn "REFRESH AND REVOKE"
-    let RefreshTokenResponse at rt = case parseEither parseJSON body of
+    let RefreshTokenResponse at rt' = case parseEither parseJSON body of
                                         Left e -> error $ "BAIL: " ++ e
                                         Right x -> x
-        newTokenConfig = TokenConfig at rt
-    putStrLn $ "accessToken stayed the same: " ++ show (accessToken == at)
+        newTokenConfig = TokenConfig at rt'
+        AccessToken at0 = accessToken
+        AccessToken at1 = at
+    putStrLn $ "accessToken stayed the same: " ++ show (at0 == at1)
     tokenConfigPath <- getTokenConfigPath
     encodeYAMLFile tokenConfigPath newTokenConfig
     action
@@ -152,7 +155,7 @@ getWeightGoal (AccessToken at) = do
 main :: IO ()
 main = do
     Just config@(Config (FitbitAPI clientId clientSecret)) <- getConfig
-    tokenConfig@(TokenConfig accessToken refreshToken) <- myGetTokenConfig config
+    tokenConfig@(TokenConfig accessToken _) <- myGetTokenConfig config
     weightGoal <- withRefresh clientId clientSecret tokenConfig $ getWeightGoal accessToken
     print weightGoal
 

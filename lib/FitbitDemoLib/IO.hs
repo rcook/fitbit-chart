@@ -1,4 +1,4 @@
-module FitbitDemo.IO
+module FitbitDemoLib.IO
     ( decodeJSON
     , decodeYAML
     , decodeYAMLFile
