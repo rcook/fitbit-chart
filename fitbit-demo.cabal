@@ -50,10 +50,13 @@ executable fitbit-demo-app
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
                                           , base64-bytestring
+                                          , bytestring
                                           , data-default-class
                                           , directory
                                           , filepath
                                           , fitbit-demo
+                                          , http-client
+                                          , http-types
                                           , lens
                                           , modern-uri
                                           , req

@@ -49,7 +49,7 @@ instance ToJSON Config where
             [ "fitbit-api" .= fitbitAPI
             ]
 
-newtype AccessToken = AccessToken Text deriving Show
+newtype AccessToken = AccessToken Text deriving (Eq, Show)
 newtype RefreshToken = RefreshToken Text deriving Show
 
 data TokenConfig = TokenConfig AccessToken RefreshToken deriving Show
