@@ -1,18 +1,21 @@
 module FitbitDemoApp.Config
-    ( getConfig -- TODO: Rename to getAppConfig
+    ( PromptForAppConfig
+    , getAppConfig
     , getTokenConfig
+    , getTokenConfigPath
     ) where
 
-import qualified Data.Text.IO as Text (getLine)
 import           FitbitDemoLib
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
 
+type PromptForAppConfig = IO AppConfig
+
 configDir :: FilePath
 configDir = ".fitbit-demo"
 
-getConfigPath :: IO FilePath
-getConfigPath = do
+getAppConfigPath :: IO FilePath
+getAppConfigPath = do
     homeDir <- getHomeDirectory
     return $ homeDir </> configDir </> "config.yaml"
 
@@ -21,29 +24,20 @@ getTokenConfigPath = do
     homeDir <- getHomeDirectory
     return $ homeDir </> configDir </> "token.yaml"
 
-promptForConfig :: IO AppConfig
-promptForConfig = do
-    putStrLn "No Fitbit API configuration was found."
-    putStr "Enter Fitbit client ID: "
-    clientId <- ClientId <$> Text.getLine
-    putStr "Enter Fitbit client secret: "
-    clientSecret <- ClientSecret <$> Text.getLine
-    return $ AppConfig (FitbitAPI clientId clientSecret)
-
-newConfig :: FilePath -> IO AppConfig
-newConfig p = do
-    config <- promptForConfig
+newAppConfig :: PromptForAppConfig -> FilePath -> IO AppConfig
+newAppConfig prompt p = do
+    config <- prompt
     createDirectoryIfMissing True (takeDirectory p)
     encodeYAMLFile p config
     return config
 
-getConfig :: IO (Maybe AppConfig)
-getConfig = do
-    configPath <- getConfigPath
-    configPathExists <- doesFileExist configPath
-    if configPathExists
-        then decodeYAMLFile configPath
-        else Just <$> newConfig configPath
+getAppConfig :: PromptForAppConfig -> IO (Maybe AppConfig)
+getAppConfig prompt = do
+    appConfigPath <- getAppConfigPath
+    appConfigExists <- doesFileExist appConfigPath
+    if appConfigExists
+        then decodeYAMLFile appConfigPath
+        else Just <$> newAppConfig prompt appConfigPath
 
 getTokenConfig :: IO (Maybe TokenConfig)
 getTokenConfig = do

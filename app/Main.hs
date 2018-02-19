@@ -38,10 +38,50 @@ import           Network.HTTP.Req
                     , runReq
                     )
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
-import           System.Directory (doesFileExist, getHomeDirectory)
-import           System.FilePath ((</>))
+import           System.Directory (doesFileExist)
 import qualified Text.URI as URI (mkURI, render)
 import           Text.URI.QQ (uri)
+
+promptForAppConfig :: PromptForAppConfig
+promptForAppConfig = do
+    putStrLn "No Fitbit API configuration was found."
+    putStr "Enter Fitbit client ID: "
+    clientId <- ClientId <$> Text.getLine
+    putStr "Enter Fitbit client secret: "
+    clientSecret <- ClientSecret <$> Text.getLine
+    return $ AppConfig (FitbitAPI clientId clientSecret)
+
+promptForCallbackURI :: PromptForCallbackURI
+promptForCallbackURI authUri = do
+    putStrLn "Open following link in browser:"
+    Text.putStrLn $ URI.render authUri
+    putStr "Enter callback URI: "
+    URI.mkURI =<< Text.getLine
+
+-- TODO: Move to Config
+readTokenConfig :: AppConfig -> IO TokenConfig
+readTokenConfig (AppConfig (FitbitAPI clientId clientSecret)) = do
+    authCode <- getAuthCode clientId promptForCallbackURI
+    let Just (url, _) = toUrlHttps [uri|https://api.fitbit.com/oauth2/token|]
+    result <- doIt url authCode clientId clientSecret
+    let (AccessTokenResponse at rt) = case result of
+                                        Left e -> error e
+                                        Right x -> x
+        tokenConfig = TokenConfig at rt
+    tokenConfigPath <- getTokenConfigPath
+    encodeYAMLFile tokenConfigPath tokenConfig
+    return tokenConfig
+
+-- TODO: Move to Config
+myGetTokenConfig :: AppConfig -> IO TokenConfig
+myGetTokenConfig config = do
+    tokenConfigPath <- getTokenConfigPath
+    tokenConfigExists <- doesFileExist tokenConfigPath
+    if tokenConfigExists
+        then do
+            Just tokenConfig <- getTokenConfig
+            return tokenConfig
+        else readTokenConfig config
 
 data AccessTokenRequest = AccessTokenRequest ClientId AuthCode deriving Show
 instance ToJSON AccessTokenRequest where
@@ -72,46 +112,6 @@ doIt url (AuthCode ac) clientId@(ClientId cid) clientSecret = runReq def $ do
 encodeClientAuth :: ClientId -> ClientSecret -> ByteString
 encodeClientAuth (ClientId cId) (ClientSecret s) = Base64.encode $ ByteString.concat [Text.encodeUtf8 cId, ":", Text.encodeUtf8 s]
 
--- TODO: Move to Config
-readTokenConfig :: AppConfig -> IO TokenConfig
-readTokenConfig (AppConfig (FitbitAPI clientId clientSecret)) = do
-    authCode <- getAuthCode clientId
-                    (\authUri -> do
-                        putStrLn "Open following link in browser:"
-                        Text.putStrLn $ URI.render authUri
-                        putStr "Enter callback URI: "
-                        URI.mkURI =<< Text.getLine)
-
-    let Just (url, _) = toUrlHttps [uri|https://api.fitbit.com/oauth2/token|]
-    result <- doIt url authCode clientId clientSecret
-    let (AccessTokenResponse at rt) = case result of
-                                        Left e -> error e
-                                        Right x -> x
-        tokenConfig = TokenConfig at rt
-    tokenConfigPath <- getTokenConfigPath
-    encodeYAMLFile tokenConfigPath tokenConfig
-    return tokenConfig
-
--- TODO: Move to Config
-configDir :: FilePath
-configDir = ".fitbit-demo"
-
--- TODO: Move to Config
-getTokenConfigPath :: IO FilePath
-getTokenConfigPath = do
-    homeDir <- getHomeDirectory
-    return $ homeDir </> configDir </> "token.yaml"
-
--- TODO: Move to Config
-myGetTokenConfig :: AppConfig -> IO TokenConfig
-myGetTokenConfig config = do
-    tokenConfigPath <- getTokenConfigPath
-    tokenConfigPathExists <- doesFileExist tokenConfigPath
-    if tokenConfigPathExists
-        then do
-            Just tokenConfig <- getTokenConfig
-            return tokenConfig
-        else readTokenConfig config
 
 data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken deriving Show
 
@@ -162,7 +162,7 @@ getWeightGoal (AccessToken at) = do
 
 main :: IO ()
 main = do
-    Just config@(AppConfig (FitbitAPI clientId clientSecret)) <- getConfig
+    Just config@(AppConfig (FitbitAPI clientId clientSecret)) <- getAppConfig promptForAppConfig
     tokenConfig@(TokenConfig accessToken _) <- myGetTokenConfig config
     weightGoal <- withRefresh clientId clientSecret tokenConfig $ getWeightGoal accessToken
     print weightGoal
