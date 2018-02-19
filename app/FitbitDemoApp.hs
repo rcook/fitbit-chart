@@ -1,5 +1,7 @@
 module FitbitDemoApp
-    ( module FitbitDemoApp.Config
+    ( module FitbitDemoApp.AuthCode
+    , module FitbitDemoApp.Config
     ) where
 
+import FitbitDemoApp.AuthCode
 import FitbitDemoApp.Config

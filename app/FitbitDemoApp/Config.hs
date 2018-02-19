@@ -1,5 +1,6 @@
 module FitbitDemoApp.Config
-    ( getConfig
+    ( getConfig -- TODO: Rename to getAppConfig
+    , getTokenConfig
     ) where
 
 import qualified Data.Text.IO as Text (getLine)
@@ -14,6 +15,11 @@ getConfigPath :: IO FilePath
 getConfigPath = do
     homeDir <- getHomeDirectory
     return $ homeDir </> configDir </> "config.yaml"
+
+getTokenConfigPath :: IO FilePath
+getTokenConfigPath = do
+    homeDir <- getHomeDirectory
+    return $ homeDir </> configDir </> "token.yaml"
 
 promptForConfig :: IO Config
 promptForConfig = do
@@ -38,3 +44,9 @@ getConfig = do
     if configPathExists
         then decodeYAMLFile configPath
         else Just <$> newConfig configPath
+
+getTokenConfig :: IO (Maybe TokenConfig)
+getTokenConfig = do
+    tokenConfigPath <- getTokenConfigPath
+    -- TODO: What to do if it doesn't exist yet? Start auth code workflow etc.
+    decodeYAMLFile tokenConfigPath

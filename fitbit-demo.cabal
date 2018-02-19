@@ -27,6 +27,8 @@ library
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
                                           , bytestring
+                                          , modern-uri
+                                          , req
                                           , text
                                           , yaml
   exposed-modules:                          FitbitDemo
@@ -45,12 +47,20 @@ executable fitbit-demo-app
                                             -Werror=incomplete-patterns
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
-  build-depends:                            base >= 4.7 && < 5
+  build-depends:                            aeson
+                                          , base >= 4.7 && < 5
+                                          , base64-bytestring
+                                          , data-default-class
                                           , directory
                                           , filepath
                                           , fitbit-demo
+                                          , lens
+                                          , modern-uri
+                                          , req
+                                          , req-url-extra
                                           , text
   other-modules:                            FitbitDemoApp
+                                          , FitbitDemoApp.AuthCode
                                           , FitbitDemoApp.Config
 
 test-suite fitbit-demo-test
