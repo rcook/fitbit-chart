@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
 
 module Main (main) where
 
@@ -33,10 +32,7 @@ import           Network.HTTP.Req
                     , responseBody
                     , runReq
                     )
-import           Network.HTTP.Req.Url.Extra (toUrlHttps)
-import           System.Directory (doesFileExist)
 import qualified Text.URI as URI (mkURI, render)
-import           Text.URI.QQ (uri)
 
 promptForAppConfig :: PromptForAppConfig
 promptForAppConfig = do
@@ -61,27 +57,6 @@ foo url authCode (FitbitAPI clientId clientSecret) = do
                                         Left e -> error e
                                         Right x -> x
     return $ TokenConfig at rt
-
--- TODO: Move to Config
-readTokenConfig :: Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
-readTokenConfig f prompt (AppConfig fitbitAPI@(FitbitAPI clientId _)) = do
-    authCode <- getAuthCode clientId prompt
-    let Just (url, _) = toUrlHttps [uri|https://api.fitbit.com/oauth2/token|]
-    tokenConfig <- f url authCode fitbitAPI
-    tokenConfigPath <- getTokenConfigPath
-    encodeYAMLFile tokenConfigPath tokenConfig
-    return tokenConfig
-
--- TODO: Move to Config
-myGetTokenConfig :: Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
-myGetTokenConfig f prompt config = do
-    tokenConfigPath <- getTokenConfigPath
-    tokenConfigExists <- doesFileExist tokenConfigPath
-    if tokenConfigExists
-        then do
-            Just tokenConfig <- decodeYAMLFile tokenConfigPath
-            return tokenConfig
-        else readTokenConfig f prompt config
 
 data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken deriving Show
 
@@ -133,7 +108,7 @@ getWeightGoal (AccessToken at) = do
 main :: IO ()
 main = do
     Just config@(AppConfig (FitbitAPI clientId clientSecret)) <- getAppConfig promptForAppConfig
-    tokenConfig@(TokenConfig accessToken _) <- myGetTokenConfig foo promptForCallbackURI config
+    tokenConfig@(TokenConfig accessToken _) <- getTokenConfig foo promptForCallbackURI config
     weightGoal <- withRefresh clientId clientSecret tokenConfig $ getWeightGoal accessToken
     print weightGoal
 
