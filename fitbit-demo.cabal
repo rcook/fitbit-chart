@@ -70,6 +70,7 @@ executable fitbit-demo-app
   other-modules:                            FitbitDemoApp
                                           , FitbitDemoApp.AccessToken
                                           , FitbitDemoApp.Config
+                                          , FitbitDemoApp.RefreshToken
                                           , FitbitDemoApp.Util
 
 test-suite fitbit-demo-test

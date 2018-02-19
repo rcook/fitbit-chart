@@ -4,12 +4,9 @@
 module Main (main) where
 
 import           Control.Exception (catch, throwIO)
-import           Data.Aeson ((.:), FromJSON(..), Value, withObject)
-import           Data.Aeson.Types (parseEither)
-import qualified Data.ByteString as ByteString (append)
+import           Data.Aeson (Value)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
-import           Data.Text (Text)
 import qualified Data.Text.Encoding as Text (encodeUtf8)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           FitbitDemoApp
@@ -18,12 +15,9 @@ import           Network.HTTP.Client (HttpException(..), HttpExceptionContent(..
 import           Network.HTTP.Types (unauthorized401)
 import           Network.HTTP.Req
                     ( (/:)
-                    , (=:)
                     , GET(..)
                     , HttpException(..)
                     , NoReqBody(..)
-                    , POST(..)
-                    , ReqBodyUrlEnc(..)
                     , header
                     , https
                     , jsonResponse
@@ -52,34 +46,19 @@ promptForCallbackURI authUri = do
 
 foo :: Foo
 foo url authCode (FitbitAPI clientId clientSecret) = do
-    result <- sendAccessTokenRequest url authCode clientId clientSecret
+    result <- sendAccessToken url authCode clientId clientSecret
     let (AccessTokenResponse at rt) = case result of
                                         Left e -> error e
                                         Right x -> x
     return $ TokenConfig at rt
 
-data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken deriving Show
-
-instance FromJSON RefreshTokenResponse where
-    parseJSON =
-        withObject "RefreshTokenResponse" $ \v -> RefreshTokenResponse
-            <$> (AccessToken <$> v .: "access_token")
-            <*> (RefreshToken <$> v .: "refresh_token")
-
 refreshAndInvoke :: ClientId -> ClientSecret -> TokenConfig -> IO a -> IO a
-refreshAndInvoke clientId clientSecret (TokenConfig accessToken (RefreshToken rt)) action = do
-    let url = https "api.fitbit.com" /: "oauth2" /: "token"
-    let opts = header "Authorization" (ByteString.append "Basic " (encodeClientAuth clientId clientSecret))
-        formBody = "grant_type" =: ("refresh_token" :: Text) <> "refresh_token" =: rt <> "expires_in" =: ("3600" :: Text)
-    body <- runReq def $ responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts
-    putStrLn "REFRESH AND REVOKE"
-    let RefreshTokenResponse at rt' = case parseEither parseJSON body of
-                                        Left e -> error $ "BAIL: " ++ e
+refreshAndInvoke clientId clientSecret (TokenConfig _ refreshToken) action = do
+    result <- sendRefreshToken clientId clientSecret refreshToken
+    let (RefreshTokenResponse at rt) = case result of
+                                        Left e -> error e
                                         Right x -> x
-        newTokenConfig = TokenConfig at rt'
-        AccessToken at0 = accessToken
-        AccessToken at1 = at
-    putStrLn $ "accessToken stayed the same: " ++ show (at0 == at1)
+    let newTokenConfig = TokenConfig at rt
     tokenConfigPath <- getTokenConfigPath
     encodeYAMLFile tokenConfigPath newTokenConfig
     action
