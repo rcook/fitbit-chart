@@ -28,13 +28,6 @@ import           Network.HTTP.Req
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
 import           Text.URI.QQ (uri)
 
-{-
-fitbitAuthorizationUri :: Url 'Https
-fitbitAuthorizationUri =
-    let Just (url, _) = parseUrlHttps "https://www.fitbit.com/oauth2/authorize"
-    in url
--}
-
 data AccessTokenRequest = AccessTokenRequest ClientId AuthCode deriving Show
 instance ToJSON AccessTokenRequest where
     toJSON (AccessTokenRequest (ClientId cid) (AuthCode ac)) =
@@ -78,5 +71,12 @@ main = do
     print result
     putStrLn "Done"
     -}
-    Just (TokenConfig accessToken refreshToken) <- getTokenConfig
-    print accessToken
+    Just (TokenConfig (AccessToken ac) refreshToken) <- getTokenConfig
+    let ac' = Text.encodeUtf8 ac
+    result <- responseBody <$> (runReq def $
+                req GET
+                    (https "api.fitbit.com" /: "1" /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json")
+                    NoReqBody
+                    jsonResponse
+                    (oAuth2Bearer ac' <> header "Accept-Language" "en_US"))
+    print (result :: Value)
