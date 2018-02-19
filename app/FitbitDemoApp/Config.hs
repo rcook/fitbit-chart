@@ -1,7 +1,6 @@
 module FitbitDemoApp.Config
     ( PromptForAppConfig
     , getAppConfig
-    , getTokenConfig
     , getTokenConfigPath
     ) where
 
@@ -38,9 +37,3 @@ getAppConfig prompt = do
     if appConfigExists
         then decodeYAMLFile appConfigPath
         else Just <$> newAppConfig prompt appConfigPath
-
-getTokenConfig :: IO (Maybe TokenConfig)
-getTokenConfig = do
-    tokenConfigPath <- getTokenConfigPath
-    -- TODO: What to do if it doesn't exist yet? Start auth code workflow etc.
-    decodeYAMLFile tokenConfigPath

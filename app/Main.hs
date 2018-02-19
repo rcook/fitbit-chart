@@ -5,11 +5,9 @@
 module Main (main) where
 
 import           Control.Exception (catch, throwIO)
-import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), Value, object, withObject)
+import           Data.Aeson ((.:), FromJSON(..), Value, withObject)
 import           Data.Aeson.Types (parseEither)
-import           Data.ByteString (ByteString)
-import qualified Data.ByteString as ByteString (append, concat)
-import qualified Data.ByteString.Base64 as Base64 (encode)
+import qualified Data.ByteString as ByteString (append)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
@@ -27,8 +25,6 @@ import           Network.HTTP.Req
                     , NoReqBody(..)
                     , POST(..)
                     , ReqBodyUrlEnc(..)
-                    , Scheme(..)
-                    , Url
                     , header
                     , https
                     , jsonResponse
@@ -79,39 +75,9 @@ myGetTokenConfig config = do
     tokenConfigExists <- doesFileExist tokenConfigPath
     if tokenConfigExists
         then do
-            Just tokenConfig <- getTokenConfig
+            Just tokenConfig <- decodeYAMLFile tokenConfigPath
             return tokenConfig
         else readTokenConfig config
-
-data AccessTokenRequest = AccessTokenRequest ClientId AuthCode deriving Show
-instance ToJSON AccessTokenRequest where
-    toJSON (AccessTokenRequest (ClientId cid) (AuthCode ac)) =
-        object
-            [ "code" .= ac
-            , "grant_type" .= ("authorization_code" :: Text)
-            , "client_id" .= cid
-            , "redirect_uri" .= ("http://localhost:8765/callback/" :: Text) -- TODO: Should come from Config!
-            ]
-
-data AccessTokenResponse = AccessTokenResponse AccessToken RefreshToken deriving Show
-
-instance FromJSON AccessTokenResponse where
-    parseJSON =
-        withObject "AccessTokenResponse" $ \v -> AccessTokenResponse
-            <$> (AccessToken <$> v .: "access_token")
-            <*> (RefreshToken <$> v .: "refresh_token")
-
-
-doIt :: Url 'Https -> AuthCode -> ClientId -> ClientSecret -> IO (Either String AccessTokenResponse)
-doIt url (AuthCode ac) clientId@(ClientId cid) clientSecret = runReq def $ do
-    let opts = header "Authorization" (ByteString.append "Basic " (encodeClientAuth clientId clientSecret))
-        formBody = "code" =: ac <> "grant_type" =: ("authorization_code" :: Text) <> "client_id" =: cid <> "expires_in" =: ("3600" :: Text)
-    body <- responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts
-    return $ parseEither parseJSON body
-
-encodeClientAuth :: ClientId -> ClientSecret -> ByteString
-encodeClientAuth (ClientId cId) (ClientSecret s) = Base64.encode $ ByteString.concat [Text.encodeUtf8 cId, ":", Text.encodeUtf8 s]
-
 
 data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken deriving Show
 

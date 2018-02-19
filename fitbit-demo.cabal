@@ -68,7 +68,9 @@ executable fitbit-demo-app
                                           , req-url-extra
                                           , text
   other-modules:                            FitbitDemoApp
+                                          , FitbitDemoApp.AccessToken
                                           , FitbitDemoApp.Config
+                                          , FitbitDemoApp.Util
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0
