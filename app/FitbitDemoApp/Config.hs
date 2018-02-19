@@ -1,14 +1,22 @@
+{-# LANGUAGE DataKinds #-}
+
 module FitbitDemoApp.Config
-    ( PromptForAppConfig
+    ( Foo
+    , PromptForAppConfig
     , getAppConfig
     , getTokenConfigPath
     ) where
 
 import           FitbitDemoLib
+import           Network.HTTP.Req
+                    ( Scheme(..)
+                    , Url
+                    )
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
 
 type PromptForAppConfig = IO AppConfig
+type Foo = Url 'Https -> AuthCode -> FitbitAPI -> IO TokenConfig
 
 configDir :: FilePath
 configDir = ".fitbit-demo"
