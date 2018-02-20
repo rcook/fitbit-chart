@@ -37,6 +37,7 @@ library
                                           , FitbitDemoLib.AuthCode
                                           , FitbitDemoLib.FitbitAPI
                                           , FitbitDemoLib.IO
+                                          , FitbitDemoLib.OAuth2App
                                           , FitbitDemoLib.TokenConfig
                                           , FitbitDemoLib.Types
 

@@ -36,8 +36,8 @@ pResponse =
         <$> (AccessToken <$> v .: "access_token")
         <*> (RefreshToken <$> v .: "refresh_token")
 
-sendAccessToken :: Url 'Https -> AccessTokenRequest -> IO (Either String AccessTokenResponse)
-sendAccessToken url (AccessTokenRequest (FitbitAPI clientId@(ClientId cid) clientSecret) (AuthCode ac)) = runReq def $ do
+sendAccessToken :: OAuth2App -> Url 'Https -> AccessTokenRequest -> IO (Either String AccessTokenResponse)
+sendAccessToken oauth2 url (AccessTokenRequest (FitbitAPI clientId@(ClientId cid) clientSecret) (AuthCode ac)) = runReq def $ do
     let opts = tokenAuthHeader clientId clientSecret
         formBody = "code" =: ac <> "grant_type" =: ("authorization_code" :: Text) <> "client_id" =: cid <> "expires_in" =: ("3600" :: Text)
     body <- responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts

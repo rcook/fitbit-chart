@@ -50,21 +50,21 @@ getAppConfig prompt = do
         then decodeYAMLFile appConfigPath
         else Just <$> newAppConfig prompt appConfigPath
 
-readTokenConfig :: Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
-readTokenConfig f prompt (AppConfig fitbitAPI@(FitbitAPI clientId _)) = do
-    authCode <- getAuthCode clientId prompt
-    let Just (url, _) = toUrlHttps [uri|https://api.fitbit.com/oauth2/token|]
+readTokenConfig :: OAuth2App -> Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
+readTokenConfig oauth2 f prompt (AppConfig fitbitAPI@(FitbitAPI clientId _)) = do
+    authCode <- getAuthCode oauth2 clientId prompt
+    let url = tokenRequestUrl oauth2
     tokenConfig <- f url authCode fitbitAPI
     tokenConfigPath <- getTokenConfigPath
     encodeYAMLFile tokenConfigPath tokenConfig
     return tokenConfig
 
-getTokenConfig :: Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
-getTokenConfig f prompt config = do
+getTokenConfig :: OAuth2App -> Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
+getTokenConfig oauth2 f prompt config = do
     tokenConfigPath <- getTokenConfigPath
     tokenConfigExists <- doesFileExist tokenConfigPath
     if tokenConfigExists
         then do
             Just tokenConfig <- decodeYAMLFile tokenConfigPath
             return tokenConfig
-        else readTokenConfig f prompt config
+        else readTokenConfig oauth2 f prompt config

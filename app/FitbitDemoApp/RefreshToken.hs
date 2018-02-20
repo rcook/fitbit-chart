@@ -32,9 +32,9 @@ pResponse =
         <$> (AccessToken <$> v .: "access_token")
         <*> (RefreshToken <$> v .: "refresh_token")
 
-sendRefreshToken :: ClientId -> ClientSecret -> RefreshToken -> IO (Either String RefreshTokenResponse)
-sendRefreshToken clientId clientSecret (RefreshToken rt) = do
-    let url = https "api.fitbit.com" /: "oauth2" /: "token"
+sendRefreshToken :: OAuth2App -> ClientId -> ClientSecret -> RefreshToken -> IO (Either String RefreshTokenResponse)
+sendRefreshToken oauth2 clientId clientSecret (RefreshToken rt) = do
+    let url = tokenRequestUrl oauth2
         opts = tokenAuthHeader clientId clientSecret
         formBody = "grant_type" =: ("refresh_token" :: Text) <> "refresh_token" =: rt <> "expires_in" =: ("3600" :: Text)
     body <- runReq def $ responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts

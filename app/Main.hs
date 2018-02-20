@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module Main (main) where
 
@@ -18,6 +19,8 @@ import           Network.HTTP.Req
                     , GET(..)
                     , HttpException(..)
                     , NoReqBody(..)
+                    , Scheme(..)
+                    , Url
                     , header
                     , https
                     , jsonResponse
@@ -27,6 +30,7 @@ import           Network.HTTP.Req
                     , runReq
                     )
 import qualified Text.URI as URI (mkURI, render)
+import           Text.URI.QQ (uri)
 
 promptForAppConfig :: PromptForAppConfig
 promptForAppConfig = do
@@ -38,15 +42,24 @@ promptForAppConfig = do
     return $ AppConfig (FitbitAPI clientId clientSecret)
 
 promptForCallbackURI :: PromptForCallbackURI
-promptForCallbackURI authUri = do
+promptForCallbackURI authUri' = do
     putStrLn "Open following link in browser:"
-    Text.putStrLn $ URI.render authUri
+    Text.putStrLn $ URI.render authUri'
     putStr "Enter callback URI: "
     URI.mkURI =<< Text.getLine
 
+fitbitApp :: OAuth2App
+fitbitApp =
+    OAuth2App
+        (https "api.fitbit.com" /: "oauth2" /: "token") -- tokenRequestUrl
+        [uri|https://www.fitbit.com/oauth2/authorize|]  -- authUri
+
+fitbitUrl :: Url 'Https
+fitbitUrl = https "api.fitbit.com" /: "1"
+
 foo :: Foo
 foo url authCode fitbitAPI = do
-    result <- sendAccessToken url (AccessTokenRequest fitbitAPI authCode)
+    result <- sendAccessToken fitbitApp url (AccessTokenRequest fitbitAPI authCode)
     let (AccessTokenResponse at rt) = case result of
                                         Left e -> error e
                                         Right x -> x
@@ -54,7 +67,7 @@ foo url authCode fitbitAPI = do
 
 refreshAndInvoke :: ClientId -> ClientSecret -> TokenConfig -> IO a -> IO a
 refreshAndInvoke clientId clientSecret (TokenConfig _ refreshToken) action = do
-    result <- sendRefreshToken clientId clientSecret refreshToken
+    result <- sendRefreshToken fitbitApp clientId clientSecret refreshToken
     let (RefreshTokenResponse at rt) = case result of
                                         Left e -> error e
                                         Right x -> x
@@ -79,7 +92,7 @@ getWeightGoal (AccessToken at) = do
     let at' = Text.encodeUtf8 at
     responseBody <$> (runReq def $
         req GET
-            (https "api.fitbit.com" /: "1" /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json")
+            (fitbitUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json")
             NoReqBody
             jsonResponse
             (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
@@ -87,7 +100,7 @@ getWeightGoal (AccessToken at) = do
 main :: IO ()
 main = do
     Just config@(AppConfig (FitbitAPI clientId clientSecret)) <- getAppConfig promptForAppConfig
-    tokenConfig@(TokenConfig accessToken _) <- getTokenConfig foo promptForCallbackURI config
+    tokenConfig@(TokenConfig accessToken _) <- getTokenConfig fitbitApp foo promptForCallbackURI config
     weightGoal <- withRefresh clientId clientSecret tokenConfig $ getWeightGoal accessToken
     print weightGoal
 
