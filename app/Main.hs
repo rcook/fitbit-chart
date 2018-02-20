@@ -12,12 +12,10 @@ import qualified Data.Text.Encoding as Text (encodeUtf8)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           FitbitDemoApp
 import           FitbitDemoLib
-import           Network.HTTP.Client (HttpException(..), HttpExceptionContent(..), responseStatus)
 import           Network.HTTP.Types (unauthorized401)
 import           Network.HTTP.Req
                     ( (/:)
                     , GET(..)
-                    , HttpException(..)
                     , NoReqBody(..)
                     , Scheme(..)
                     , Url
@@ -78,15 +76,10 @@ refresh clientId clientSecret (TokenConfig _ refreshToken) = do
     encodeYAMLFile tokenConfigPath newTokenConfig
 
 withRefresh :: ClientId -> ClientSecret -> TokenConfig -> IO a -> IO a
-withRefresh clientId clientSecret tokenConfig action = do
-    result <- catch action $ \e ->
-                case e of
-                    VanillaHttpException (HttpExceptionRequest _ (StatusCodeException response _)) ->
-                        if responseStatus response == unauthorized401
+withRefresh clientId clientSecret tokenConfig action =
+    catch action $ \e -> if hasResponseStatus e unauthorized401
                             then refresh clientId clientSecret tokenConfig >> action
                             else throwIO e
-                    _ -> throwIO e
-    return result
 
 getWeightGoal :: AccessToken -> IO Value
 getWeightGoal (AccessToken at) = do
