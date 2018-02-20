@@ -10,17 +10,13 @@ module FitbitDemoApp.Config
     ) where
 
 import           FitbitDemoLib
-import           Network.HTTP.Req
-                    ( Scheme(..)
-                    , Url
-                    )
-import           Network.HTTP.Req.Url.Extra (toUrlHttps)
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
+import           Text.URI (URI)
 import           Text.URI.QQ (uri)
 
 type PromptForAppConfig = IO AppConfig
-type Foo = Url 'Https -> AuthCode -> FitbitAPI -> IO TokenConfig
+type Foo = OAuth2App -> AuthCode -> FitbitAPI -> IO TokenConfig
 
 configDir :: FilePath
 configDir = ".fitbit-demo"
@@ -53,8 +49,7 @@ getAppConfig prompt = do
 readTokenConfig :: OAuth2App -> Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
 readTokenConfig oauth2 f prompt (AppConfig fitbitAPI@(FitbitAPI clientId _)) = do
     authCode <- getAuthCode oauth2 clientId prompt
-    let Just (url, _) = toUrlHttps $ tokenRequestURI oauth2
-    tokenConfig <- f url authCode fitbitAPI
+    tokenConfig <- f oauth2 authCode fitbitAPI
     tokenConfigPath <- getTokenConfigPath
     encodeYAMLFile tokenConfigPath tokenConfig
     return tokenConfig

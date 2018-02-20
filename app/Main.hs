@@ -29,6 +29,7 @@ import           Network.HTTP.Req
                     , responseBody
                     , runReq
                     )
+import           Network.HTTP.Req.Url.Extra (toUrlHttps)
 import qualified Text.URI as URI (mkURI, render)
 import           Text.URI.QQ (uri)
 
@@ -58,7 +59,8 @@ fitbitUrl :: Url 'Https
 fitbitUrl = https "api.fitbit.com" /: "1"
 
 foo :: Foo
-foo url authCode fitbitAPI = do
+foo oauth2 authCode fitbitAPI = do
+    let Just (url, _) = toUrlHttps (tokenRequestURI oauth2)
     result <- sendAccessToken fitbitApp url (AccessTokenRequest fitbitAPI authCode)
     let (AccessTokenResponse at rt) = case result of
                                         Left e -> error e
