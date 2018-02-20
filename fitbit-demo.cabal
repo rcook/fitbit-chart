@@ -68,6 +68,7 @@ executable fitbit-demo-app
                                           , req
                                           , req-url-extra
                                           , text
+                                          , time
   other-modules:                            FitbitDemoApp
                                           , FitbitDemoApp.AccessToken
                                           , FitbitDemoApp.Config

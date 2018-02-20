@@ -8,8 +8,10 @@ import           Control.Exception (catch, throwIO)
 import           Data.Aeson (Value)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
+import           Data.Text (Text)
 import qualified Data.Text.Encoding as Text (encodeUtf8)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
+import           Data.Time.Calendar (Day)
 import           FitbitDemoApp
 import           FitbitDemoLib
 import           Network.HTTP.Types (unauthorized401)
@@ -63,7 +65,7 @@ foo authCode fitbitAPI = do
                                         Right x -> x
     return $ TokenConfig at rt
 
-refresh :: ClientId -> ClientSecret -> TokenConfig -> IO ()
+refresh :: ClientId -> ClientSecret -> TokenConfig -> IO TokenConfig
 refresh clientId clientSecret (TokenConfig _ refreshToken) = do
     result <- sendRefreshToken fitbitApp clientId clientSecret refreshToken
     let (RefreshTokenResponse at rt) = case result of
@@ -72,12 +74,17 @@ refresh clientId clientSecret (TokenConfig _ refreshToken) = do
     let newTokenConfig = TokenConfig at rt
     tokenConfigPath <- getTokenConfigPath
     encodeYAMLFile tokenConfigPath newTokenConfig
+    return newTokenConfig
 
-withRefresh :: ClientId -> ClientSecret -> TokenConfig -> IO a -> IO a
+withRefresh :: ClientId -> ClientSecret -> TokenConfig -> IO a -> IO (a, TokenConfig)
 withRefresh clientId clientSecret tokenConfig action =
-    catch action $ \e -> if hasResponseStatus e unauthorized401
-                            then refresh clientId clientSecret tokenConfig >> action
-                            else throwIO e
+    catch (action >>= \result -> return (result, tokenConfig)) $
+        \e -> if hasResponseStatus e unauthorized401
+                then do
+                    newTokenConfig <- refresh clientId clientSecret tokenConfig
+                    result <- action
+                    return (result, newTokenConfig)
+                else throwIO e
 
 getWeightGoal :: AccessToken -> IO Value
 getWeightGoal (AccessToken at) = do
@@ -89,11 +96,43 @@ getWeightGoal (AccessToken at) = do
             jsonResponse
             (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
 
+data Period = OneDay | SevenDays | ThirtyDays | OneWeek | OneMonth | ThreeMonths | SixMonths | OneYear | Max
+
+formatPeriod :: Period -> Text
+formatPeriod OneDay = "1d"
+formatPeriod SevenDays = "7d"
+formatPeriod ThirtyDays = "30d"
+formatPeriod OneWeek = "1w"
+formatPeriod OneMonth = "1m"
+formatPeriod ThreeMonths = "3m"
+formatPeriod SixMonths = "6m"
+formatPeriod OneYear = "1y"
+formatPeriod Max = "max"
+
+getWeightTimeSeries :: AccessToken -> Day -> Period -> IO Value
+getWeightTimeSeries (AccessToken at) startDay period = do
+    let at' = Text.encodeUtf8 at
+    responseBody <$> (runReq def $
+        req GET
+            (fitbitUrl /: "user" /: "-" /: "body" /: "weight" /: "date" /: formatDay startDay /: formatPeriod period <> ".json")
+            NoReqBody
+            jsonResponse
+            (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
+
 main :: IO ()
 main = do
     Just config@(AppConfig (FitbitAPI clientId clientSecret)) <- getAppConfig promptForAppConfig
     tokenConfig@(TokenConfig accessToken _) <- getTokenConfig fitbitApp foo promptForCallbackURI config
-    weightGoal <- withRefresh clientId clientSecret tokenConfig $ getWeightGoal accessToken
+
+    let at0 = accessToken
+        tc0 = tokenConfig
+
+    -- TODO: Refactor to use State etc.
+    (weightGoal, tc1@(TokenConfig at1 _)) <- withRefresh clientId clientSecret tc0 $ getWeightGoal at0
     print weightGoal
+
+    let d = mkDay 2014 9 8
+    (weightTimeSeries, _) <- withRefresh clientId clientSecret tc1 $ getWeightTimeSeries at1 d Max
+    print weightTimeSeries
 
     putStrLn "DONE"
