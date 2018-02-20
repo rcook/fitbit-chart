@@ -45,8 +45,8 @@ promptForCallbackURI authUri = do
     URI.mkURI =<< Text.getLine
 
 foo :: Foo
-foo url authCode (FitbitAPI clientId clientSecret) = do
-    result <- sendAccessToken url authCode clientId clientSecret
+foo url authCode fitbitAPI = do
+    result <- sendAccessToken url (AccessTokenRequest fitbitAPI authCode)
     let (AccessTokenResponse at rt) = case result of
                                         Left e -> error e
                                         Right x -> x

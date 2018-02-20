@@ -2,7 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module FitbitDemoApp.AccessToken
-    ( AccessTokenResponse(..)
+    ( AccessTokenRequest(..)
+    , AccessTokenResponse(..)
     , sendAccessToken
     ) where
 
@@ -25,6 +26,8 @@ import           Network.HTTP.Req
                     , runReq
                     )
 
+data AccessTokenRequest = AccessTokenRequest FitbitAPI AuthCode deriving Show
+
 data AccessTokenResponse = AccessTokenResponse AccessToken RefreshToken deriving Show
 
 instance FromJSON AccessTokenResponse where
@@ -33,8 +36,8 @@ instance FromJSON AccessTokenResponse where
             <$> (AccessToken <$> v .: "access_token")
             <*> (RefreshToken <$> v .: "refresh_token")
 
-sendAccessToken :: Url 'Https -> AuthCode -> ClientId -> ClientSecret -> IO (Either String AccessTokenResponse)
-sendAccessToken url (AuthCode ac) clientId@(ClientId cid) clientSecret = runReq def $ do
+sendAccessToken :: Url 'Https -> AccessTokenRequest -> IO (Either String AccessTokenResponse)
+sendAccessToken url (AccessTokenRequest (FitbitAPI clientId@(ClientId cid) clientSecret) (AuthCode ac)) = runReq def $ do
     let opts = tokenAuthHeader clientId clientSecret
         formBody = "code" =: ac <> "grant_type" =: ("authorization_code" :: Text) <> "client_id" =: cid <> "expires_in" =: ("3600" :: Text)
     body <- responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts
