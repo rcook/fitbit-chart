@@ -11,7 +11,7 @@ import           System.Directory (createDirectoryIfMissing, doesFileExist, getH
 import           System.FilePath ((</>), takeDirectory)
 
 type PromptForAppConfig = IO AppConfig
-type Foo = OAuth2App -> AuthCode -> FitbitAPI -> IO TokenConfig
+type Foo = AuthCode -> FitbitAPI -> IO TokenConfig
 
 configDir :: FilePath
 configDir = ".fitbit-demo"
@@ -44,7 +44,7 @@ getAppConfig prompt = do
 readTokenConfig :: OAuth2App -> Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
 readTokenConfig oauth2 f prompt (AppConfig fitbitAPI@(FitbitAPI clientId _)) = do
     authCode <- getAuthCode oauth2 clientId prompt
-    tokenConfig <- f oauth2 authCode fitbitAPI
+    tokenConfig <- f authCode fitbitAPI
     tokenConfigPath <- getTokenConfigPath
     encodeYAMLFile tokenConfigPath tokenConfig
     return tokenConfig

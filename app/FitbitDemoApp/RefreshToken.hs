@@ -13,11 +13,9 @@ import           Data.Text (Text)
 import           FitbitDemoApp.Util
 import           FitbitDemoLib
 import           Network.HTTP.Req
-                    ( (/:)
-                    , (=:)
+                    ( (=:)
                     , POST(..)
                     , ReqBodyUrlEnc(..)
-                    , https
                     , jsonResponse
                     , req
                     , responseBody
