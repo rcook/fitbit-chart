@@ -26,9 +26,9 @@ import           Network.HTTP.Req
                     , runReq
                     )
 
-data AccessTokenRequest = AccessTokenRequest FitbitAPI AuthCode deriving Show
+data AccessTokenRequest = AccessTokenRequest FitbitAPI AuthCode
 
-data AccessTokenResponse = AccessTokenResponse AccessToken RefreshToken deriving Show
+data AccessTokenResponse = AccessTokenResponse AccessToken RefreshToken
 
 pResponse :: Value -> Parser AccessTokenResponse
 pResponse =

@@ -25,7 +25,7 @@ import           Network.HTTP.Req
                     )
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
 
-data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken deriving Show
+data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken
 
 pResponse :: Value -> Parser RefreshTokenResponse
 pResponse =

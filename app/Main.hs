@@ -67,8 +67,8 @@ foo oauth2 authCode fitbitAPI = do
                                         Right x -> x
     return $ TokenConfig at rt
 
-refreshAndInvoke :: ClientId -> ClientSecret -> TokenConfig -> IO a -> IO a
-refreshAndInvoke clientId clientSecret (TokenConfig _ refreshToken) action = do
+refresh :: ClientId -> ClientSecret -> TokenConfig -> IO ()
+refresh clientId clientSecret (TokenConfig _ refreshToken) = do
     result <- sendRefreshToken fitbitApp clientId clientSecret refreshToken
     let (RefreshTokenResponse at rt) = case result of
                                         Left e -> error e
@@ -76,7 +76,6 @@ refreshAndInvoke clientId clientSecret (TokenConfig _ refreshToken) action = do
     let newTokenConfig = TokenConfig at rt
     tokenConfigPath <- getTokenConfigPath
     encodeYAMLFile tokenConfigPath newTokenConfig
-    action
 
 withRefresh :: ClientId -> ClientSecret -> TokenConfig -> IO a -> IO a
 withRefresh clientId clientSecret tokenConfig action = do
@@ -84,7 +83,7 @@ withRefresh clientId clientSecret tokenConfig action = do
                 case e of
                     VanillaHttpException (HttpExceptionRequest _ (StatusCodeException response _)) ->
                         if responseStatus response == unauthorized401
-                            then refreshAndInvoke clientId clientSecret tokenConfig action
+                            then refresh clientId clientSecret tokenConfig >> action
                             else throwIO e
                     _ -> throwIO e
     return result
