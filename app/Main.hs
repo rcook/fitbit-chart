@@ -5,7 +5,8 @@
 module Main (main) where
 
 import           Control.Exception (catch, throwIO)
-import           Data.Aeson (Value)
+import           Data.Aeson ((.:), Value, withObject)
+import           Data.Aeson.Types (Parser)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
@@ -108,6 +109,14 @@ formatPeriod ThreeMonths = "3m"
 formatPeriod SixMonths = "6m"
 formatPeriod OneYear = "1y"
 formatPeriod Max = "max"
+
+data WeightSample = WeightSample Day Text
+
+pWeightSample :: Value -> Parser WeightSample
+pWeightSample =
+    withObject "AccessTokenResponse" $ \v -> WeightSample
+        <$> (parseDay <$> v .: "dateTime")
+        <*> v .: "value"
 
 getWeightTimeSeries :: AccessToken -> Day -> Period -> IO Value
 getWeightTimeSeries (AccessToken at) startDay period = do

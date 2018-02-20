@@ -4,6 +4,7 @@ module FitbitDemoApp.Util
     ( hasResponseStatus
     , formatDay
     , mkDay
+    , parseDay
     , tokenAuthHeader
     ) where
 
@@ -34,6 +35,9 @@ hasResponseStatus _ _ = False
 
 mkDay :: Int -> Int -> Int -> Day
 mkDay year month date = fromGregorian (fromIntegral year) month date
+
+parseDay :: Text -> Day
+parseDay = undefined
 
 formatDay :: Day -> Text
 formatDay = Text.pack . show
