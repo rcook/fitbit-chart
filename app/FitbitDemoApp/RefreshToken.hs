@@ -5,8 +5,8 @@ module FitbitDemoApp.RefreshToken
     , sendRefreshToken
     ) where
 
-import           Data.Aeson ((.:), FromJSON(..), withObject)
-import           Data.Aeson.Types (parseEither)
+import           Data.Aeson ((.:), withObject)
+import           Data.Aeson.Types (Parser, Value, parseEither)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
@@ -26,11 +26,11 @@ import           Network.HTTP.Req
 
 data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken deriving Show
 
-instance FromJSON RefreshTokenResponse where
-    parseJSON =
-        withObject "RefreshTokenResponse" $ \v -> RefreshTokenResponse
-            <$> (AccessToken <$> v .: "access_token")
-            <*> (RefreshToken <$> v .: "refresh_token")
+pResponse :: Value -> Parser RefreshTokenResponse
+pResponse =
+    withObject "RefreshTokenResponse" $ \v -> RefreshTokenResponse
+        <$> (AccessToken <$> v .: "access_token")
+        <*> (RefreshToken <$> v .: "refresh_token")
 
 sendRefreshToken :: ClientId -> ClientSecret -> RefreshToken -> IO (Either String RefreshTokenResponse)
 sendRefreshToken clientId clientSecret (RefreshToken rt) = do
@@ -38,4 +38,4 @@ sendRefreshToken clientId clientSecret (RefreshToken rt) = do
         opts = tokenAuthHeader clientId clientSecret
         formBody = "grant_type" =: ("refresh_token" :: Text) <> "refresh_token" =: rt <> "expires_in" =: ("3600" :: Text)
     body <- runReq def $ responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts
-    return $ parseEither parseJSON body
+    return $ parseEither pResponse body
