@@ -1,6 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE QuasiQuotes #-}
-
 module FitbitDemoApp.Config
     ( Foo
     , PromptForAppConfig
@@ -12,8 +9,6 @@ module FitbitDemoApp.Config
 import           FitbitDemoLib
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
-import           Text.URI (URI)
-import           Text.URI.QQ (uri)
 
 type PromptForAppConfig = IO AppConfig
 type Foo = OAuth2App -> AuthCode -> FitbitAPI -> IO TokenConfig
