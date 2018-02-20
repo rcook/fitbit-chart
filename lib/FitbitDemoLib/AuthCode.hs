@@ -12,7 +12,6 @@ import           FitbitDemoLib.OAuth2App
 import           FitbitDemoLib.Types
 import           Text.URI (QueryParam(..), URI, mkQueryKey, mkQueryValue, unRText)
 import           Text.URI.Lens (queryParam, uriQuery)
-import           Text.URI.QQ (uri)
 
 type PromptForCallbackURI = URI -> IO URI
 
@@ -31,7 +30,7 @@ buildAuthUriWithOpts u qs = do
 
 getAuthCode :: OAuth2App -> ClientId -> PromptForCallbackURI -> IO AuthCode
 getAuthCode oauth2 (ClientId clientId) prompt = do
-    let Just authUriWithOpts = buildAuthUriWithOpts (authUri oauth2)
+    let Just authUriWithOpts = buildAuthUriWithOpts (authURI oauth2)
                                     [ ("client_id", clientId)
                                     , ("response_type", "code")
                                     , ("scope", "weight")

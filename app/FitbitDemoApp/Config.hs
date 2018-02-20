@@ -53,7 +53,7 @@ getAppConfig prompt = do
 readTokenConfig :: OAuth2App -> Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
 readTokenConfig oauth2 f prompt (AppConfig fitbitAPI@(FitbitAPI clientId _)) = do
     authCode <- getAuthCode oauth2 clientId prompt
-    let url = tokenRequestUrl oauth2
+    let Just (url, _) = toUrlHttps $ tokenRequestURI oauth2
     tokenConfig <- f url authCode fitbitAPI
     tokenConfigPath <- getTokenConfigPath
     encodeYAMLFile tokenConfigPath tokenConfig

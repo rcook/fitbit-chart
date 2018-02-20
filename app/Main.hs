@@ -51,7 +51,7 @@ promptForCallbackURI authUri' = do
 fitbitApp :: OAuth2App
 fitbitApp =
     OAuth2App
-        (https "api.fitbit.com" /: "oauth2" /: "token") -- tokenRequestUrl
+        [uri|https://api.fitbit.com/oauth2/token|]      -- tokenRequestUrl
         [uri|https://www.fitbit.com/oauth2/authorize|]  -- authUri
 
 fitbitUrl :: Url 'Https
