@@ -15,6 +15,7 @@ import           Data.Text (Text)
 import qualified Data.Text.Encoding as Text (encodeUtf8)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Calendar (Day)
+import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import qualified Data.Vector as Vector (toList)
 import           FitbitDemoApp
 import           FitbitDemoLib
@@ -58,8 +59,8 @@ fitbitApp =
         [uri|https://api.fitbit.com/oauth2/token|]      -- tokenRequestUrl
         [uri|https://www.fitbit.com/oauth2/authorize|]  -- authUri
 
-fitbitUrl :: Url 'Https
-fitbitUrl = https "api.fitbit.com" /: "1"
+fitbitApiUrl :: Url 'Https
+fitbitApiUrl = https "api.fitbit.com" /: "1"
 
 foo :: Foo
 foo authCode fitbitAPI = do
@@ -97,7 +98,7 @@ getWeightGoal (TokenConfig (AccessToken at) _ ) = do
     let at' = Text.encodeUtf8 at
     responseBody <$> (runReq def $
         req GET
-            (fitbitUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json")
+            (fitbitApiUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json")
             NoReqBody
             jsonResponse
             (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
@@ -115,7 +116,13 @@ formatPeriod SixMonths = "6m"
 formatPeriod OneYear = "1y"
 formatPeriod Max = "max"
 
-data WeightSample = WeightSample Day Text deriving Show
+data TimeSeriesRange = Ending Day Period | Between Day Day
+
+addTimeSeriesRangeToUrl :: TimeSeriesRange -> Url 'Https -> Url 'Https
+addTimeSeriesRangeToUrl (Ending endDay period) u = u /: formatDay endDay /: formatPeriod period <> ".json"
+addTimeSeriesRangeToUrl (Between startDay endDay) u = u /: formatDay startDay /: formatDay endDay <> ".json"
+
+data WeightSample = WeightSample Day Text
 
 pWeightSample :: Value -> Parser WeightSample
 pWeightSample =
@@ -132,12 +139,12 @@ pFoo = withObject "WeightTimeSeriesResponse" $ \v -> do
     obj <- v .: "body-weight"
     pWeightSamples obj
 
-getWeightTimeSeries :: Day -> Period -> TokenConfig -> IO (Either String [WeightSample])
-getWeightTimeSeries startDay period (TokenConfig (AccessToken at) _) = do
+getWeightTimeSeries :: TimeSeriesRange -> TokenConfig -> IO (Either String [WeightSample])
+getWeightTimeSeries range (TokenConfig (AccessToken at) _) = do
     let at' = Text.encodeUtf8 at
     body <- responseBody <$> (runReq def $
                 req GET
-                    (fitbitUrl /: "user" /: "-" /: "body" /: "weight" /: "date" /: formatDay startDay /: formatPeriod period <> ".json")
+                    (addTimeSeriesRangeToUrl range (fitbitApiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
                     NoReqBody
                     jsonResponse
                     (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
@@ -155,8 +162,10 @@ main = do
     (weightGoal, tc1@(TokenConfig at1 _)) <- withRefresh clientId clientSecret tc0 getWeightGoal
     print weightGoal
 
-    let d = mkDay 2014 9 8
-    (weightTimeSeries, _) <- withRefresh clientId clientSecret tc1  (getWeightTimeSeries d Max)
+    t <- getCurrentTime
+    let range = Ending (utctDay t) Max
+
+    (weightTimeSeries, _) <- withRefresh clientId clientSecret tc1  (getWeightTimeSeries range)
     let Right ws = weightTimeSeries
     forM_ (take 5 ws) $ \(WeightSample day value) -> putStrLn $ show day ++ ": " ++ show value
 

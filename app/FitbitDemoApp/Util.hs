@@ -21,6 +21,8 @@ import           Network.HTTP.Req (HttpException(..), Option, header)
 import           Network.HTTP.Types (Status)
 import           FitbitDemoLib
 
+import Debug.Trace
+
 encodeClientAuth :: ClientId -> ClientSecret -> ByteString
 encodeClientAuth (ClientId cid) (ClientSecret cs) = Base64.encode $ ByteString.concat [Text.encodeUtf8 cid, ":", Text.encodeUtf8 cs]
 
@@ -44,7 +46,7 @@ parseDay s =
             let Right (y, "") = Text.decimal yyyy -- TODO:
                 Right (m, "") = Text.decimal mm -- TODO:
                 Right (d, "") = Text.decimal dd -- TODO:
-            return $ mkDay y m d
+            return $ mkDay (trace ("y=" ++ show yyyy) y) (trace ("m=" ++ show m) m) (trace ("d=" ++ show d) d)
         _ -> Nothing
 
 formatDay :: Day -> Text
