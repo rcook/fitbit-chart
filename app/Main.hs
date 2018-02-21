@@ -6,10 +6,6 @@ module Main (main) where
 
 import           Control.Exception (catch, throwIO)
 import           Control.Monad (forM_)
-import           Data.Aeson (Value)
-import           Data.Default.Class (def)
-import           Data.Monoid ((<>))
-import qualified Data.Text.Encoding as Text (encodeUtf8)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           FitbitDemoApp
@@ -17,17 +13,9 @@ import           FitbitDemoLib
 import           Network.HTTP.Types (unauthorized401)
 import           Network.HTTP.Req
                     ( (/:)
-                    , GET(..)
-                    , NoReqBody(..)
                     , Scheme(..)
                     , Url
-                    , header
                     , https
-                    , jsonResponse
-                    , oAuth2Bearer
-                    , req
-                    , responseBody
-                    , runReq
                     )
 import           OAuth2
 import qualified Text.URI as URI (mkURI, render)
@@ -87,23 +75,13 @@ withRefresh (AppConfig (FitbitAPI clientId clientSecret)) tokenConfig action =
                     return (result, newTokenConfig)
                 else throwIO e
 
-getWeightGoal :: TokenConfig -> IO Value
-getWeightGoal (TokenConfig (AccessToken at) _ ) = do
-    let at' = Text.encodeUtf8 at
-    responseBody <$> (runReq def $
-        req GET
-            (fitbitApiUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json")
-            NoReqBody
-            jsonResponse
-            (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
-
 main :: IO ()
 main = do
     Just appConfig <- getAppConfig promptForAppConfig
     tc0 <- getTokenConfig fitbitApp foo promptForCallbackURI appConfig
 
     -- TODO: Refactor to use State etc.
-    (weightGoal, tc1) <- withRefresh appConfig tc0 getWeightGoal
+    (weightGoal, tc1) <- withRefresh appConfig tc0 (getWeightGoal fitbitApiUrl)
     print weightGoal
 
     t <- getCurrentTime

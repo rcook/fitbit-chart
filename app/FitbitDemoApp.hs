@@ -4,6 +4,7 @@ module FitbitDemoApp
     , module FitbitDemoApp.RefreshToken
     , module FitbitDemoApp.Types
     , module FitbitDemoApp.Util
+    , module FitbitDemoApp.WeightGoal
     , module FitbitDemoApp.WeightTimeSeries
     ) where
 
@@ -12,4 +13,5 @@ import FitbitDemoApp.Config
 import FitbitDemoApp.RefreshToken
 import FitbitDemoApp.Types
 import FitbitDemoApp.Util
+import FitbitDemoApp.WeightGoal
 import FitbitDemoApp.WeightTimeSeries

@@ -84,6 +84,7 @@ executable fitbit-demo-app
                                           , FitbitDemoApp.RefreshToken
                                           , FitbitDemoApp.Types
                                           , FitbitDemoApp.Util
+                                          , FitbitDemoApp.WeightGoal
                                           , FitbitDemoApp.WeightTimeSeries
 
 test-suite fitbit-demo-test
