@@ -79,18 +79,20 @@ refresh clientId clientSecret (TokenConfig _ refreshToken) = do
     encodeYAMLFile tokenConfigPath newTokenConfig
     return newTokenConfig
 
-withRefresh :: ClientId -> ClientSecret -> TokenConfig -> IO a -> IO (a, TokenConfig)
+type APIAction a = TokenConfig -> IO a
+
+withRefresh :: ClientId -> ClientSecret -> TokenConfig -> APIAction a -> IO (a, TokenConfig)
 withRefresh clientId clientSecret tokenConfig action =
-    catch (action >>= \result -> return (result, tokenConfig)) $
+    catch (action tokenConfig >>= \result -> return (result, tokenConfig)) $
         \e -> if hasResponseStatus e unauthorized401
                 then do
                     newTokenConfig <- refresh clientId clientSecret tokenConfig
-                    result <- action
+                    result <- action newTokenConfig
                     return (result, newTokenConfig)
                 else throwIO e
 
-getWeightGoal :: AccessToken -> IO Value
-getWeightGoal (AccessToken at) = do
+getWeightGoal :: TokenConfig -> IO Value
+getWeightGoal (TokenConfig (AccessToken at) _ ) = do
     let at' = Text.encodeUtf8 at
     responseBody <$> (runReq def $
         req GET
@@ -129,8 +131,8 @@ pFoo = withObject "WeightTimeSeriesResponse" $ \v -> do
     obj <- v .: "body-weight"
     pWeightSamples obj
 
-getWeightTimeSeries :: AccessToken -> Day -> Period -> IO (Either String [WeightSample])
-getWeightTimeSeries (AccessToken at) startDay period = do
+getWeightTimeSeries :: Day -> Period -> TokenConfig -> IO (Either String [WeightSample])
+getWeightTimeSeries startDay period (TokenConfig (AccessToken at) _) = do
     let at' = Text.encodeUtf8 at
     body <- responseBody <$> (runReq def $
                 req GET
@@ -149,11 +151,11 @@ main = do
         tc0 = tokenConfig
 
     -- TODO: Refactor to use State etc.
-    (weightGoal, tc1@(TokenConfig at1 _)) <- withRefresh clientId clientSecret tc0 $ getWeightGoal at0
+    (weightGoal, tc1@(TokenConfig at1 _)) <- withRefresh clientId clientSecret tc0 getWeightGoal
     print weightGoal
 
     let d = mkDay 2014 9 8
-    (weightTimeSeries, _) <- withRefresh clientId clientSecret tc1 $ getWeightTimeSeries at1 d Max
+    (weightTimeSeries, _) <- withRefresh clientId clientSecret tc1  (getWeightTimeSeries d Max)
     print weightTimeSeries
 
     putStrLn "DONE"
