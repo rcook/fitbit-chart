@@ -5,6 +5,7 @@
 module Main (main) where
 
 import           Control.Exception (catch, throwIO)
+import           Control.Monad (forM_)
 import           Data.Aeson ((.:), Value, withArray, withObject)
 import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Default.Class (def)
@@ -156,6 +157,7 @@ main = do
 
     let d = mkDay 2014 9 8
     (weightTimeSeries, _) <- withRefresh clientId clientSecret tc1  (getWeightTimeSeries d Max)
-    print weightTimeSeries
+    let Right ws = weightTimeSeries
+    forM_ (take 5 ws) $ \(WeightSample day value) -> putStrLn $ show day ++ ": " ++ show value
 
     putStrLn "DONE"
