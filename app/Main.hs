@@ -5,14 +5,16 @@
 module Main (main) where
 
 import           Control.Exception (catch, throwIO)
-import           Data.Aeson ((.:), Value, withObject)
-import           Data.Aeson.Types (Parser)
+import           Data.Aeson ((.:), Value, withArray, withObject)
+import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Default.Class (def)
+import           Data.Maybe (fromJust)
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
 import qualified Data.Text.Encoding as Text (encodeUtf8)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Calendar (Day)
+import qualified Data.Vector as Vector (toList)
 import           FitbitDemoApp
 import           FitbitDemoLib
 import           Network.HTTP.Types (unauthorized401)
@@ -110,23 +112,33 @@ formatPeriod SixMonths = "6m"
 formatPeriod OneYear = "1y"
 formatPeriod Max = "max"
 
-data WeightSample = WeightSample Day Text
+data WeightSample = WeightSample Day Text deriving Show
 
 pWeightSample :: Value -> Parser WeightSample
 pWeightSample =
-    withObject "AccessTokenResponse" $ \v -> WeightSample
-        <$> (parseDay <$> v .: "dateTime")
+    withObject "WeightSample" $ \v -> WeightSample
+        <$> (fromJust . parseDay <$> v .: "dateTime")
         <*> v .: "value"
 
-getWeightTimeSeries :: AccessToken -> Day -> Period -> IO Value
+pWeightSamples :: Value -> Parser [WeightSample]
+pWeightSamples =
+    withArray "[WeightSample]" $ mapM pWeightSample . Vector.toList
+
+pFoo :: Value -> Parser [WeightSample]
+pFoo = withObject "WeightTimeSeriesResponse" $ \v -> do
+    obj <- v .: "body-weight"
+    pWeightSamples obj
+
+getWeightTimeSeries :: AccessToken -> Day -> Period -> IO (Either String [WeightSample])
 getWeightTimeSeries (AccessToken at) startDay period = do
     let at' = Text.encodeUtf8 at
-    responseBody <$> (runReq def $
-        req GET
-            (fitbitUrl /: "user" /: "-" /: "body" /: "weight" /: "date" /: formatDay startDay /: formatPeriod period <> ".json")
-            NoReqBody
-            jsonResponse
-            (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
+    body <- responseBody <$> (runReq def $
+                req GET
+                    (fitbitUrl /: "user" /: "-" /: "body" /: "weight" /: "date" /: formatDay startDay /: formatPeriod period <> ".json")
+                    NoReqBody
+                    jsonResponse
+                    (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
+    return $ parseEither pFoo body
 
 main :: IO ()
 main = do
