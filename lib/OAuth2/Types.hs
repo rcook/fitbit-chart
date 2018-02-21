@@ -1,4 +1,4 @@
-module FitbitDemoLib.Types
+module OAuth2.Types
     ( AccessToken(..)
     , ClientId(..)
     , ClientSecret(..)

@@ -5,7 +5,7 @@ module FitbitDemoLib.FitbitAPI
     ) where
 
 import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withObject)
-import           FitbitDemoLib.Types
+import           OAuth2
 
 -- | Fitbit API configuration
 data FitbitAPI = FitbitAPI ClientId ClientSecret deriving Show

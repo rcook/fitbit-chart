@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoLib.OAuth2.AuthCode
+module OAuth2.AuthCode
     ( AuthCode(..)
     , PromptForCallbackURI
     , getAuthCode
@@ -8,8 +8,8 @@ module FitbitDemoLib.OAuth2.AuthCode
 
 import           Control.Lens ((^..), (.~), (&))
 import           Data.Text (Text)
-import           FitbitDemoLib.OAuth2App
-import           FitbitDemoLib.Types
+import           OAuth2.App
+import           OAuth2.Types
 import           Text.URI (QueryParam(..), URI, mkQueryKey, mkQueryValue, unRText)
 import           Text.URI.Lens (queryParam, uriQuery)
 
@@ -35,9 +35,9 @@ buildAuthUriWithOpts u qs = do
 --
 -- We don't bother with @redirect_uri@ or @state@ since they do not seem
 -- to be required.
-getAuthCode :: OAuth2App -> ClientId -> PromptForCallbackURI -> IO AuthCode
+getAuthCode :: App -> ClientId -> PromptForCallbackURI -> IO AuthCode
 getAuthCode oauth2 (ClientId clientId) prompt = do
-    let Just authUriWithOpts = buildAuthUriWithOpts (authURI oauth2)
+    let Just authUriWithOpts = buildAuthUriWithOpts (authUri oauth2)
                                     [ ("client_id", clientId)
                                     , ("response_type", "code")
                                     , ("scope", "weight")

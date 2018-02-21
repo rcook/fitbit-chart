@@ -23,6 +23,7 @@ import           Network.HTTP.Req
                     , runReq
                     )
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
+import           OAuth2
 
 data AccessTokenRequest = AccessTokenRequest FitbitAPI AuthCode
 
@@ -34,9 +35,9 @@ pResponse =
         <$> (AccessToken <$> v .: "access_token")
         <*> (RefreshToken <$> v .: "refresh_token")
 
-sendAccessToken :: OAuth2App -> AccessTokenRequest -> IO (Either String AccessTokenResponse)
+sendAccessToken :: App -> AccessTokenRequest -> IO (Either String AccessTokenResponse)
 sendAccessToken oauth2 (AccessTokenRequest (FitbitAPI clientId@(ClientId cid) clientSecret) (AuthCode ac)) = runReq def $ do
-    let Just (url, _) = toUrlHttps $ tokenRequestURI oauth2
+    let Just (url, _) = toUrlHttps $ tokenUri oauth2
         opts = tokenAuthHeader clientId clientSecret
         formBody = "code" =: ac <> "grant_type" =: ("authorization_code" :: Text) <> "client_id" =: cid <> "expires_in" =: ("3600" :: Text)
     body <- responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts

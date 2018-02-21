@@ -42,12 +42,12 @@ library
                                           , FitbitDemoLib.FitbitAPI
                                           , FitbitDemoLib.HttpUtil
                                           , FitbitDemoLib.IO
-                                          , FitbitDemoLib.OAuth2
-                                          , FitbitDemoLib.OAuth2.AuthCode
-                                          , FitbitDemoLib.OAuth2App
                                           , FitbitDemoLib.OAuth2Util
                                           , FitbitDemoLib.TokenConfig
-                                          , FitbitDemoLib.Types
+                                          , OAuth2
+                                          , OAuth2.App
+                                          , OAuth2.AuthCode
+                                          , OAuth2.Types
 
 executable fitbit-demo-app
   default-language:                         Haskell2010

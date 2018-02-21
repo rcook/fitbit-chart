@@ -21,6 +21,7 @@ import           Network.HTTP.Req
                     , runReq
                     )
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
+import           OAuth2
 
 data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken
 
@@ -30,9 +31,9 @@ pResponse =
         <$> (AccessToken <$> v .: "access_token")
         <*> (RefreshToken <$> v .: "refresh_token")
 
-sendRefreshToken :: OAuth2App -> ClientId -> ClientSecret -> RefreshToken -> IO (Either String RefreshTokenResponse)
+sendRefreshToken :: App -> ClientId -> ClientSecret -> RefreshToken -> IO (Either String RefreshTokenResponse)
 sendRefreshToken oauth2 clientId clientSecret (RefreshToken rt) = do
-    let Just (url, _) = toUrlHttps $ tokenRequestURI oauth2
+    let Just (url, _) = toUrlHttps $ tokenUri oauth2
         opts = tokenAuthHeader clientId clientSecret
         formBody = "grant_type" =: ("refresh_token" :: Text) <> "refresh_token" =: rt <> "expires_in" =: ("3600" :: Text)
     body <- runReq def $ responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts

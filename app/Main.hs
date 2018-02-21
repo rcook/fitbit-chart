@@ -34,6 +34,7 @@ import           Network.HTTP.Req
                     , responseBody
                     , runReq
                     )
+import           OAuth2
 import qualified Text.URI as URI (mkURI, render)
 import           Text.URI.QQ (uri)
 
@@ -53,11 +54,11 @@ promptForCallbackURI authUri' = do
     putStr "Enter callback URI: "
     URI.mkURI =<< Text.getLine
 
-fitbitApp :: OAuth2App
+fitbitApp :: App
 fitbitApp =
-    OAuth2App
-        [uri|https://api.fitbit.com/oauth2/token|]      -- tokenRequestUrl
+    App
         [uri|https://www.fitbit.com/oauth2/authorize|]  -- authUri
+        [uri|https://api.fitbit.com/oauth2/token|]      -- tokenUri
 
 fitbitApiUrl :: Url 'Https
 fitbitApiUrl = https "api.fitbit.com" /: "1"

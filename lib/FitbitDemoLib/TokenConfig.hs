@@ -5,7 +5,7 @@ module FitbitDemoLib.TokenConfig
     ) where
 
 import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withObject)
-import           FitbitDemoLib.Types
+import           OAuth2
 
 data TokenConfig = TokenConfig AccessToken RefreshToken deriving Show
 
