@@ -10,7 +10,6 @@ import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Default.Class (def)
 import           Data.Maybe (fromJust)
 import           Data.Monoid ((<>))
-import qualified Data.Text.Encoding as Text (encodeUtf8)
 import qualified Data.Vector as Vector (toList)
 import           FitbitDemoApp.Types
 import           FitbitDemoApp.Util
@@ -21,14 +20,11 @@ import           Network.HTTP.Req
                     , NoReqBody(..)
                     , Scheme(..)
                     , Url
-                    , header
                     , jsonResponse
-                    , oAuth2Bearer
                     , req
                     , responseBody
                     , runReq
                     )
-import           OAuth2
 
 getWeightTimeSeries :: Url 'Https -> TimeSeriesRange -> TokenConfig -> IO (Either String [WeightSample])
 getWeightTimeSeries fitbitApiUrl range tokenConfig = do
