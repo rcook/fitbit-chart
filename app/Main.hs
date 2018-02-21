@@ -83,8 +83,8 @@ refresh clientId clientSecret (TokenConfig _ refreshToken) = do
 
 type APIAction a = TokenConfig -> IO a
 
-withRefresh :: ClientId -> ClientSecret -> TokenConfig -> APIAction a -> IO (a, TokenConfig)
-withRefresh clientId clientSecret tokenConfig action =
+withRefresh :: AppConfig -> TokenConfig -> APIAction a -> IO (a, TokenConfig)
+withRefresh (AppConfig (FitbitAPI clientId clientSecret)) tokenConfig action =
     catch (action tokenConfig >>= \result -> return (result, tokenConfig)) $
         \e -> if hasResponseStatus e unauthorized401
                 then do
@@ -152,17 +152,17 @@ getWeightTimeSeries range (TokenConfig (AccessToken at) _) = do
 
 main :: IO ()
 main = do
-    Just config@(AppConfig (FitbitAPI clientId clientSecret)) <- getAppConfig promptForAppConfig
-    tc0 <- getTokenConfig fitbitApp foo promptForCallbackURI config
+    Just appConfig <- getAppConfig promptForAppConfig
+    tc0 <- getTokenConfig fitbitApp foo promptForCallbackURI appConfig
 
     -- TODO: Refactor to use State etc.
-    (weightGoal, tc1) <- withRefresh clientId clientSecret tc0 getWeightGoal
+    (weightGoal, tc1) <- withRefresh appConfig tc0 getWeightGoal
     print weightGoal
 
     t <- getCurrentTime
     let range = Ending (utctDay t) Max
 
-    (weightTimeSeries, _) <- withRefresh clientId clientSecret tc1  (getWeightTimeSeries range)
+    (weightTimeSeries, _) <- withRefresh appConfig tc1  (getWeightTimeSeries range)
     let Right ws = weightTimeSeries
     forM_ (take 5 ws) $ \(WeightSample day value) -> putStrLn $ show day ++ ": " ++ show value
 
