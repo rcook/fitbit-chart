@@ -14,7 +14,6 @@ import           Data.Monoid ((<>))
 import           Data.Text (Text)
 import qualified Data.Text.Encoding as Text (encodeUtf8)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
-import           Data.Time.Calendar (Day)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import qualified Data.Vector as Vector (toList)
 import           FitbitDemoApp
@@ -82,8 +81,6 @@ refresh clientId clientSecret (TokenConfig _ refreshToken) = do
     encodeYAMLFile tokenConfigPath newTokenConfig
     return newTokenConfig
 
-type APIAction a = TokenConfig -> IO a
-
 withRefresh :: AppConfig -> TokenConfig -> APIAction a -> IO (a, TokenConfig)
 withRefresh (AppConfig (FitbitAPI clientId clientSecret)) tokenConfig action =
     catch (action tokenConfig >>= \result -> return (result, tokenConfig)) $
@@ -104,8 +101,6 @@ getWeightGoal (TokenConfig (AccessToken at) _ ) = do
             jsonResponse
             (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
 
-data Period = OneDay | SevenDays | ThirtyDays | OneWeek | OneMonth | ThreeMonths | SixMonths | OneYear | Max
-
 formatPeriod :: Period -> Text
 formatPeriod OneDay = "1d"
 formatPeriod SevenDays = "7d"
@@ -117,13 +112,9 @@ formatPeriod SixMonths = "6m"
 formatPeriod OneYear = "1y"
 formatPeriod Max = "max"
 
-data TimeSeriesRange = Ending Day Period | Between Day Day
-
 addTimeSeriesRangeToUrl :: TimeSeriesRange -> Url 'Https -> Url 'Https
 addTimeSeriesRangeToUrl (Ending endDay period) u = u /: formatDay endDay /: formatPeriod period <> ".json"
 addTimeSeriesRangeToUrl (Between startDay endDay) u = u /: formatDay startDay /: formatDay endDay <> ".json"
-
-data WeightSample = WeightSample Day Text
 
 pWeightSample :: Value -> Parser WeightSample
 pWeightSample =

@@ -82,6 +82,7 @@ executable fitbit-demo-app
                                           , FitbitDemoApp.AccessToken
                                           , FitbitDemoApp.Config
                                           , FitbitDemoApp.RefreshToken
+                                          , FitbitDemoApp.Types
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0
