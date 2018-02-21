@@ -28,6 +28,13 @@ buildAuthUriWithOpts u qs = do
     qs' <- convertParams qs
     return $ u & uriQuery .~ qs'
 
+-- | Gets OAuth2 authorization code
+--
+-- Implements standard OAuth2 authorization workflow for web server apps
+-- as described <https://aaronparecki.com/oauth-2-simplified/#web-server-apps here>.
+--
+-- We don't bother with @redirect_uri@ or @state@ since they do not seem
+-- to be required.
 getAuthCode :: OAuth2App -> ClientId -> PromptForCallbackURI -> IO AuthCode
 getAuthCode oauth2 (ClientId clientId) prompt = do
     let Just authUriWithOpts = buildAuthUriWithOpts (authURI oauth2)
