@@ -164,6 +164,7 @@ main = do
 
     (weightTimeSeries, _) <- withRefresh appConfig tc1  (getWeightTimeSeries range)
     let Right ws = weightTimeSeries
-    forM_ (take 5 ws) $ \(WeightSample day value) -> putStrLn $ show day ++ ": " ++ show value
+    forM_ (take 5 ws) $ \(WeightSample day value) ->
+        putStrLn $ show day ++ ": " ++ show value
 
     putStrLn "DONE"
