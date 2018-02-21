@@ -153,13 +153,10 @@ getWeightTimeSeries range (TokenConfig (AccessToken at) _) = do
 main :: IO ()
 main = do
     Just config@(AppConfig (FitbitAPI clientId clientSecret)) <- getAppConfig promptForAppConfig
-    tokenConfig@(TokenConfig accessToken _) <- getTokenConfig fitbitApp foo promptForCallbackURI config
-
-    let at0 = accessToken
-        tc0 = tokenConfig
+    tc0 <- getTokenConfig fitbitApp foo promptForCallbackURI config
 
     -- TODO: Refactor to use State etc.
-    (weightGoal, tc1@(TokenConfig at1 _)) <- withRefresh clientId clientSecret tc0 getWeightGoal
+    (weightGoal, tc1) <- withRefresh clientId clientSecret tc0 getWeightGoal
     print weightGoal
 
     t <- getCurrentTime

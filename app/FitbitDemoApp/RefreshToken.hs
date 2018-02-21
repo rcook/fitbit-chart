@@ -10,7 +10,6 @@ import           Data.Aeson.Types (Parser, Value, parseEither)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
-import           FitbitDemoApp.Util
 import           FitbitDemoLib
 import           Network.HTTP.Req
                     ( (=:)

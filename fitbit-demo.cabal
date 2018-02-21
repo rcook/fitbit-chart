@@ -26,18 +26,25 @@ library
                                             -fwarn-unused-imports
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
+                                          , base64-bytestring
                                           , bytestring
+                                          , http-client
+                                          , http-types
                                           , lens
                                           , modern-uri
                                           , req
                                           , text
+                                          , time
                                           , yaml
   exposed-modules:                          FitbitDemoLib
                                           , FitbitDemoLib.AppConfig
                                           , FitbitDemoLib.AuthCode
+                                          , FitbitDemoLib.DateTime
                                           , FitbitDemoLib.FitbitAPI
+                                          , FitbitDemoLib.HttpUtil
                                           , FitbitDemoLib.IO
                                           , FitbitDemoLib.OAuth2App
+                                          , FitbitDemoLib.OAuth2Util
                                           , FitbitDemoLib.TokenConfig
                                           , FitbitDemoLib.Types
 
@@ -74,7 +81,6 @@ executable fitbit-demo-app
                                           , FitbitDemoApp.AccessToken
                                           , FitbitDemoApp.Config
                                           , FitbitDemoApp.RefreshToken
-                                          , FitbitDemoApp.Util
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0
