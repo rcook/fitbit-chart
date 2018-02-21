@@ -6,16 +6,12 @@ module Main (main) where
 
 import           Control.Exception (catch, throwIO)
 import           Control.Monad (forM_)
-import           Data.Aeson ((.:), Value, withArray, withObject)
-import           Data.Aeson.Types (Parser, parseEither)
+import           Data.Aeson (Value)
 import           Data.Default.Class (def)
-import           Data.Maybe (fromJust)
 import           Data.Monoid ((<>))
-import           Data.Text (Text)
 import qualified Data.Text.Encoding as Text (encodeUtf8)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
-import qualified Data.Vector as Vector (toList)
 import           FitbitDemoApp
 import           FitbitDemoLib
 import           Network.HTTP.Types (unauthorized401)
@@ -101,47 +97,6 @@ getWeightGoal (TokenConfig (AccessToken at) _ ) = do
             jsonResponse
             (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
 
-formatPeriod :: Period -> Text
-formatPeriod OneDay = "1d"
-formatPeriod SevenDays = "7d"
-formatPeriod ThirtyDays = "30d"
-formatPeriod OneWeek = "1w"
-formatPeriod OneMonth = "1m"
-formatPeriod ThreeMonths = "3m"
-formatPeriod SixMonths = "6m"
-formatPeriod OneYear = "1y"
-formatPeriod Max = "max"
-
-addTimeSeriesRangeToUrl :: TimeSeriesRange -> Url 'Https -> Url 'Https
-addTimeSeriesRangeToUrl (Ending endDay period) u = u /: formatDay endDay /: formatPeriod period <> ".json"
-addTimeSeriesRangeToUrl (Between startDay endDay) u = u /: formatDay startDay /: formatDay endDay <> ".json"
-
-pWeightSample :: Value -> Parser WeightSample
-pWeightSample =
-    withObject "WeightSample" $ \v -> WeightSample
-        <$> (fromJust . parseDay <$> v .: "dateTime")
-        <*> v .: "value"
-
-pWeightSamples :: Value -> Parser [WeightSample]
-pWeightSamples =
-    withArray "[WeightSample]" $ mapM pWeightSample . Vector.toList
-
-pFoo :: Value -> Parser [WeightSample]
-pFoo = withObject "WeightTimeSeriesResponse" $ \v -> do
-    obj <- v .: "body-weight"
-    pWeightSamples obj
-
-getWeightTimeSeries :: TimeSeriesRange -> TokenConfig -> IO (Either String [WeightSample])
-getWeightTimeSeries range (TokenConfig (AccessToken at) _) = do
-    let at' = Text.encodeUtf8 at
-    body <- responseBody <$> (runReq def $
-                req GET
-                    (addTimeSeriesRangeToUrl range (fitbitApiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
-                    NoReqBody
-                    jsonResponse
-                    (oAuth2Bearer at' <> header "Accept-Language" "en_US"))
-    return $ parseEither pFoo body
-
 main :: IO ()
 main = do
     Just appConfig <- getAppConfig promptForAppConfig
@@ -154,7 +109,7 @@ main = do
     t <- getCurrentTime
     let range = Ending (utctDay t) Max
 
-    (weightTimeSeries, _) <- withRefresh appConfig tc1  (getWeightTimeSeries range)
+    (weightTimeSeries, _) <- withRefresh appConfig tc1  (getWeightTimeSeries fitbitApiUrl range)
     let Right ws = weightTimeSeries
     forM_ (take 5 ws) $ \(WeightSample day value) ->
         putStrLn $ show day ++ ": " ++ show value

@@ -3,9 +3,13 @@ module FitbitDemoApp
     , module FitbitDemoApp.Config
     , module FitbitDemoApp.RefreshToken
     , module FitbitDemoApp.Types
+    , module FitbitDemoApp.Util
+    , module FitbitDemoApp.WeightTimeSeries
     ) where
 
 import FitbitDemoApp.AccessToken
 import FitbitDemoApp.Config
 import FitbitDemoApp.RefreshToken
 import FitbitDemoApp.Types
+import FitbitDemoApp.Util
+import FitbitDemoApp.WeightTimeSeries

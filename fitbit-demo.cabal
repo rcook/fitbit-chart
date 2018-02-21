@@ -83,6 +83,8 @@ executable fitbit-demo-app
                                           , FitbitDemoApp.Config
                                           , FitbitDemoApp.RefreshToken
                                           , FitbitDemoApp.Types
+                                          , FitbitDemoApp.Util
+                                          , FitbitDemoApp.WeightTimeSeries
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0
