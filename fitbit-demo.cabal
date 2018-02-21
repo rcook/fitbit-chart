@@ -38,11 +38,12 @@ library
                                           , yaml
   exposed-modules:                          FitbitDemoLib
                                           , FitbitDemoLib.AppConfig
-                                          , FitbitDemoLib.AuthCode
                                           , FitbitDemoLib.DateTime
                                           , FitbitDemoLib.FitbitAPI
                                           , FitbitDemoLib.HttpUtil
                                           , FitbitDemoLib.IO
+                                          , FitbitDemoLib.OAuth2
+                                          , FitbitDemoLib.OAuth2.AuthCode
                                           , FitbitDemoLib.OAuth2App
                                           , FitbitDemoLib.OAuth2Util
                                           , FitbitDemoLib.TokenConfig

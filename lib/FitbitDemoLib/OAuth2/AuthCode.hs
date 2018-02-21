@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoLib.AuthCode
+module FitbitDemoLib.OAuth2.AuthCode
     ( AuthCode(..)
     , PromptForCallbackURI
     , getAuthCode
