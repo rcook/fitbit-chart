@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 
-module FitbitDemoApp.Types
+module FitbitDemoLib.Types
     ( APIAction
     , Period(..)
     , TimeSeriesRange(..)

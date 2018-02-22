@@ -1,13 +1,13 @@
 {-# LANGUAGE DataKinds #-}
 
-module FitbitDemoApp.APIUtil
+module FitbitDemoLib.APIUtil
     ( fitbitApiGet
     ) where
 
 import           Data.Aeson (Value)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
-import           FitbitDemoLib
+import           FitbitDemoLib.HttpUtil
 import           Network.HTTP.Req
                     ( GET(..)
                     , NoReqBody(..)

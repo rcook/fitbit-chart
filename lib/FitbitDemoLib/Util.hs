@@ -1,22 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module FitbitDemoLib.Util
-    ( parseDouble
-    , parseInt
+    ( formatPeriod
     ) where
 
 import           Data.Text (Text)
-import qualified Data.Text as Text (unpack)
-import qualified Data.Text.Read as Text (decimal, double)
+import           FitbitDemoLib.Types
 
-parseInt :: Text -> Either String Int
-parseInt s =
-    case Text.decimal s of
-        Right (result, "") -> return result
-        _ -> Left $ "Could not parse int from " ++ Text.unpack s
-
-parseDouble :: Text -> Either String Double
-parseDouble s =
-    case Text.double s of
-        Right (result, "") -> return result
-        _ -> Left $ "Could not parse double from " ++ Text.unpack s
+formatPeriod :: Period -> Text
+formatPeriod OneDay = "1d"
+formatPeriod SevenDays = "7d"
+formatPeriod ThirtyDays = "30d"
+formatPeriod OneWeek = "1w"
+formatPeriod OneMonth = "1m"
+formatPeriod ThreeMonths = "3m"
+formatPeriod SixMonths = "6m"
+formatPeriod OneYear = "1y"
+formatPeriod Max = "max"

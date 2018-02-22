@@ -23,25 +23,30 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , ClientSecret(..)
                     , PromptForCallbackURI
                     )
+import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
+import           System.FilePath ((</>), takeDirectory)
 import           Text.Printf (printf)
 import qualified Text.URI as URI (mkURI, render)
 import           Text.URI.QQ (uri)
 
-promptForAppConfig :: PromptForAppConfig
+promptForAppConfig :: AppConfigPrompt
 promptForAppConfig = do
     putStrLn "No Fitbit API configuration was found."
     putStr "Enter Fitbit client ID: "
     clientId <- OAuth2.ClientId <$> Text.getLine
     putStr "Enter Fitbit client secret: "
     clientSecret <- OAuth2.ClientSecret <$> Text.getLine
-    return $ AppConfig (FitbitAPI (OAuth2.ClientPair clientId clientSecret))
+    return $ AppConfig (OAuth2.ClientPair clientId clientSecret)
 
-promptForCallbackURI :: OAuth2.PromptForCallbackURI
-promptForCallbackURI authUri' = do
+promptForCallbackUri :: OAuth2.PromptForCallbackURI
+promptForCallbackUri authUri' = do
     putStrLn "Open following link in browser:"
     Text.putStrLn $ URI.render authUri'
     putStr "Enter callback URI: "
     URI.mkURI =<< Text.getLine
+
+configDir :: FilePath
+configDir = ".fitbit-demo"
 
 fitbitApp :: OAuth2.App
 fitbitApp =
@@ -55,13 +60,19 @@ fitbitApiUrl = https "api.fitbit.com" /: "1"
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
 
+updateTokenPair :: UpdateTokenPair
+updateTokenPair tokenPair = do
+    path <- getTokenPairPath configDir
+    createDirectoryIfMissing True (takeDirectory path)
+    encodeYAMLFile path (TokenConfig tokenPair)
+
 main :: IO ()
 main = do
-    Just (AppConfig (FitbitAPI clientPair)) <- getAppConfig promptForAppConfig
-    tp0 <- getTokenPair fitbitApp clientPair promptForCallbackURI
+    Just (AppConfig clientPair) <- getAppConfig configDir promptForAppConfig
+    tp0 <- getTokenPair configDir fitbitApp clientPair promptForCallbackUri
 
     -- TODO: Refactor to use State etc.
-    (Right weightGoal, tp1) <- withRefresh fitbitApp fitbitApiUrl clientPair tp0 getWeightGoal
+    (Right weightGoal, tp1) <- withRefresh updateTokenPair fitbitApp fitbitApiUrl clientPair tp0 getWeightGoal
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
@@ -69,7 +80,7 @@ main = do
     t <- getCurrentTime
     let range = Ending (utctDay t) Max
 
-    (weightTimeSeries, _) <- withRefresh fitbitApp fitbitApiUrl clientPair tp1  (getWeightTimeSeries range)
+    (weightTimeSeries, _) <- withRefresh updateTokenPair fitbitApp fitbitApiUrl clientPair tp1  (getWeightTimeSeries range)
     let Right ws = weightTimeSeries
     forM_ (take 5 ws) $ \(WeightSample day value) ->
         putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"

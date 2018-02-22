@@ -27,20 +27,26 @@ library
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
                                           , bytestring
+                                          , data-default-class
                                           , http-client
                                           , http-types
                                           , req
                                           , req-oauth2
                                           , text
                                           , time
+                                          , vector
                                           , yaml
   exposed-modules:                          FitbitDemoLib
-                                          , FitbitDemoLib.AppConfig
+                                          , FitbitDemoLib.APIUtil
                                           , FitbitDemoLib.DateTime
-                                          , FitbitDemoLib.FitbitAPI
                                           , FitbitDemoLib.HttpUtil
                                           , FitbitDemoLib.IO
+                                          , FitbitDemoLib.OAuth2Helper
+                                          , FitbitDemoLib.Parser
+                                          , FitbitDemoLib.Types
                                           , FitbitDemoLib.Util
+                                          , FitbitDemoLib.WeightGoal
+                                          , FitbitDemoLib.WeightTimeSeries
 
 executable fitbit-demo-app
   default-language:                         Haskell2010
@@ -56,25 +62,17 @@ executable fitbit-demo-app
                                             -fwarn-unused-imports
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
-                                          , data-default-class
                                           , directory
                                           , filepath
                                           , fitbit-demo
-                                          , http-types
                                           , modern-uri
                                           , req
                                           , req-oauth2
                                           , text
                                           , time
-                                          , vector
   other-modules:                            FitbitDemoApp
-                                          , FitbitDemoApp.APIUtil
-                                          , FitbitDemoApp.Config
-                                          , FitbitDemoApp.OAuth2Helper
-                                          , FitbitDemoApp.Types
-                                          , FitbitDemoApp.Util
-                                          , FitbitDemoApp.WeightGoal
-                                          , FitbitDemoApp.WeightTimeSeries
+                                          , FitbitDemoApp.AppConfig
+                                          , FitbitDemoApp.TokenConfig
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0
