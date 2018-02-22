@@ -1,28 +1,28 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoApp.RefreshToken
+module OAuth2.RefreshToken
     ( RefreshTokenRequest(..)
     , RefreshTokenResponse(..)
-    , sendRefreshToken
+    , fetchRefreshToken
     ) where
 
 import           Data.Aeson ((.:), withObject)
 import           Data.Aeson.Types (Parser, Value, parseEither)
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
-import           FitbitDemoApp.APIUtil
-import           FitbitDemoLib
 import           Network.HTTP.Req ((=:))
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
-import           OAuth2
+import           OAuth2.App
+import           OAuth2.Types
+import           OAuth2.Util
 
 data RefreshTokenRequest = RefreshTokenRequest ClientId ClientSecret RefreshToken
 
 data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken
 
-sendRefreshToken :: App -> RefreshTokenRequest -> IO (Either String RefreshTokenResponse)
-sendRefreshToken app (RefreshTokenRequest clientId clientSecret (RefreshToken rt)) = do
+fetchRefreshToken :: App -> RefreshTokenRequest -> IO (Either String RefreshTokenResponse)
+fetchRefreshToken app (RefreshTokenRequest clientId clientSecret (RefreshToken rt)) = do
     let Just (url, _) = toUrlHttps $ tokenUri app
     parseEither pResponse <$>
         oAuth2Post

@@ -1,28 +1,35 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoApp.AccessToken
+module OAuth2.AccessToken
     ( AccessTokenRequest(..)
     , AccessTokenResponse(..)
-    , sendAccessToken
+    , fetchAccessToken
     ) where
 
 import           Data.Aeson ((.:), withObject)
 import           Data.Aeson.Types (Parser, Value, parseEither)
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
-import           FitbitDemoApp.APIUtil
-import           FitbitDemoLib
 import           Network.HTTP.Req ((=:))
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
-import           OAuth2
+import           OAuth2.App
+import           OAuth2.AuthCode
+import           OAuth2.Types
+import           OAuth2.Util
 
 data AccessTokenRequest = AccessTokenRequest ClientId ClientSecret AuthCode
 
 data AccessTokenResponse = AccessTokenResponse AccessToken RefreshToken
 
-sendAccessToken :: App -> AccessTokenRequest -> IO (Either String AccessTokenResponse)
-sendAccessToken app (AccessTokenRequest clientId@(ClientId cid) clientSecret (AuthCode ac)) = do
+-- | Gets OAuth2 access token
+--
+-- Implements standard OAuth2 access token workflow for web server apps
+-- as described <https://aaronparecki.com/oauth-2-simplified/#web-server-apps here>.
+--
+-- We don't pass @client_secret@ because that would be silly. We also don't bother
+-- with @redirect_uri@ since this do not seem to be required.
+fetchAccessToken :: App -> AccessTokenRequest -> IO (Either String AccessTokenResponse)
+fetchAccessToken app (AccessTokenRequest clientId@(ClientId cid) clientSecret (AuthCode ac)) = do
     let Just (url, _) = toUrlHttps $ tokenUri app
     parseEither pResponse <$>
         oAuth2Post

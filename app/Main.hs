@@ -50,7 +50,7 @@ fitbitApiUrl = https "api.fitbit.com" /: "1"
 
 foo :: Foo
 foo authCode (FitbitAPI clientId clientSecret) = do
-    result <- sendAccessToken fitbitApp (AccessTokenRequest clientId clientSecret authCode)
+    result <- fetchAccessToken fitbitApp (AccessTokenRequest clientId clientSecret authCode)
     let (AccessTokenResponse at rt) = case result of
                                         Left e -> error e
                                         Right x -> x
@@ -58,7 +58,7 @@ foo authCode (FitbitAPI clientId clientSecret) = do
 
 refresh :: ClientId -> ClientSecret -> TokenConfig -> IO TokenConfig
 refresh clientId clientSecret (TokenConfig _ refreshToken) = do
-    result <- sendRefreshToken fitbitApp (RefreshTokenRequest clientId clientSecret refreshToken)
+    result <- fetchRefreshToken fitbitApp (RefreshTokenRequest clientId clientSecret refreshToken)
     let (RefreshTokenResponse at rt) = case result of
                                         Left e -> error e
                                         Right x -> x

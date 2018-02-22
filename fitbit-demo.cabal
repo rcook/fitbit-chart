@@ -28,11 +28,13 @@ library
                                           , base >= 4.7 && < 5
                                           , base64-bytestring
                                           , bytestring
+                                          , data-default-class
                                           , http-client
                                           , http-types
                                           , lens
                                           , modern-uri
                                           , req
+                                          , req-url-extra
                                           , text
                                           , time
                                           , yaml
@@ -46,9 +48,12 @@ library
                                           , FitbitDemoLib.TokenConfig
                                           , FitbitDemoLib.Util
                                           , OAuth2
+                                          , OAuth2.AccessToken
                                           , OAuth2.App
                                           , OAuth2.AuthCode
+                                          , OAuth2.RefreshToken
                                           , OAuth2.Types
+                                          , OAuth2.Util
 
 executable fitbit-demo-app
   default-language:                         Haskell2010
@@ -81,9 +86,7 @@ executable fitbit-demo-app
                                           , vector
   other-modules:                            FitbitDemoApp
                                           , FitbitDemoApp.APIUtil
-                                          , FitbitDemoApp.AccessToken
                                           , FitbitDemoApp.Config
-                                          , FitbitDemoApp.RefreshToken
                                           , FitbitDemoApp.Types
                                           , FitbitDemoApp.Util
                                           , FitbitDemoApp.WeightGoal
