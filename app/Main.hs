@@ -4,14 +4,12 @@
 
 module Main (main) where
 
-import           Control.Exception (catch, throwIO)
 import           Control.Monad (forM_)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           FitbitDemoApp
 import           FitbitDemoLib
-import           Network.HTTP.Types (unauthorized401)
 import           Network.HTTP.Req
                     ( (/:)
                     , Scheme(..)
@@ -19,17 +17,11 @@ import           Network.HTTP.Req
                     , https
                     )
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
-                    ( AccessTokenRequest(..)
-                    , AccessTokenResponse(..)
-                    , App(..)
+                    ( App(..)
                     , ClientId(..)
+                    , ClientPair(..)
                     , ClientSecret(..)
                     , PromptForCallbackURI
-                    , RefreshTokenRequest(..)
-                    , RefreshTokenResponse(..)
-                    , TokenPair(..)
-                    , fetchAccessToken
-                    , fetchRefreshToken
                     )
 import           Text.Printf (printf)
 import qualified Text.URI as URI (mkURI, render)
@@ -42,7 +34,7 @@ promptForAppConfig = do
     clientId <- OAuth2.ClientId <$> Text.getLine
     putStr "Enter Fitbit client secret: "
     clientSecret <- OAuth2.ClientSecret <$> Text.getLine
-    return $ AppConfig (FitbitAPI clientId clientSecret)
+    return $ AppConfig (FitbitAPI (OAuth2.ClientPair clientId clientSecret))
 
 promptForCallbackURI :: OAuth2.PromptForCallbackURI
 promptForCallbackURI authUri' = do
@@ -60,24 +52,16 @@ fitbitApp =
 fitbitApiUrl :: Url 'Https
 fitbitApiUrl = https "api.fitbit.com" /: "1"
 
-foo :: Foo
-foo authCode (FitbitAPI clientId clientSecret) = do
-    result <- OAuth2.fetchAccessToken fitbitApp (OAuth2.AccessTokenRequest clientId clientSecret authCode)
-    let (OAuth2.AccessTokenResponse at rt) = case result of
-                                                Left e -> error e
-                                                Right x -> x
-    return $ OAuth2.TokenPair at rt
-
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
 
 main :: IO ()
 main = do
-    Just appConfig <- getAppConfig promptForAppConfig
-    tp0 <- getTokenPair fitbitApp foo promptForCallbackURI appConfig
+    Just (AppConfig (FitbitAPI clientPair)) <- getAppConfig promptForAppConfig
+    tp0 <- getTokenPair fitbitApp clientPair promptForCallbackURI
 
     -- TODO: Refactor to use State etc.
-    (Right weightGoal, tp1) <- withRefresh fitbitApp fitbitApiUrl appConfig tp0 getWeightGoal
+    (Right weightGoal, tp1) <- withRefresh fitbitApp fitbitApiUrl clientPair tp0 getWeightGoal
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
@@ -85,7 +69,7 @@ main = do
     t <- getCurrentTime
     let range = Ending (utctDay t) Max
 
-    (weightTimeSeries, _) <- withRefresh fitbitApp fitbitApiUrl appConfig tp1  (getWeightTimeSeries range)
+    (weightTimeSeries, _) <- withRefresh fitbitApp fitbitApiUrl clientPair tp1  (getWeightTimeSeries range)
     let Right ws = weightTimeSeries
     forM_ (take 5 ws) $ \(WeightSample day value) ->
         putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"

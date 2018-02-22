@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module FitbitDemoApp.Config
-    ( Foo
-    , PromptForAppConfig
+    ( PromptForAppConfig
     , TokenPairWrapper(..)
     , getAppConfig
     , getTokenPair
@@ -20,18 +19,21 @@ import           Data.Aeson
 import           FitbitDemoLib
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
+                    , AccessTokenRequest(..)
+                    , AccessTokenResponse(..)
                     , App
                     , AuthCode
+                    , ClientPair(..)
                     , PromptForCallbackURI
                     , RefreshToken(..)
                     , TokenPair(..)
+                    , fetchAccessToken
                     , getAuthCode
                     )
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
 
 type PromptForAppConfig = IO AppConfig
-type Foo = OAuth2.AuthCode -> FitbitAPI -> IO OAuth2.TokenPair
 
 -- Wrap with a newtype to avoid creating an orphan instance of FromJSON/ToJSON for TokenPair
 -- TODO: There's probably a more elegant way of serializing/deserializing TokenPair as YAML
@@ -74,26 +76,39 @@ newAppConfig prompt p = do
 getAppConfig :: PromptForAppConfig -> IO (Maybe AppConfig)
 getAppConfig prompt = do
     appConfigPath <- getAppConfigPath
-    appConfigExists <- doesFileExist appConfigPath
-    if appConfigExists
+    exists <- doesFileExist appConfigPath
+    if exists
         then decodeYAMLFile appConfigPath
         else Just <$> newAppConfig prompt appConfigPath
 
-readTokenPair :: OAuth2.App -> Foo -> OAuth2.PromptForCallbackURI -> AppConfig -> IO OAuth2.TokenPair
-readTokenPair app f prompt (AppConfig fitbitAPI@(FitbitAPI clientId _)) = do
+readTokenPair :: OAuth2.App -> OAuth2.ClientPair -> OAuth2.PromptForCallbackURI -> IO OAuth2.TokenPair
+readTokenPair app clientPair@(OAuth2.ClientPair clientId _) prompt = do
     authCode <- OAuth2.getAuthCode app clientId prompt
-    tokenPair <- f authCode fitbitAPI
+    tokenPair <- foo app authCode clientPair
     tokenPairPath <- getTokenPairPath
     -- TODO: Figure out how to do this without a ToJSON instance
     encodeYAMLFile tokenPairPath (TokenPairWrapper tokenPair)
     return tokenPair
 
-getTokenPair :: OAuth2.App -> Foo -> OAuth2.PromptForCallbackURI -> AppConfig -> IO OAuth2.TokenPair
-getTokenPair app f prompt config = do
+-- | Gets token pair
+--
+-- If a token pair exists in the token pair configuration file, read
+-- it from the file and return that. Otherwise
+getTokenPair :: OAuth2.App -> OAuth2.ClientPair -> OAuth2.PromptForCallbackURI -> IO OAuth2.TokenPair
+getTokenPair app clientPair prompt = do
     tokenPairPath <- getTokenPairPath
-    tokenPairExists <- doesFileExist tokenPairPath
-    if tokenPairExists
+    exists <- doesFileExist tokenPairPath
+    if exists
         then do
             Just (TokenPairWrapper tokenPair) <- decodeYAMLFile tokenPairPath -- TODO: Error handling!
             return tokenPair
-        else readTokenPair app f prompt config
+        else readTokenPair app clientPair prompt
+
+foo :: OAuth2.App -> OAuth2.AuthCode -> OAuth2.ClientPair -> IO OAuth2.TokenPair
+foo app authCode clientPair = do
+    result <- OAuth2.fetchAccessToken app (OAuth2.AccessTokenRequest clientPair authCode)
+    let (OAuth2.AccessTokenResponse tokenPair) = case result of
+                                                Left e -> error e
+                                                Right x -> x
+    return tokenPair
+        

@@ -10,7 +10,6 @@ module FitbitDemoApp.Types
 
 import           Data.Text (Text)
 import           Data.Time.Calendar (Day)
-import           FitbitDemoLib
 import           Network.HTTP.Req
                     ( Scheme(..)
                     , Url
