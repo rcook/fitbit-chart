@@ -67,27 +67,6 @@ foo authCode (FitbitAPI clientId clientSecret) = do
                                                 Right x -> x
     return $ TokenConfig at rt
 
-refresh :: OAuth2.ClientId -> OAuth2.ClientSecret -> TokenConfig -> IO TokenConfig
-refresh clientId clientSecret (TokenConfig _ refreshToken) = do
-    result <- OAuth2.fetchRefreshToken fitbitApp (OAuth2.RefreshTokenRequest clientId clientSecret refreshToken)
-    let (OAuth2.RefreshTokenResponse at rt) = case result of
-                                                Left e -> error e
-                                                Right x -> x
-    let newTokenConfig = TokenConfig at rt
-    tokenConfigPath <- getTokenConfigPath
-    encodeYAMLFile tokenConfigPath newTokenConfig
-    return newTokenConfig
-
-withRefresh :: Url 'Https -> AppConfig -> TokenConfig -> APIAction a -> IO (Either String a, TokenConfig)
-withRefresh apiUrl (AppConfig (FitbitAPI clientId clientSecret)) tokenConfig action =
-    catch (action apiUrl tokenConfig >>= \result -> return (result, tokenConfig)) $
-        \e -> if hasResponseStatus e unauthorized401
-                then do
-                    newTokenConfig <- refresh clientId clientSecret tokenConfig
-                    result <- action apiUrl newTokenConfig
-                    return (result, newTokenConfig)
-                else throwIO e
-
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
 
@@ -97,7 +76,7 @@ main = do
     tc0 <- getTokenConfig fitbitApp foo promptForCallbackURI appConfig
 
     -- TODO: Refactor to use State etc.
-    (Right weightGoal, tc1) <- withRefresh fitbitApiUrl appConfig tc0 getWeightGoal
+    (Right weightGoal, tc1) <- withRefresh fitbitApp fitbitApiUrl appConfig tc0 getWeightGoal
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
@@ -105,7 +84,7 @@ main = do
     t <- getCurrentTime
     let range = Ending (utctDay t) Max
 
-    (weightTimeSeries, _) <- withRefresh fitbitApiUrl appConfig tc1  (getWeightTimeSeries range)
+    (weightTimeSeries, _) <- withRefresh fitbitApp fitbitApiUrl appConfig tc1  (getWeightTimeSeries range)
     let Right ws = weightTimeSeries
     forM_ (take 5 ws) $ \(WeightSample day value) ->
         putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"

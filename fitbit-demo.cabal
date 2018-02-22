@@ -72,6 +72,7 @@ executable fitbit-demo-app
   other-modules:                            FitbitDemoApp
                                           , FitbitDemoApp.APIUtil
                                           , FitbitDemoApp.Config
+                                          , FitbitDemoApp.OAuth2Helper
                                           , FitbitDemoApp.Types
                                           , FitbitDemoApp.Util
                                           , FitbitDemoApp.WeightGoal
