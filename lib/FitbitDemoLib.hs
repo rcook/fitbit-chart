@@ -6,6 +6,7 @@ module FitbitDemoLib
     , module FitbitDemoLib.IO
     , module FitbitDemoLib.OAuth2Util
     , module FitbitDemoLib.TokenConfig
+    , module FitbitDemoLib.Util
     ) where
 
 import FitbitDemoLib.AppConfig
@@ -15,3 +16,4 @@ import FitbitDemoLib.HttpUtil
 import FitbitDemoLib.IO
 import FitbitDemoLib.OAuth2Util
 import FitbitDemoLib.TokenConfig
+import FitbitDemoLib.Util

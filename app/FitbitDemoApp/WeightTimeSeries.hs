@@ -8,7 +8,7 @@ module FitbitDemoApp.WeightTimeSeries
 import           Data.Aeson ((.:), Value, withArray, withObject)
 import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Default.Class (def)
-import           Data.Maybe (fromJust)
+import           Data.Either (fromRight)
 import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
 import           FitbitDemoApp.Types
@@ -52,5 +52,5 @@ pWeightSamples =
 pWeightSample :: Value -> Parser WeightSample
 pWeightSample =
     withObject "WeightSample" $ \v -> WeightSample
-        <$> (fromJust . parseDay <$> v .: "dateTime")
-        <*> v .: "value"
+        <$> (fromRight (error "FAIL") . parseDay <$> v .: "dateTime") -- TODO: Error handling
+        <*> (fromRight (error "FAIL") . parseDouble <$> v .: "value") -- TODO: Error handling

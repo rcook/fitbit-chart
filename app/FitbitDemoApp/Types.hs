@@ -5,7 +5,6 @@ module FitbitDemoApp.Types
     , WeightSample(..)
     ) where
 
-import           Data.Text (Text)
 import           Data.Time.Calendar (Day)
 import           FitbitDemoLib
 
@@ -13,6 +12,6 @@ data Period = OneDay | SevenDays | ThirtyDays | OneWeek | OneMonth | ThreeMonths
 
 data TimeSeriesRange = Ending Day Period | Between Day Day
 
-data WeightSample = WeightSample Day Text
+data WeightSample = WeightSample Day Double
 
 type APIAction a = TokenConfig -> IO a

@@ -44,6 +44,7 @@ library
                                           , FitbitDemoLib.IO
                                           , FitbitDemoLib.OAuth2Util
                                           , FitbitDemoLib.TokenConfig
+                                          , FitbitDemoLib.Util
                                           , OAuth2
                                           , OAuth2.App
                                           , OAuth2.AuthCode
