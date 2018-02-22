@@ -1,5 +1,6 @@
 module FitbitDemoApp
-    ( module FitbitDemoApp.AccessToken
+    ( module FitbitDemoApp.APIUtil
+    , module FitbitDemoApp.AccessToken
     , module FitbitDemoApp.Config
     , module FitbitDemoApp.RefreshToken
     , module FitbitDemoApp.Types
@@ -8,6 +9,7 @@ module FitbitDemoApp
     , module FitbitDemoApp.WeightTimeSeries
     ) where
 
+import FitbitDemoApp.APIUtil
 import FitbitDemoApp.AccessToken
 import FitbitDemoApp.Config
 import FitbitDemoApp.RefreshToken

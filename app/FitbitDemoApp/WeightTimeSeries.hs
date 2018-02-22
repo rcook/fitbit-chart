@@ -7,35 +7,20 @@ module FitbitDemoApp.WeightTimeSeries
 
 import           Data.Aeson ((.:), Value, withArray, withObject)
 import           Data.Aeson.Types (Parser, parseEither)
-import           Data.Default.Class (def)
 import           Data.Either (fromRight)
 import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
 import           FitbitDemoApp.Types
+import           FitbitDemoApp.APIUtil
 import           FitbitDemoApp.Util
 import           FitbitDemoLib
-import           Network.HTTP.Req
-                    ( (/:)
-                    , GET(..)
-                    , NoReqBody(..)
-                    , Scheme(..)
-                    , Url
-                    , jsonResponse
-                    , req
-                    , responseBody
-                    , runReq
-                    )
+import           Network.HTTP.Req ((/:), Scheme(..), Url)
 
 getWeightTimeSeries :: TimeSeriesRange -> APIAction [WeightSample]
-getWeightTimeSeries range apiUrl tokenConfig = do
-    body <- responseBody <$> (runReq def $
-                req GET
-                    (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
-                    NoReqBody
-                    jsonResponse
-                    (bearerHeader tokenConfig <> acceptLanguage))
-    return $ parseEither pResponse body
-
+getWeightTimeSeries range apiUrl tokenConfig =
+    parseEither pResponse
+        <$> fitbitApiGet (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date")) tokenConfig
+    
 buildUrl :: TimeSeriesRange -> Url 'Https -> Url 'Https
 buildUrl (Ending endDay period) u = u /: formatDay endDay /: formatPeriod period <> ".json"
 buildUrl (Between startDay endDay) u = u /: formatDay startDay /: formatDay endDay <> ".json"

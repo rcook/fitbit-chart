@@ -7,34 +7,16 @@ module FitbitDemoApp.WeightGoal
 
 import           Data.Aeson ((.:), Value, withObject)
 import           Data.Aeson.Types (Parser, parseEither)
-import           Data.Default.Class (def)
-import           Data.Monoid ((<>))
 import           FitbitDemoApp.Types
-import           FitbitDemoLib
-import           Network.HTTP.Req
-                    ( (/:)
-                    , GET(..)
-                    , NoReqBody(..)
-                    , jsonResponse
-                    , req
-                    , responseBody
-                    , runReq
-                    )
+import           FitbitDemoApp.APIUtil
+import           Network.HTTP.Req ((/:))
 
 getWeightGoal :: APIAction WeightGoal
-getWeightGoal apiUrl tokenConfig = do
-    body <- responseBody <$> (runReq def $
-                req GET
-                    (apiUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json")
-                    NoReqBody
-                    jsonResponse
-                    (bearerHeader tokenConfig <> acceptLanguage))
-    return $ parseEither pResponse body
+getWeightGoal apiUrl tokenConfig =
+    parseEither pResponse
+        <$> fitbitApiGet (apiUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json") tokenConfig
 
 pResponse :: Value -> Parser WeightGoal
 pResponse = withObject "WeightGoalResponse" $ \v -> do
     obj <- v .: "goal"
-    goalType <- obj .: "goalType"
-    goalWeight <- obj .: "weight"
-    startWeight <- obj .: "startWeight"
-    return $ WeightGoal goalType goalWeight startWeight
+    WeightGoal <$> obj .: "goalType" <*> obj .: "weight" <*> obj .: "startWeight"
