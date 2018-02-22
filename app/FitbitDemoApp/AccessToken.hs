@@ -17,12 +17,12 @@ import           Network.HTTP.Req ((=:))
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
 import           OAuth2
 
-data AccessTokenRequest = AccessTokenRequest FitbitAPI AuthCode
+data AccessTokenRequest = AccessTokenRequest ClientId ClientSecret AuthCode
 
 data AccessTokenResponse = AccessTokenResponse AccessToken RefreshToken
 
 sendAccessToken :: App -> AccessTokenRequest -> IO (Either String AccessTokenResponse)
-sendAccessToken app (AccessTokenRequest (FitbitAPI clientId@(ClientId cid) clientSecret) (AuthCode ac)) = do
+sendAccessToken app (AccessTokenRequest clientId@(ClientId cid) clientSecret (AuthCode ac)) = do
     let Just (url, _) = toUrlHttps $ tokenUri app
     parseEither pResponse <$>
         oAuth2Post

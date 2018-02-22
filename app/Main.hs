@@ -49,8 +49,8 @@ fitbitApiUrl :: Url 'Https
 fitbitApiUrl = https "api.fitbit.com" /: "1"
 
 foo :: Foo
-foo authCode fitbitAPI = do
-    result <- sendAccessToken fitbitApp (AccessTokenRequest fitbitAPI authCode)
+foo authCode (FitbitAPI clientId clientSecret) = do
+    result <- sendAccessToken fitbitApp (AccessTokenRequest clientId clientSecret authCode)
     let (AccessTokenResponse at rt) = case result of
                                         Left e -> error e
                                         Right x -> x
@@ -58,7 +58,7 @@ foo authCode fitbitAPI = do
 
 refresh :: ClientId -> ClientSecret -> TokenConfig -> IO TokenConfig
 refresh clientId clientSecret (TokenConfig _ refreshToken) = do
-    result <- sendRefreshToken fitbitApp clientId clientSecret refreshToken
+    result <- sendRefreshToken fitbitApp (RefreshTokenRequest clientId clientSecret refreshToken)
     let (RefreshTokenResponse at rt) = case result of
                                         Left e -> error e
                                         Right x -> x

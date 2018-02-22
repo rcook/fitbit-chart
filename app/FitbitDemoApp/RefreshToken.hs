@@ -2,7 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module FitbitDemoApp.RefreshToken
-    ( RefreshTokenResponse(..)
+    ( RefreshTokenRequest(..)
+    , RefreshTokenResponse(..)
     , sendRefreshToken
     ) where
 
@@ -16,10 +17,12 @@ import           Network.HTTP.Req ((=:))
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
 import           OAuth2
 
+data RefreshTokenRequest = RefreshTokenRequest ClientId ClientSecret RefreshToken
+
 data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken
 
-sendRefreshToken :: App -> ClientId -> ClientSecret -> RefreshToken -> IO (Either String RefreshTokenResponse)
-sendRefreshToken app clientId clientSecret (RefreshToken rt) = do
+sendRefreshToken :: App -> RefreshTokenRequest -> IO (Either String RefreshTokenResponse)
+sendRefreshToken app (RefreshTokenRequest clientId clientSecret (RefreshToken rt)) = do
     let Just (url, _) = toUrlHttps $ tokenUri app
     parseEither pResponse <$>
         oAuth2Post
