@@ -4,6 +4,7 @@ module FitbitDemoApp.TokenConfig
     ( TokenConfig(..)
     , getTokenPair
     , getTokenPairPath
+    , writeTokenPair
     ) where
 
 import           Data.Aeson
@@ -58,11 +59,14 @@ readTokenPair :: FilePath -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.PromptFor
 readTokenPair configDir app clientPair@(OAuth2.ClientPair clientId _) prompt = do
     authCode <- OAuth2.getAuthCode app clientId prompt
     tokenPair <- foo app authCode clientPair
+    writeTokenPair configDir tokenPair
+    return tokenPair
+
+writeTokenPair :: FilePath -> OAuth2.TokenPair -> IO ()
+writeTokenPair configDir tokenPair = do
     path <- getTokenPairPath configDir
-    -- TODO: Figure out how to do this without a ToJSON instance
     createDirectoryIfMissing True (takeDirectory path)
     encodeYAMLFile path (TokenConfig tokenPair)
-    return tokenPair
 
 -- | Gets token pair
 --

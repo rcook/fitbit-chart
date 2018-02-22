@@ -60,19 +60,15 @@ fitbitApiUrl = https "api.fitbit.com" /: "1"
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
 
-updateTokenPair :: UpdateTokenPair
-updateTokenPair tokenPair = do
-    path <- getTokenPairPath configDir
-    createDirectoryIfMissing True (takeDirectory path)
-    encodeYAMLFile path (TokenConfig tokenPair)
-
 main :: IO ()
 main = do
     Just (AppConfig clientPair) <- getAppConfig configDir promptForAppConfig
     tp0 <- getTokenPair configDir fitbitApp clientPair promptForCallbackUri
 
+    let withRefresh' = withRefresh (writeTokenPair configDir) fitbitApp fitbitApiUrl clientPair
+
     -- TODO: Refactor to use State etc.
-    (Right weightGoal, tp1) <- withRefresh updateTokenPair fitbitApp fitbitApiUrl clientPair tp0 getWeightGoal
+    (Right weightGoal, tp1) <- withRefresh' tp0 getWeightGoal
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
@@ -80,7 +76,7 @@ main = do
     t <- getCurrentTime
     let range = Ending (utctDay t) Max
 
-    (weightTimeSeries, _) <- withRefresh updateTokenPair fitbitApp fitbitApiUrl clientPair tp1  (getWeightTimeSeries range)
+    (weightTimeSeries, _) <- withRefresh' tp1  (getWeightTimeSeries range)
     let Right ws = weightTimeSeries
     forM_ (take 5 ws) $ \(WeightSample day value) ->
         putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
