@@ -26,11 +26,11 @@ import           Network.HTTP.Req
                     , runReq
                     )
 
-getWeightTimeSeries :: Url 'Https -> TimeSeriesRange -> TokenConfig -> IO (Either String [WeightSample])
-getWeightTimeSeries fitbitApiUrl range tokenConfig = do
+getWeightTimeSeries :: TimeSeriesRange -> APIAction [WeightSample]
+getWeightTimeSeries range apiUrl tokenConfig = do
     body <- responseBody <$> (runReq def $
                 req GET
-                    (buildUrl range (fitbitApiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
+                    (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
                     NoReqBody
                     jsonResponse
                     (bearerHeader tokenConfig <> acceptLanguage))
