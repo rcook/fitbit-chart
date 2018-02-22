@@ -8,7 +8,7 @@ import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withO
 import           FitbitDemoLib.FitbitAPI
 
 -- | Application configuration
-data AppConfig = AppConfig FitbitAPI deriving Show
+data AppConfig = AppConfig FitbitAPI deriving (Eq, Show)
 
 -- | 'FromJSON' instance for deserializing application configuration from YAML
 instance FromJSON AppConfig where

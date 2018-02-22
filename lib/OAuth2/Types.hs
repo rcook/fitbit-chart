@@ -8,10 +8,10 @@ module OAuth2.Types
 import           Data.Text (Text)
 
 -- | Fitbit API client ID
-newtype ClientId = ClientId Text deriving Show
+newtype ClientId = ClientId Text deriving (Eq, Show)
 
 -- | Fitbit API client secret
-newtype ClientSecret = ClientSecret Text deriving Show
+newtype ClientSecret = ClientSecret Text deriving (Eq, Show)
 
 -- | Fitbit API access token
 newtype AccessToken = AccessToken Text deriving Show

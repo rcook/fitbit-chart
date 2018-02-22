@@ -8,7 +8,7 @@ import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withO
 import           OAuth2
 
 -- | Fitbit API configuration
-data FitbitAPI = FitbitAPI ClientId ClientSecret deriving Show
+data FitbitAPI = FitbitAPI ClientId ClientSecret deriving (Eq, Show)
 
 -- | 'FromJSON' instance for deserializing Fitbit API configuration from YAML
 instance FromJSON FitbitAPI where
