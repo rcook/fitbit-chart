@@ -27,6 +27,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , PromptForCallbackURI
                     , RefreshTokenRequest(..)
                     , RefreshTokenResponse(..)
+                    , TokenPair(..)
                     , fetchAccessToken
                     , fetchRefreshToken
                     )
@@ -65,7 +66,7 @@ foo authCode (FitbitAPI clientId clientSecret) = do
     let (OAuth2.AccessTokenResponse at rt) = case result of
                                                 Left e -> error e
                                                 Right x -> x
-    return $ TokenConfig at rt
+    return $ OAuth2.TokenPair at rt
 
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
@@ -73,10 +74,10 @@ formatDouble = printf "%.1f"
 main :: IO ()
 main = do
     Just appConfig <- getAppConfig promptForAppConfig
-    tc0 <- getTokenConfig fitbitApp foo promptForCallbackURI appConfig
+    tp0 <- getTokenPair fitbitApp foo promptForCallbackURI appConfig
 
     -- TODO: Refactor to use State etc.
-    (Right weightGoal, tc1) <- withRefresh fitbitApp fitbitApiUrl appConfig tc0 getWeightGoal
+    (Right weightGoal, tp1) <- withRefresh fitbitApp fitbitApiUrl appConfig tp0 getWeightGoal
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
@@ -84,7 +85,7 @@ main = do
     t <- getCurrentTime
     let range = Ending (utctDay t) Max
 
-    (weightTimeSeries, _) <- withRefresh fitbitApp fitbitApiUrl appConfig tc1  (getWeightTimeSeries range)
+    (weightTimeSeries, _) <- withRefresh fitbitApp fitbitApiUrl appConfig tp1  (getWeightTimeSeries range)
     let Right ws = weightTimeSeries
     forM_ (take 5 ws) $ \(WeightSample day value) ->
         putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"

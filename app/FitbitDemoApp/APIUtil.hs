@@ -18,7 +18,8 @@ import           Network.HTTP.Req
                     , responseBody
                     , runReq
                     )
+import qualified Network.HTTP.Req.OAuth2 as OAuth2 (AccessToken, oAuth2BearerHeader)
 
-fitbitApiGet :: Url 'Https -> TokenConfig -> IO Value
-fitbitApiGet url tokenConfig =
-    responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (bearerHeader tokenConfig <> acceptLanguage))
+fitbitApiGet :: Url 'Https -> OAuth2.AccessToken -> IO Value
+fitbitApiGet url accessToken =
+    responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (OAuth2.oAuth2BearerHeader accessToken <> acceptLanguage))

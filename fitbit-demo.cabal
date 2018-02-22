@@ -40,8 +40,6 @@ library
                                           , FitbitDemoLib.FitbitAPI
                                           , FitbitDemoLib.HttpUtil
                                           , FitbitDemoLib.IO
-                                          , FitbitDemoLib.OAuth2Util
-                                          , FitbitDemoLib.TokenConfig
                                           , FitbitDemoLib.Util
 
 executable fitbit-demo-app
