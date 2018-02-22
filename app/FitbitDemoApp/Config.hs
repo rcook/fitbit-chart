@@ -7,12 +7,12 @@ module FitbitDemoApp.Config
     ) where
 
 import           FitbitDemoLib
-import           OAuth2
+import qualified Network.HTTP.Req.OAuth2 as OAuth2 (App, AuthCode, PromptForCallbackURI, getAuthCode)
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
 
 type PromptForAppConfig = IO AppConfig
-type Foo = AuthCode -> FitbitAPI -> IO TokenConfig
+type Foo = OAuth2.AuthCode -> FitbitAPI -> IO TokenConfig
 
 configDir :: FilePath
 configDir = ".fitbit-demo"
@@ -42,20 +42,20 @@ getAppConfig prompt = do
         then decodeYAMLFile appConfigPath
         else Just <$> newAppConfig prompt appConfigPath
 
-readTokenConfig :: App -> Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
-readTokenConfig oauth2 f prompt (AppConfig fitbitAPI@(FitbitAPI clientId _)) = do
-    authCode <- getAuthCode oauth2 clientId prompt
+readTokenConfig :: OAuth2.App -> Foo -> OAuth2.PromptForCallbackURI -> AppConfig -> IO TokenConfig
+readTokenConfig app f prompt (AppConfig fitbitAPI@(FitbitAPI clientId _)) = do
+    authCode <- OAuth2.getAuthCode app clientId prompt
     tokenConfig <- f authCode fitbitAPI
     tokenConfigPath <- getTokenConfigPath
     encodeYAMLFile tokenConfigPath tokenConfig
     return tokenConfig
 
-getTokenConfig :: App -> Foo -> PromptForCallbackURI -> AppConfig -> IO TokenConfig
-getTokenConfig oauth2 f prompt config = do
+getTokenConfig :: OAuth2.App -> Foo -> OAuth2.PromptForCallbackURI -> AppConfig -> IO TokenConfig
+getTokenConfig app f prompt config = do
     tokenConfigPath <- getTokenConfigPath
     tokenConfigExists <- doesFileExist tokenConfigPath
     if tokenConfigExists
         then do
             Just tokenConfig <- decodeYAMLFile tokenConfigPath
             return tokenConfig
-        else readTokenConfig oauth2 f prompt config
+        else readTokenConfig app f prompt config

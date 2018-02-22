@@ -2,13 +2,12 @@
 
 module FitbitDemoLib.OAuth2Util
     ( bearerHeader
-    , tokenAuthHeader
     ) where
 
 import qualified Data.Text.Encoding as Text (encodeUtf8)
 import           FitbitDemoLib.TokenConfig
 import           Network.HTTP.Req (Option, Scheme(..), oAuth2Bearer)
-import           OAuth2
+import qualified Network.HTTP.Req.OAuth2 as OAuth2 (AccessToken(..))
 
 bearerHeader :: TokenConfig -> Option 'Https
-bearerHeader (TokenConfig (AccessToken at) _) = oAuth2Bearer (Text.encodeUtf8 at)
+bearerHeader (TokenConfig (OAuth2.AccessToken at) _) = oAuth2Bearer (Text.encodeUtf8 at)

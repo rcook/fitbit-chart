@@ -5,18 +5,18 @@ module FitbitDemoLib.TokenConfig
     ) where
 
 import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withObject)
-import           OAuth2
+import qualified Network.HTTP.Req.OAuth2 as OAuth2 (AccessToken(..), RefreshToken(..))
 
-data TokenConfig = TokenConfig AccessToken RefreshToken deriving Show
+data TokenConfig = TokenConfig OAuth2.AccessToken OAuth2.RefreshToken deriving Show
 
 instance FromJSON TokenConfig where
     parseJSON =
         withObject "TokenConfig" $ \v -> TokenConfig
-            <$> (AccessToken <$> v .: "access-token")
-            <*> (RefreshToken <$> v .: "refresh-token")
+            <$> (OAuth2.AccessToken <$> v .: "access-token")
+            <*> (OAuth2.RefreshToken <$> v .: "refresh-token")
 
 instance ToJSON TokenConfig where
-    toJSON (TokenConfig (AccessToken at) (RefreshToken rt)) =
+    toJSON (TokenConfig (OAuth2.AccessToken at) (OAuth2.RefreshToken rt)) =
         object
             [ "access-token" .= at
             , "refresh-token" .= rt

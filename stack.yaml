@@ -1,3 +1,6 @@
 resolver: lts-10.4
 extra-deps:
 - req-url-extra-0.1.0.0
+packages:
+- .
+- ../req-oauth2

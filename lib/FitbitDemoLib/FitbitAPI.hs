@@ -5,21 +5,21 @@ module FitbitDemoLib.FitbitAPI
     ) where
 
 import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withObject)
-import           OAuth2
+import qualified Network.HTTP.Req.OAuth2 as OAuth2 (ClientId(..), ClientSecret(..))
 
 -- | Fitbit API configuration
-data FitbitAPI = FitbitAPI ClientId ClientSecret deriving (Eq, Show)
+data FitbitAPI = FitbitAPI OAuth2.ClientId OAuth2.ClientSecret deriving (Eq, Show)
 
 -- | 'FromJSON' instance for deserializing Fitbit API configuration from YAML
 instance FromJSON FitbitAPI where
     parseJSON =
         withObject "FitbitAPI" $ \v -> FitbitAPI
-            <$> (ClientId <$> v .: "client-id")
-            <*> (ClientSecret <$> v .: "client-secret")
+            <$> (OAuth2.ClientId <$> v .: "client-id")
+            <*> (OAuth2.ClientSecret <$> v .: "client-secret")
 
 -- | 'ToJSON' instance for serializing Fitbit API configuration to YAML
 instance ToJSON FitbitAPI where
-    toJSON (FitbitAPI (ClientId cid) (ClientSecret cs)) =
+    toJSON (FitbitAPI (OAuth2.ClientId cid) (OAuth2.ClientSecret cs)) =
         object
             [ "client-id" .= cid
             , "client-secret" .= cs
