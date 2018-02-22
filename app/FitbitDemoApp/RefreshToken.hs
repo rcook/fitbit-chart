@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module FitbitDemoApp.RefreshToken
@@ -7,34 +8,27 @@ module FitbitDemoApp.RefreshToken
 
 import           Data.Aeson ((.:), withObject)
 import           Data.Aeson.Types (Parser, Value, parseEither)
-import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
+import           FitbitDemoApp.APIUtil
 import           FitbitDemoLib
-import           Network.HTTP.Req
-                    ( (=:)
-                    , POST(..)
-                    , ReqBodyUrlEnc(..)
-                    , jsonResponse
-                    , req
-                    , responseBody
-                    , runReq
-                    )
+import           Network.HTTP.Req ((=:))
 import           Network.HTTP.Req.Url.Extra (toUrlHttps)
 import           OAuth2
 
 data RefreshTokenResponse = RefreshTokenResponse AccessToken RefreshToken
+
+sendRefreshToken :: App -> ClientId -> ClientSecret -> RefreshToken -> IO (Either String RefreshTokenResponse)
+sendRefreshToken app clientId clientSecret (RefreshToken rt) = do
+    let Just (url, _) = toUrlHttps $ tokenUri app
+    parseEither pResponse <$>
+        oAuth2Post
+            url
+            (tokenAuthHeader clientId clientSecret)
+            ("grant_type" =: ("refresh_token" :: Text) <> "refresh_token" =: rt <> "expires_in" =: ("3600" :: Text))
 
 pResponse :: Value -> Parser RefreshTokenResponse
 pResponse =
     withObject "RefreshTokenResponse" $ \v -> RefreshTokenResponse
         <$> (AccessToken <$> v .: "access_token")
         <*> (RefreshToken <$> v .: "refresh_token")
-
-sendRefreshToken :: App -> ClientId -> ClientSecret -> RefreshToken -> IO (Either String RefreshTokenResponse)
-sendRefreshToken oauth2 clientId clientSecret (RefreshToken rt) = do
-    let Just (url, _) = toUrlHttps $ tokenUri oauth2
-        opts = tokenAuthHeader clientId clientSecret
-        formBody = "grant_type" =: ("refresh_token" :: Text) <> "refresh_token" =: rt <> "expires_in" =: ("3600" :: Text)
-    body <- runReq def $ responseBody <$> req POST url (ReqBodyUrlEnc formBody) jsonResponse opts
-    return $ parseEither pResponse body

@@ -77,6 +77,9 @@ withRefresh apiUrl (AppConfig (FitbitAPI clientId clientSecret)) tokenConfig act
                     return (result, newTokenConfig)
                 else throwIO e
 
+formatDouble :: Double -> String
+formatDouble = printf "%.1f"
+
 main :: IO ()
 main = do
     Just appConfig <- getAppConfig promptForAppConfig
@@ -85,8 +88,8 @@ main = do
     -- TODO: Refactor to use State etc.
     (Right weightGoal, tc1) <- withRefresh fitbitApiUrl appConfig tc0 getWeightGoal
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
-    putStrLn $ "Goal weight: " ++ printf "%.1f lb" (goalWeight weightGoal)
-    putStrLn $ "Start weight: " ++ printf "%.1f lb" (startWeight weightGoal)
+    putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
+    putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
 
     t <- getCurrentTime
     let range = Ending (utctDay t) Max
@@ -94,6 +97,6 @@ main = do
     (weightTimeSeries, _) <- withRefresh fitbitApiUrl appConfig tc1  (getWeightTimeSeries range)
     let Right ws = weightTimeSeries
     forM_ (take 5 ws) $ \(WeightSample day value) ->
-        putStrLn $ show day ++ ": " ++ printf "%.1f" value
+        putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
 
     putStrLn "DONE"
