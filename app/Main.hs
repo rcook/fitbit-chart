@@ -23,8 +23,6 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , ClientSecret(..)
                     , PromptForCallbackURI
                     )
-import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
-import           System.FilePath ((</>), takeDirectory)
 import           Text.Printf (printf)
 import qualified Text.URI as URI (mkURI, render)
 import           Text.URI.QQ (uri)
@@ -62,10 +60,10 @@ formatDouble = printf "%.1f"
 
 main :: IO ()
 main = do
-    Just (AppConfig clientPair) <- getAppConfig configDir promptForAppConfig
-    tp0 <- getTokenPair configDir fitbitApp clientPair promptForCallbackUri
+    Right (AppConfig clientPair) <- getAppConfig configDir promptForAppConfig
+    Right (TokenConfig tp0) <- getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    let withRefresh' = withRefresh (writeTokenPair configDir) fitbitApp fitbitApiUrl clientPair
+    let withRefresh' = withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair
 
     -- TODO: Refactor to use State etc.
     (Right weightGoal, tp1) <- withRefresh' tp0 getWeightGoal

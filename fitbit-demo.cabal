@@ -63,6 +63,7 @@ executable fitbit-demo-app
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
                                           , directory
+                                          , errors
                                           , filepath
                                           , fitbit-demo
                                           , modern-uri

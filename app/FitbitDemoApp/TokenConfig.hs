@@ -2,11 +2,11 @@
 
 module FitbitDemoApp.TokenConfig
     ( TokenConfig(..)
-    , getTokenPair
-    , getTokenPairPath
-    , writeTokenPair
+    , getTokenConfig
+    , writeTokenConfig
     ) where
 
+import           Control.Error.Util (note)
 import           Data.Aeson
                     ( (.=)
                     , (.:)
@@ -21,7 +21,6 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , AccessTokenRequest(..)
                     , AccessTokenResponse(..)
                     , App
-                    , AuthCode
                     , ClientPair(..)
                     , PromptForCallbackURI
                     , RefreshToken(..)
@@ -50,43 +49,38 @@ instance ToJSON TokenConfig where
             , "refresh-token" .= rt
             ]
 
-getTokenPairPath :: FilePath -> IO FilePath
-getTokenPairPath configDir = do
+-- | Gets token configuration from file or via authorization code workflow
+--
+-- If a token pair exists in the token pair configuration file, read
+-- it from the file and return that. Otherwise perform authorization code
+-- workflow.
+getTokenConfig :: FilePath -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.PromptForCallbackURI -> IO (Either String TokenConfig)
+getTokenConfig configDir app clientPair prompt = do
+    path <- getTokenConfigPath configDir
+    exists <- doesFileExist path
+    if exists
+        then note ("Could not read token configuration from " ++ path) <$> decodeYAMLFile path
+        else fetchTokenConfig configDir app clientPair prompt
+
+-- | Writes token configuration to configuration file
+writeTokenConfig :: FilePath -> TokenConfig -> IO ()
+writeTokenConfig configDir tokenConfig = do
+    path <- getTokenConfigPath configDir
+    createDirectoryIfMissing True (takeDirectory path)
+    encodeYAMLFile path tokenConfig
+
+getTokenConfigPath :: FilePath -> IO FilePath
+getTokenConfigPath configDir = do
     homeDir <- getHomeDirectory
     return $ homeDir </> configDir </> "token.yaml"
 
-readTokenPair :: FilePath -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.PromptForCallbackURI -> IO OAuth2.TokenPair
-readTokenPair configDir app clientPair@(OAuth2.ClientPair clientId _) prompt = do
+fetchTokenConfig :: FilePath -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.PromptForCallbackURI -> IO (Either String TokenConfig)
+fetchTokenConfig configDir app clientPair@(OAuth2.ClientPair clientId _) prompt = do
     authCode <- OAuth2.getAuthCode app clientId prompt
-    tokenPair <- foo app authCode clientPair
-    writeTokenPair configDir tokenPair
-    return tokenPair
-
-writeTokenPair :: FilePath -> OAuth2.TokenPair -> IO ()
-writeTokenPair configDir tokenPair = do
-    path <- getTokenPairPath configDir
-    createDirectoryIfMissing True (takeDirectory path)
-    encodeYAMLFile path (TokenConfig tokenPair)
-
--- | Gets token pair
---
--- If a token pair exists in the token pair configuration file, read
--- it from the file and return that. Otherwise
-getTokenPair :: FilePath -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.PromptForCallbackURI -> IO OAuth2.TokenPair
-getTokenPair configDir app clientPair prompt = do
-    path <- getTokenPairPath configDir
-    exists <- doesFileExist path
-    if exists
-        then do
-            Just (TokenConfig tokenPair) <- decodeYAMLFile path -- TODO: Error handling!
-            return tokenPair
-        else readTokenPair configDir app clientPair prompt
-
-foo :: OAuth2.App -> OAuth2.AuthCode -> OAuth2.ClientPair -> IO OAuth2.TokenPair
-foo app authCode clientPair = do
     result <- OAuth2.fetchAccessToken app (OAuth2.AccessTokenRequest clientPair authCode)
-    let (OAuth2.AccessTokenResponse tokenPair) = case result of
-                                                Left e -> error e
-                                                Right x -> x
-    return tokenPair
-        
+    case result of
+        Right (OAuth2.AccessTokenResponse tokenPair) -> do
+            let tokenConfig = TokenConfig tokenPair
+            writeTokenConfig configDir tokenConfig
+            return $ Right tokenConfig
+        Left e -> return $ Left e

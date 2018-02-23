@@ -6,6 +6,7 @@ module FitbitDemoApp.AppConfig
     , getAppConfig
     ) where
 
+import           Control.Error.Util (note)
 import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withObject)
 import           FitbitDemoLib.IO (decodeYAMLFile, encodeYAMLFile)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
@@ -16,6 +17,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
 
+-- | Action to prompt user to enter new app configuration
 type AppConfigPrompt = IO AppConfig
 
 -- | App configuration
@@ -41,13 +43,14 @@ instance ToJSON AppConfig where
                                 ]
             ]
 
-getAppConfig :: FilePath -> AppConfigPrompt -> IO (Maybe AppConfig)
+-- | Gets app configuration from configuration file or user input
+getAppConfig :: FilePath -> AppConfigPrompt -> IO (Either String AppConfig)
 getAppConfig configDir prompt = do
     path <- getAppConfigPath configDir
     exists <- doesFileExist path
     if exists
-        then decodeYAMLFile path
-        else Just <$> mkAppConfig prompt path
+        then note ("Could not read app configuration from " ++ path) <$> decodeYAMLFile path
+        else Right <$> mkAppConfig prompt path
 
 getAppConfigPath :: FilePath -> IO FilePath
 getAppConfigPath configDir = do
