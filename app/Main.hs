@@ -70,6 +70,7 @@ foo refresher action = do
     put tp'
     return result
 
+runOAuth2App :: OAuth2.TokenPair -> OAuth2App a -> IO ()
 runOAuth2App tokenPair action = void $ flip runStateT tokenPair action
 
 main :: IO ()
