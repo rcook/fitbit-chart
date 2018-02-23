@@ -4,7 +4,9 @@
 
 module Main (main) where
 
-import           Control.Monad (forM_)
+import           Control.Monad (forM_, void)
+import           Control.Monad.IO.Class (liftIO)
+import           Control.Monad.Trans.State.Strict
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -22,6 +24,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , ClientPair(..)
                     , ClientSecret(..)
                     , PromptForCallbackURI
+                    , TokenPair
                     )
 import           Text.Printf (printf)
 import qualified Text.URI as URI (mkURI, render)
@@ -58,6 +61,17 @@ fitbitApiUrl = https "api.fitbit.com" /: "1"
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
 
+type OAuth2App = StateT OAuth2.TokenPair IO
+
+foo :: (OAuth2.TokenPair -> t1 -> IO (a, OAuth2.TokenPair)) -> t1 -> OAuth2App a
+foo refresher action = do
+    tp <- get
+    (result, tp') <- liftIO $ refresher tp action
+    put tp'
+    return result
+
+runOAuth2App tokenPair action = void $ flip runStateT tokenPair action
+
 main :: IO ()
 main = do
     Right (AppConfig clientPair) <- getAppConfig configDir promptForAppConfig
@@ -65,18 +79,18 @@ main = do
 
     let withRefresh' = withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair
 
-    -- TODO: Refactor to use State etc.
-    (Right weightGoal, tp1) <- withRefresh' tp0 getWeightGoal
-    Text.putStrLn $ "Goal type: " <> goalType weightGoal
-    putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
-    putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
+    runOAuth2App tp0 $ do
+        Right weightGoal <- foo withRefresh' getWeightGoal
+        liftIO $ do
+            Text.putStrLn $ "Goal type: " <> goalType weightGoal
+            putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
+            putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
 
-    t <- getCurrentTime
-    let range = Ending (utctDay t) Max
+        t <- liftIO getCurrentTime
+        let range = Ending (utctDay t) Max
 
-    (weightTimeSeries, _) <- withRefresh' tp1  (getWeightTimeSeries range)
-    let Right ws = weightTimeSeries
-    forM_ (take 5 ws) $ \(WeightSample day value) ->
-        putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
+        Right weightTimeSeries <- foo withRefresh' (getWeightTimeSeries range)
+        forM_ (take 5 weightTimeSeries) $ \(WeightSample day value) ->
+            liftIO $ putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
 
     putStrLn "DONE"
