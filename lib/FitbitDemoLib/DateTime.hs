@@ -8,7 +8,6 @@ module FitbitDemoLib.DateTime
 import           Data.Text (Text)
 import qualified Data.Text as Text (pack)
 import           Data.Time.Calendar (Day, fromGregorian)
-import           FitbitDemoLib.Util
 
 mkDay :: Int -> Int -> Int -> Day
 mkDay year month date = fromGregorian (fromIntegral year) month date
