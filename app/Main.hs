@@ -26,6 +26,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , PromptForCallbackURI
                     , TokenPair
                     )
+import           System.IO (hFlush, stdout)
 import           Text.Printf (printf)
 import qualified Text.URI as URI (mkURI, render)
 import           Text.URI.QQ (uri)
@@ -34,8 +35,10 @@ promptForAppConfig :: AppConfigPrompt
 promptForAppConfig = do
     putStrLn "No Fitbit API configuration was found."
     putStr "Enter Fitbit client ID: "
+    hFlush stdout
     clientId <- OAuth2.ClientId <$> Text.getLine
     putStr "Enter Fitbit client secret: "
+    hFlush stdout
     clientSecret <- OAuth2.ClientSecret <$> Text.getLine
     return $ AppConfig (OAuth2.ClientPair clientId clientSecret)
 
@@ -43,7 +46,8 @@ promptForCallbackUri :: OAuth2.PromptForCallbackURI
 promptForCallbackUri authUri' = do
     putStrLn "Open following link in browser:"
     Text.putStrLn $ URI.render authUri'
-    putStr "Enter callback URI: "
+    putStr "Enter callback URI including authorization code: "
+    hFlush stdout
     URI.mkURI =<< Text.getLine
 
 configDir :: FilePath
