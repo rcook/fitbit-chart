@@ -79,13 +79,13 @@ runOAuth2App tokenPair action = void $ flip runStateT tokenPair action
 
 main :: IO ()
 main = do
-    Right (AppConfig clientPair) <- getAppConfig configDir promptForAppConfig
-    Right (TokenConfig tp0) <- getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
+    AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
+    TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
     let withRefresh' = withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair
 
     runOAuth2App tp0 $ do
-        Right weightGoal <- foo withRefresh' getWeightGoal
+        weightGoal <- exitOnFailure $ foo withRefresh' getWeightGoal
         liftIO $ do
             Text.putStrLn $ "Goal type: " <> goalType weightGoal
             putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
@@ -94,7 +94,7 @@ main = do
         t <- liftIO getCurrentTime
         let range = Ending (utctDay t) Max
 
-        Right weightTimeSeries <- foo withRefresh' (getWeightTimeSeries range)
+        weightTimeSeries <- exitOnFailure $ foo withRefresh' (getWeightTimeSeries range)
         forM_ (take 5 weightTimeSeries) $ \(WeightSample day value) ->
             liftIO $ putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
 

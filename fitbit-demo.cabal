@@ -75,6 +75,7 @@ executable fitbit-demo-app
   other-modules:                            FitbitDemoApp
                                           , FitbitDemoApp.AppConfig
                                           , FitbitDemoApp.TokenConfig
+                                          , FitbitDemoApp.Util
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0
