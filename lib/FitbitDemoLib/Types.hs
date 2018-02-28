@@ -2,6 +2,7 @@
 
 module FitbitDemoLib.Types
     ( APIAction
+    , APIResult
     , Period(..)
     , TimeSeriesRange(..)
     , WeightGoal(..)

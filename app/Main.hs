@@ -68,23 +68,18 @@ formatDouble = printf "%.1f"
 
 -- type OAuth2App a = StateT { runStateT :: OAuth2.TokenPair -> IO (a, OAuth2.TokenPair) }
 type OAuth2App = StateT OAuth2.TokenPair IO
-
-type Blah a = APIAction a -> OAuth2.TokenPair -> IO (Either String a, OAuth2.TokenPair)
+type APIActionWithRefresh a = APIAction a -> OAuth2.TokenPair -> IO (APIResult a, OAuth2.TokenPair)
 
 runOAuth2App ::
     OAuth2.TokenPair
-    -> (forall a . Blah a)
-    -> ((forall b . APIAction b -> OAuth2App (Either String b)) -> OAuth2App c)
-    -> IO ()
-runOAuth2App tokenPair withRefresh'' action =
-    let foo' :: forall a . APIAction a -> OAuth2App (Either String a)
-        foo' = foo withRefresh''
-    in
-    void $ flip runStateT tokenPair (action foo')
+    -> (forall a . APIActionWithRefresh a)
+    -> ((forall b . APIAction b -> OAuth2App (APIResult b)) -> OAuth2App c)
+    -> IO (c, OAuth2.TokenPair)
+runOAuth2App tokenPair wrapWithRefresh action = runStateT (action wrap) tokenPair
     where
-        foo refresher' action' = do
+        wrap action' = do
             tp <- get
-            (result, tp') <- liftIO $ (flip refresher') tp action'
+            (result, tp') <- liftIO $ wrapWithRefresh action' tp
             put tp'
             return result
 
@@ -93,7 +88,7 @@ main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    runOAuth2App tp0 (flip $ withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \fooWithRefresh -> do
+    void $ runOAuth2App tp0 (flip $ withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \fooWithRefresh -> do
         weightGoal <- exitOnFailure $ fooWithRefresh getWeightGoal
         liftIO $ do
             Text.putStrLn $ "Goal type: " <> goalType weightGoal
