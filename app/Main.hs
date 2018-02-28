@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RankNTypes #-}
 
 module Main (main) where
 
@@ -76,8 +77,8 @@ foo refresher action = do
     put tp'
     return result
 
-runOAuth2App :: OAuth2.TokenPair -> (Context a t1  -> OAuth2App a) -> IO ()
-runOAuth2App tokenPair action = void $ flip runStateT tokenPair (action foo)
+runOAuth2App :: OAuth2.TokenPair -> (forall a . Blah a) -> ((forall b . Blah b) -> OAuth2App c) -> IO ()
+runOAuth2App tokenPair withRefresh'' action = void $ flip runStateT tokenPair (action withRefresh'')
 
 type Blah a = OAuth2.TokenPair -> APIAction a -> IO (Either String a, OAuth2.TokenPair)
 
@@ -86,10 +87,7 @@ main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    let withRefresh' :: Blah a
-        withRefresh' = withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair
-
-    runOAuth2App tp0 $ \_ -> do
+    runOAuth2App tp0 (withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \withRefresh' -> do
         weightGoal <- exitOnFailure $ foo withRefresh' getWeightGoal
         liftIO $ do
             Text.putStrLn $ "Goal type: " <> goalType weightGoal
