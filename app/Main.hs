@@ -68,7 +68,9 @@ formatDouble = printf "%.1f"
 
 type OAuth2App = StateT OAuth2.TokenPair IO
 
-type Context a t1 = (OAuth2.TokenPair -> t1 -> IO (a, OAuth2.TokenPair)) -> t1 -> OAuth2App a
+type Blah a = OAuth2.TokenPair -> APIAction a -> IO (Either String a, OAuth2.TokenPair)
+
+type Context a b = (OAuth2.TokenPair -> b -> IO (a, OAuth2.TokenPair)) -> b -> OAuth2App a
 
 foo :: Context a b
 foo refresher action = do
@@ -77,18 +79,24 @@ foo refresher action = do
     put tp'
     return result
 
-runOAuth2App :: OAuth2.TokenPair -> (forall a . Blah a) -> ((forall b . Blah b) -> OAuth2App c) -> IO ()
-runOAuth2App tokenPair withRefresh'' action = void $ flip runStateT tokenPair (action withRefresh'')
-
-type Blah a = OAuth2.TokenPair -> APIAction a -> IO (Either String a, OAuth2.TokenPair)
+runOAuth2App ::
+    OAuth2.TokenPair
+    -> (forall a . Blah a)
+    -> ((forall b . APIAction b -> OAuth2App (Either String b)) -> OAuth2App c)
+    -> IO ()
+runOAuth2App tokenPair withRefresh'' action =
+    let foo' :: forall a . APIAction a -> OAuth2App (Either String a)
+        foo' = foo withRefresh''
+    in
+    void $ flip runStateT tokenPair (action foo')
 
 main :: IO ()
 main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    runOAuth2App tp0 (withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \withRefresh' -> do
-        weightGoal <- exitOnFailure $ foo withRefresh' getWeightGoal
+    runOAuth2App tp0 (withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \fooWithRefresh -> do
+        weightGoal <- exitOnFailure $ fooWithRefresh getWeightGoal
         liftIO $ do
             Text.putStrLn $ "Goal type: " <> goalType weightGoal
             putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
@@ -97,7 +105,7 @@ main = do
         t <- liftIO getCurrentTime
         let range = Ending (utctDay t) Max
 
-        weightTimeSeries <- exitOnFailure $ foo withRefresh' (getWeightTimeSeries range)
+        weightTimeSeries <- exitOnFailure $ fooWithRefresh (getWeightTimeSeries range)
         forM_ (take 5 weightTimeSeries) $ \(WeightSample day value) ->
             liftIO $ putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
 
