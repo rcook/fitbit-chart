@@ -66,18 +66,10 @@ fitbitApiUrl = https "api.fitbit.com" /: "1"
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
 
+-- type OAuth2App a = StateT { runStateT :: OAuth2.TokenPair -> IO (a, OAuth2.TokenPair) }
 type OAuth2App = StateT OAuth2.TokenPair IO
 
-type Blah a = OAuth2.TokenPair -> APIAction a -> IO (Either String a, OAuth2.TokenPair)
-
-type Context a b = (OAuth2.TokenPair -> b -> IO (a, OAuth2.TokenPair)) -> b -> OAuth2App a
-
-foo :: Context a b
-foo refresher action = do
-    tp <- get
-    (result, tp') <- liftIO $ refresher tp action
-    put tp'
-    return result
+type Blah a = APIAction a -> OAuth2.TokenPair -> IO (Either String a, OAuth2.TokenPair)
 
 runOAuth2App ::
     OAuth2.TokenPair
@@ -89,13 +81,19 @@ runOAuth2App tokenPair withRefresh'' action =
         foo' = foo withRefresh''
     in
     void $ flip runStateT tokenPair (action foo')
+    where
+        foo refresher' action' = do
+            tp <- get
+            (result, tp') <- liftIO $ (flip refresher') tp action'
+            put tp'
+            return result
 
 main :: IO ()
 main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    runOAuth2App tp0 (withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \fooWithRefresh -> do
+    runOAuth2App tp0 (flip $ withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \fooWithRefresh -> do
         weightGoal <- exitOnFailure $ fooWithRefresh getWeightGoal
         liftIO $ do
             Text.putStrLn $ "Goal type: " <> goalType weightGoal
