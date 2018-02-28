@@ -1,6 +1,5 @@
 module FitbitDemoLib
-    ( module FitbitDemoLib.APIUtil
-    , module FitbitDemoLib.DateTime
+    ( module FitbitDemoLib.DateTime
     , module FitbitDemoLib.HttpUtil
     , module FitbitDemoLib.IO
     , module FitbitDemoLib.OAuth2App
@@ -12,7 +11,6 @@ module FitbitDemoLib
     , module FitbitDemoLib.WeightTimeSeries
     ) where
 
-import FitbitDemoLib.APIUtil
 import FitbitDemoLib.DateTime
 import FitbitDemoLib.HttpUtil
 import FitbitDemoLib.IO

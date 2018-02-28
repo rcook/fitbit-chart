@@ -38,7 +38,6 @@ library
                                           , vector
                                           , yaml
   exposed-modules:                          FitbitDemoLib
-                                          , FitbitDemoLib.APIUtil
                                           , FitbitDemoLib.DateTime
                                           , FitbitDemoLib.HttpUtil
                                           , FitbitDemoLib.IO

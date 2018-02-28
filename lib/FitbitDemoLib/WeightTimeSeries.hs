@@ -10,8 +10,8 @@ import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Either (fromRight)
 import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
-import           FitbitDemoLib.APIUtil
 import           FitbitDemoLib.DateTime
+import           FitbitDemoLib.OAuth2Helper
 import           FitbitDemoLib.Parser
 import           FitbitDemoLib.Types
 import           FitbitDemoLib.Util
@@ -21,7 +21,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2 (TokenPair(..))
 getWeightTimeSeries :: TimeSeriesRange -> APIAction [WeightSample]
 getWeightTimeSeries range apiUrl (OAuth2.TokenPair accessToken _) =
     parseEither pResponse
-        <$> fitbitApiGet (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date")) accessToken
+        <$> oAuth2Get (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date")) accessToken
     
 buildUrl :: TimeSeriesRange -> Url 'Https -> Url 'Https
 buildUrl (Ending endDay period) u = u /: formatDay endDay /: formatPeriod period <> ".json"

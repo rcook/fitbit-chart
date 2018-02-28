@@ -2,23 +2,35 @@
 
 module FitbitDemoLib.OAuth2Helper
     ( UpdateTokenPair
+    , oAuth2Get
     , withRefresh
     ) where
 
 import           Control.Exception (catch, throwIO)
+import           Data.Aeson (Value)
+import           Data.Default.Class (def)
+import           Data.Monoid ((<>))
 import           FitbitDemoLib.HttpUtil
 import           FitbitDemoLib.Types
 import           Network.HTTP.Req
-                    ( Scheme(..)
+                    ( GET(..)
+                    , NoReqBody(..)
+                    , Scheme(..)
                     , Url
+                    , jsonResponse
+                    , req
+                    , responseBody
+                    , runReq
                     )
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
-                    ( App(..)
+                    ( AccessToken
+                    , App(..)
                     , ClientPair(..)
                     , RefreshTokenRequest(..)
                     , RefreshTokenResponse(..)
                     , TokenPair(..)
                     , fetchRefreshToken
+                    , oAuth2BearerHeader
                     )
 import           Network.HTTP.Types (unauthorized401)
 
@@ -42,3 +54,7 @@ withRefresh u app apiUrl clientPair tokenPair action =
                     result <- action apiUrl newTokenPair
                     return (result, newTokenPair)
                 else throwIO e
+
+oAuth2Get :: Url 'Https -> OAuth2.AccessToken -> IO Value
+oAuth2Get url accessToken =
+    responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (OAuth2.oAuth2BearerHeader accessToken <> acceptLanguage))

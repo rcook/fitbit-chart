@@ -7,7 +7,7 @@ module FitbitDemoLib.WeightGoal
 
 import           Data.Aeson ((.:), Value, withObject)
 import           Data.Aeson.Types (Parser, parseEither)
-import           FitbitDemoLib.APIUtil
+import           FitbitDemoLib.OAuth2Helper
 import           FitbitDemoLib.Types
 import           Network.HTTP.Req ((/:))
 import qualified Network.HTTP.Req.OAuth2 as OAuth2 (TokenPair(..))
@@ -15,7 +15,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2 (TokenPair(..))
 getWeightGoal :: APIAction WeightGoal
 getWeightGoal apiUrl (OAuth2.TokenPair accessToken _) =
     parseEither pResponse
-        <$> fitbitApiGet (apiUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json") accessToken
+        <$> oAuth2Get (apiUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json") accessToken
 
 pResponse :: Value -> Parser WeightGoal
 pResponse = withObject "WeightGoalResponse" $ \v -> do
