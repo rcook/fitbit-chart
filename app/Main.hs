@@ -1,13 +1,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE RankNTypes #-}
 
 module Main (main) where
 
 import           Control.Monad (forM_, void)
 import           Control.Monad.IO.Class (liftIO)
-import           Control.Monad.Trans.State.Strict
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -25,7 +23,6 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , ClientPair(..)
                     , ClientSecret(..)
                     , PromptForCallbackURI
-                    , TokenPair
                     )
 import           System.IO (hFlush, stdout)
 import           Text.Printf (printf)
@@ -65,23 +62,6 @@ fitbitApiUrl = https "api.fitbit.com" /: "1"
 
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
-
--- type OAuth2App a = StateT { runStateT :: OAuth2.TokenPair -> IO (a, OAuth2.TokenPair) }
-type OAuth2App = StateT OAuth2.TokenPair IO
-type APIActionWithRefresh a = APIAction a -> OAuth2.TokenPair -> IO (APIResult a, OAuth2.TokenPair)
-
-runOAuth2App ::
-    OAuth2.TokenPair
-    -> (forall a . APIActionWithRefresh a)
-    -> ((forall b . APIAction b -> OAuth2App (APIResult b)) -> OAuth2App c)
-    -> IO (c, OAuth2.TokenPair)
-runOAuth2App tokenPair wrapWithRefresh action = runStateT (action wrap) tokenPair
-    where
-        wrap action' = do
-            tp <- get
-            (result, tp') <- liftIO $ wrapWithRefresh action' tp
-            put tp'
-            return result
 
 main :: IO ()
 main = do

@@ -3,6 +3,7 @@ module FitbitDemoLib
     , module FitbitDemoLib.DateTime
     , module FitbitDemoLib.HttpUtil
     , module FitbitDemoLib.IO
+    , module FitbitDemoLib.OAuth2App
     , module FitbitDemoLib.OAuth2Helper
     , module FitbitDemoLib.Parser
     , module FitbitDemoLib.Types
@@ -15,6 +16,7 @@ import FitbitDemoLib.APIUtil
 import FitbitDemoLib.DateTime
 import FitbitDemoLib.HttpUtil
 import FitbitDemoLib.IO
+import FitbitDemoLib.OAuth2App
 import FitbitDemoLib.OAuth2Helper
 import FitbitDemoLib.Parser
 import FitbitDemoLib.Types
