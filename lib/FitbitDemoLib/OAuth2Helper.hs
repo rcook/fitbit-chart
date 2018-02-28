@@ -11,7 +11,7 @@ import           Data.Aeson (Value)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
 import           FitbitDemoLib.HttpUtil
-import           FitbitDemoLib.Types
+import           FitbitDemoLib.OAuth2Types
 import           Network.HTTP.Req
                     ( GET(..)
                     , NoReqBody(..)

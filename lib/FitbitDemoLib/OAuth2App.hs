@@ -6,7 +6,7 @@ module FitbitDemoLib.OAuth2App
 
 import           Control.Monad.IO.Class (liftIO)
 import           Control.Monad.Trans.State.Strict
-import           FitbitDemoLib.Types
+import           FitbitDemoLib.OAuth2Types
 import qualified Network.HTTP.Req.OAuth2 as OAuth2 (TokenPair)
 
 type OAuth2App = StateT OAuth2.TokenPair IO

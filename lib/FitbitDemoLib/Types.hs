@@ -1,9 +1,5 @@
-{-# LANGUAGE DataKinds #-}
-
 module FitbitDemoLib.Types
-    ( APIAction
-    , APIResult
-    , Period(..)
+    ( Period(..)
     , TimeSeriesRange(..)
     , WeightGoal(..)
     , WeightSample(..)
@@ -11,11 +7,6 @@ module FitbitDemoLib.Types
 
 import           Data.Text (Text)
 import           Data.Time.Calendar (Day)
-import           Network.HTTP.Req
-                    ( Scheme(..)
-                    , Url
-                    )
-import qualified Network.HTTP.Req.OAuth2 as OAuth2 (TokenPair)
 
 data Period = OneDay | SevenDays | ThirtyDays | OneWeek | OneMonth | ThreeMonths | SixMonths | OneYear | Max
 
@@ -28,7 +19,3 @@ data WeightGoal = WeightGoal
     }
 
 data WeightSample = WeightSample Day Double
-
-type APIResult a = Either String a
-
-type APIAction a = Url 'Https -> OAuth2.TokenPair -> IO (APIResult a)

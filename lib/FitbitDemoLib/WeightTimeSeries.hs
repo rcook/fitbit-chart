@@ -12,6 +12,7 @@ import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
 import           FitbitDemoLib.DateTime
 import           FitbitDemoLib.OAuth2Helper
+import           FitbitDemoLib.OAuth2Types
 import           FitbitDemoLib.Parser
 import           FitbitDemoLib.Types
 import           FitbitDemoLib.Util
