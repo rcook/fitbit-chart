@@ -88,6 +88,14 @@ mkCallFitbitApi clientPair action =
     where
         updateTokenPair = writeTokenConfig configDir . TokenConfig
 
+type OAuth2App = StateT OAuth2.TokenPair IO
+
+evalOAuth2App :: OAuth2.TokenPair -> OAuth2App a -> IO a
+evalOAuth2App = flip evalStateT
+
+--runOAuth2App :: t -> StateT t IO a -> IO (a, t)
+--runOAuth2App = flip runStateT
+
 main :: IO ()
 main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
@@ -96,7 +104,7 @@ main = do
     let callFitbitApi = mkCallFitbitApi clientPair
 
     t <- getCurrentTime
-    (weightGoal, weightTimeSeries) <- (flip evalStateT) tp0 $ do
+    (weightGoal, weightTimeSeries) <- evalOAuth2App tp0 $ do
         weightGoal' <- callFitbitApi getWeightGoal
         weightTimeSeries' <- callFitbitApi $ getWeightTimeSeries (Ending (utctDay t) Max)
         return (weightGoal', weightTimeSeries')
