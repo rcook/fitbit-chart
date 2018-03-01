@@ -76,9 +76,10 @@ main = do
                         return result
         call = exitOnFailure . wrap
         updateTokenPair = writeTokenConfig configDir . TokenConfig
+        callFitbitApi action = call (action fitbitApiUrl updateTokenPair fitbitApp clientPair)
 
     void $ (flip runStateT) tp0 $ do
-        weightGoal <- call (getWeightGoal fitbitApiUrl updateTokenPair fitbitApp clientPair)
+        weightGoal <- callFitbitApi getWeightGoal
         liftIO $ do
             Text.putStrLn $ "Goal type: " <> goalType weightGoal
             putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
@@ -87,7 +88,7 @@ main = do
         t <- liftIO getCurrentTime
         let range = Ending (utctDay t) Max
 
-        weightTimeSeries <- call (getWeightTimeSeries range fitbitApiUrl updateTokenPair fitbitApp clientPair)
+        weightTimeSeries <- callFitbitApi $ getWeightTimeSeries range
         forM_ (take 5 weightTimeSeries) $ \(WeightSample day value) ->
             liftIO $ putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
 
