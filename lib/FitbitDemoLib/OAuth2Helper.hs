@@ -1,10 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 
 module FitbitDemoLib.OAuth2Helper
-    ( UpdateTokenPair
-    , oAuth2Get
-    , oAuth2GetWithRefresh
-    , withRefresh
+    ( oAuth2Get
     ) where
 
 import           Control.Exception (catch, throwIO)
@@ -36,32 +33,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     )
 import           Network.HTTP.Types (unauthorized401)
 
-type UpdateTokenPair = OAuth2.TokenPair -> IO ()
-
-refresh :: UpdateTokenPair -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.TokenPair -> IO OAuth2.TokenPair
-refresh u app clientPair (OAuth2.TokenPair _ refreshToken) = do
-    result <- OAuth2.fetchRefreshToken app (OAuth2.RefreshTokenRequest clientPair refreshToken)
-    let (OAuth2.RefreshTokenResponse newTokenPair) = case result of
-                                                        Left e -> error e -- TODO: Error handling
-                                                        Right x -> x
-    u newTokenPair
-    return newTokenPair
-
-withRefresh :: UpdateTokenPair -> OAuth2.App -> Url 'Https -> OAuth2.ClientPair -> OAuth2.TokenPair -> APIAction a -> IO (Either String a, OAuth2.TokenPair)
-withRefresh u app apiUrl clientPair tokenPair action =
-    catch (action apiUrl tokenPair >>= \result -> return (result, tokenPair)) $
-        \e -> if hasResponseStatus e unauthorized401
-                then do
-                    newTokenPair <- refresh u app clientPair tokenPair
-                    result <- action apiUrl newTokenPair
-                    return (result, newTokenPair)
-                else throwIO e
-
-oAuth2Get :: Url 'Https -> OAuth2.AccessToken -> IO Value
-oAuth2Get url accessToken =
-    responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (OAuth2.oAuth2BearerHeader accessToken <> acceptLanguage))
-
-oAuth2GetWithRefresh ::
+oAuth2Get ::
     (Value -> Parser a)
     -> Url 'Https
     -> UpdateTokenPair
@@ -69,12 +41,25 @@ oAuth2GetWithRefresh ::
     -> OAuth2.ClientPair
     -> OAuth2.TokenPair
     -> IO (Either String a, OAuth2.TokenPair)
-oAuth2GetWithRefresh p apiUrl u app clientPair tokenPair@(OAuth2.TokenPair accessToken _) = do
-    (temp, tokenPair') <- catch (oAuth2Get apiUrl accessToken >>= \value -> return (value, tokenPair)) $
+oAuth2Get p apiUrl u app clientPair tokenPair@(OAuth2.TokenPair accessToken _) = do
+    (temp, tokenPair') <- catch (getHelper apiUrl accessToken >>= \value -> return (value, tokenPair)) $
                             \e -> if hasResponseStatus e unauthorized401
                                     then do
-                                        newTokenPair@(OAuth2.TokenPair newAccessToken _) <- refresh u app clientPair tokenPair
-                                        result <- oAuth2Get apiUrl newAccessToken
+                                        newTokenPair@(OAuth2.TokenPair newAccessToken _) <- refreshHelper u app clientPair tokenPair
+                                        result <- getHelper apiUrl newAccessToken
                                         return (result, newTokenPair)
                                     else throwIO e
     return (parseEither p temp, tokenPair')
+
+getHelper :: Url 'Https -> OAuth2.AccessToken -> IO Value
+getHelper url accessToken =
+    responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (OAuth2.oAuth2BearerHeader accessToken <> acceptLanguage))
+
+refreshHelper :: UpdateTokenPair -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.TokenPair -> IO OAuth2.TokenPair
+refreshHelper u app clientPair (OAuth2.TokenPair _ refreshToken) = do
+    result <- OAuth2.fetchRefreshToken app (OAuth2.RefreshTokenRequest clientPair refreshToken)
+    let (OAuth2.RefreshTokenResponse newTokenPair) = case result of
+                                                        Left e -> error e -- TODO: Error handling
+                                                        Right x -> x
+    u newTokenPair
+    return newTokenPair

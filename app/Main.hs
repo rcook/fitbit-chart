@@ -4,9 +4,9 @@
 
 module Main (main) where
 
-import           Control.Monad (forM_, void)
-import           Control.Monad.IO.Class (liftIO)
-import           Control.Monad.Trans.State.Strict (get, put, runStateT)
+import           Control.Monad (forM_)
+import           Control.Monad.IO.Class (MonadIO, liftIO)
+import           Control.Monad.Trans.State.Strict (StateT, evalStateT, get, put)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -24,6 +24,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , ClientPair(..)
                     , ClientSecret(..)
                     , PromptForCallbackURI
+                    , TokenPair
                     )
 import           System.IO (hFlush, stdout)
 import           Text.Printf (printf)
@@ -64,32 +65,44 @@ fitbitApiUrl = https "api.fitbit.com" /: "1"
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
 
+wrap :: MonadIO m =>
+    (t -> IO (a, t))
+    -> StateT t m a
+wrap action = do
+    tp <- get
+    (result, tp') <- liftIO $ action tp
+    put tp'
+    return result
+
+mkCallFitbitApi :: MonadIO m =>
+    c
+    -> (Url 'Https
+    -> (OAuth2.TokenPair -> IO ())
+    -> OAuth2.App
+    -> c
+    -> t
+    -> IO (Either String a, t))
+    -> StateT t m a
+mkCallFitbitApi clientPair action =
+    exitOnFailure $ wrap (action fitbitApiUrl updateTokenPair fitbitApp clientPair)
+    where
+        updateTokenPair = writeTokenConfig configDir . TokenConfig
+
 main :: IO ()
 main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    let wrap action = do
-                        tp <- get
-                        (result, tp') <- liftIO $ action tp
-                        put tp'
-                        return result
-        call = exitOnFailure . wrap
-        updateTokenPair = writeTokenConfig configDir . TokenConfig
-        callFitbitApi action = call (action fitbitApiUrl updateTokenPair fitbitApp clientPair)
+    let callFitbitApi = mkCallFitbitApi clientPair
 
-    void $ (flip runStateT) tp0 $ do
-        weightGoal <- callFitbitApi getWeightGoal
-        liftIO $ do
-            Text.putStrLn $ "Goal type: " <> goalType weightGoal
-            putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
-            putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
+    t <- getCurrentTime
+    (weightGoal, weightTimeSeries) <- (flip evalStateT) tp0 $ do
+        weightGoal' <- callFitbitApi getWeightGoal
+        weightTimeSeries' <- callFitbitApi $ getWeightTimeSeries (Ending (utctDay t) Max)
+        return (weightGoal', weightTimeSeries')
 
-        t <- liftIO getCurrentTime
-        let range = Ending (utctDay t) Max
-
-        weightTimeSeries <- callFitbitApi $ getWeightTimeSeries range
-        forM_ (take 5 weightTimeSeries) $ \(WeightSample day value) ->
-            liftIO $ putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
-
-    putStrLn "DONE"
+    Text.putStrLn $ "Goal type: " <> goalType weightGoal
+    putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
+    putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
+    forM_ (take 5 weightTimeSeries) $ \(WeightSample day value) ->
+        liftIO $ putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"

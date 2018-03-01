@@ -17,15 +17,10 @@ import           FitbitDemoLib.Parser
 import           FitbitDemoLib.Types
 import           FitbitDemoLib.Util
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
-import qualified Network.HTTP.Req.OAuth2 as OAuth2
-                    ( App(..)
-                    , ClientPair(..)
-                    , TokenPair(..)
-                    )
 
-getWeightTimeSeries :: TimeSeriesRange -> Url 'Https -> UpdateTokenPair -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.TokenPair -> IO (APIResult [WeightSample], OAuth2.TokenPair)
+getWeightTimeSeries :: TimeSeriesRange -> APIAction [WeightSample]
 getWeightTimeSeries range apiUrl =
-    oAuth2GetWithRefresh pResponse (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
+    oAuth2Get pResponse (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
 
 buildUrl :: TimeSeriesRange -> Url 'Https -> Url 'Https
 buildUrl (Ending endDay period) u = u /: formatDay endDay /: formatPeriod period <> ".json"
