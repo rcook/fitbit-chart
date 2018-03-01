@@ -6,6 +6,7 @@ module Main (main) where
 
 import           Control.Monad (forM_, void)
 import           Control.Monad.IO.Class (liftIO)
+import           Control.Monad.Trans.State.Strict (get, put, runStateT)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -68,25 +69,25 @@ main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    (result, tp1) <- getWeightGoal' fitbitApiUrl (writeTokenConfig configDir . TokenConfig) fitbitApp clientPair tp0
-    let weightGoal = case result of Left e -> error e; Right x -> x
-    Text.putStrLn $ "Goal type: " <> goalType weightGoal
-    putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
-    putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
+    let wrap action = do
+                        tp <- get
+                        (result, tp') <- liftIO $ action tp
+                        put tp'
+                        return result
+        call = exitOnFailure . wrap
+        updateTokenPair = writeTokenConfig configDir . TokenConfig
 
-    void $ runOAuth2App tp1 (flip $ withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \fooWithRefresh -> do
-        {-
-        weightGoal <- exitOnFailure $ fooWithRefresh getWeightGoal
+    void $ (flip runStateT) tp0 $ do
+        weightGoal <- call (getWeightGoal fitbitApiUrl updateTokenPair fitbitApp clientPair)
         liftIO $ do
             Text.putStrLn $ "Goal type: " <> goalType weightGoal
             putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
             putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
-        -}
 
         t <- liftIO getCurrentTime
         let range = Ending (utctDay t) Max
 
-        weightTimeSeries <- exitOnFailure $ fooWithRefresh (getWeightTimeSeries range)
+        weightTimeSeries <- call (getWeightTimeSeries range fitbitApiUrl updateTokenPair fitbitApp clientPair)
         forM_ (take 5 weightTimeSeries) $ \(WeightSample day value) ->
             liftIO $ putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
 

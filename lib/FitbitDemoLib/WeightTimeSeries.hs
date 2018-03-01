@@ -6,7 +6,7 @@ module FitbitDemoLib.WeightTimeSeries
     ) where
 
 import           Data.Aeson ((.:), Value, withArray, withObject)
-import           Data.Aeson.Types (Parser, parseEither)
+import           Data.Aeson.Types (Parser)
 import           Data.Either (fromRight)
 import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
@@ -17,13 +17,16 @@ import           FitbitDemoLib.Parser
 import           FitbitDemoLib.Types
 import           FitbitDemoLib.Util
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
-import qualified Network.HTTP.Req.OAuth2 as OAuth2 (TokenPair(..))
+import qualified Network.HTTP.Req.OAuth2 as OAuth2
+                    ( App(..)
+                    , ClientPair(..)
+                    , TokenPair(..)
+                    )
 
-getWeightTimeSeries :: TimeSeriesRange -> APIAction [WeightSample]
-getWeightTimeSeries range apiUrl (OAuth2.TokenPair accessToken _) =
-    parseEither pResponse
-        <$> oAuth2Get (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date")) accessToken
-    
+getWeightTimeSeries :: TimeSeriesRange -> Url 'Https -> UpdateTokenPair -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.TokenPair -> IO (APIResult [WeightSample], OAuth2.TokenPair)
+getWeightTimeSeries range apiUrl =
+    oAuth2GetWithRefresh pResponse (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
+
 buildUrl :: TimeSeriesRange -> Url 'Https -> Url 'Https
 buildUrl (Ending endDay period) u = u /: formatDay endDay /: formatPeriod period <> ".json"
 buildUrl (Between startDay endDay) u = u /: formatDay startDay /: formatDay endDay <> ".json"
