@@ -10,7 +10,6 @@ import           FitbitDemoLib.OAuth2Types
 import qualified Network.HTTP.Req.OAuth2 as OAuth2 (TokenPair)
 
 type OAuth2App = StateT OAuth2.TokenPair IO
-type APIActionWithRefresh a = APIAction a -> OAuth2.TokenPair -> IO (APIResult a, OAuth2.TokenPair)
 
 runOAuth2App ::
     OAuth2.TokenPair

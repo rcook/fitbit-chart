@@ -68,12 +68,20 @@ main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    void $ runOAuth2App tp0 (flip $ withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \fooWithRefresh -> do
+    (result, tp1) <- getWeightGoal' fitbitApiUrl (writeTokenConfig configDir . TokenConfig) fitbitApp clientPair tp0
+    let weightGoal = case result of Left e -> error e; Right x -> x
+    Text.putStrLn $ "Goal type: " <> goalType weightGoal
+    putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
+    putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
+
+    void $ runOAuth2App tp1 (flip $ withRefresh (writeTokenConfig configDir . TokenConfig) fitbitApp fitbitApiUrl clientPair) $ \fooWithRefresh -> do
+        {-
         weightGoal <- exitOnFailure $ fooWithRefresh getWeightGoal
         liftIO $ do
             Text.putStrLn $ "Goal type: " <> goalType weightGoal
             putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
             putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
+        -}
 
         t <- liftIO getCurrentTime
         let range = Ending (utctDay t) Max

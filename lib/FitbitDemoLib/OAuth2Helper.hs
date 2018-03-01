@@ -3,11 +3,13 @@
 module FitbitDemoLib.OAuth2Helper
     ( UpdateTokenPair
     , oAuth2Get
+    , oAuth2GetWithRefresh
     , withRefresh
     ) where
 
 import           Control.Exception (catch, throwIO)
 import           Data.Aeson (Value)
+import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
 import           FitbitDemoLib.HttpUtil
@@ -58,3 +60,21 @@ withRefresh u app apiUrl clientPair tokenPair action =
 oAuth2Get :: Url 'Https -> OAuth2.AccessToken -> IO Value
 oAuth2Get url accessToken =
     responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (OAuth2.oAuth2BearerHeader accessToken <> acceptLanguage))
+
+oAuth2GetWithRefresh ::
+    (Value -> Parser a)
+    -> Url 'Https
+    -> UpdateTokenPair
+    -> OAuth2.App
+    -> OAuth2.ClientPair
+    -> OAuth2.TokenPair
+    -> IO (Either String a, OAuth2.TokenPair)
+oAuth2GetWithRefresh p apiUrl u app clientPair tokenPair@(OAuth2.TokenPair accessToken _) = do
+    (temp, tokenPair') <- catch (oAuth2Get apiUrl accessToken >>= \value -> return (value, tokenPair)) $
+                            \e -> if hasResponseStatus e unauthorized401
+                                    then do
+                                        newTokenPair@(OAuth2.TokenPair newAccessToken _) <- refresh u app clientPair tokenPair
+                                        result <- oAuth2Get apiUrl newAccessToken
+                                        return (result, newTokenPair)
+                                    else throwIO e
+    return (parseEither p temp, tokenPair')
