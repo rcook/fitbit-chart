@@ -2,9 +2,14 @@
 
 module FitbitDemoLib.OAuth2Helper
     ( oAuth2Get
+    , evalOAuth2App
+    , mkOAuth2Call
+    , runOAuth2App
     ) where
 
 import           Control.Exception (catch, throwIO)
+import           Control.Monad.IO.Class (MonadIO, liftIO)
+import           Control.Monad.Trans.State.Strict (StateT, evalStateT, get, put, runStateT)
 import           Data.Aeson (Value)
 import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Default.Class (def)
@@ -32,6 +37,26 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , oAuth2BearerHeader
                     )
 import           Network.HTTP.Types (unauthorized401)
+
+mkOAuth2Call ::
+    (StateT OAuth2.TokenPair IO (APIResult a) -> (StateT OAuth2.TokenPair IO a))
+    -> App'
+    -> Url 'Https
+    -> (Url 'Https -> App' -> OAuth2.TokenPair -> IO (APIResult a, OAuth2.TokenPair))
+    -> OAuth2App a
+mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
+    where
+        wrap a = do
+            tp <- get
+            (result, tp') <- liftIO $ a tp
+            put tp'
+            return result
+
+evalOAuth2App :: OAuth2.TokenPair -> OAuth2App a -> IO a
+evalOAuth2App = flip evalStateT
+
+runOAuth2App :: OAuth2.TokenPair -> OAuth2App a -> IO (a, OAuth2.TokenPair)
+runOAuth2App = flip runStateT
 
 oAuth2Get ::
     (Value -> Parser a)

@@ -6,7 +6,6 @@ module Main (main) where
 
 import           Control.Monad (forM_)
 import           Control.Monad.IO.Class (liftIO)
-import           Control.Monad.Trans.State.Strict (StateT, evalStateT, get, put)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -24,7 +23,6 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , ClientPair(..)
                     , ClientSecret(..)
                     , PromptForCallbackURI
-                    , TokenPair
                     )
 import           System.IO (hFlush, stdout)
 import           Text.Printf (printf)
@@ -65,38 +63,16 @@ fitbitApiUrl = https "api.fitbit.com" /: "1"
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
 
-type OAuth2App = StateT OAuth2.TokenPair IO
-
-wrap ::
-    (OAuth2.TokenPair -> IO (a, OAuth2.TokenPair))
-    -> OAuth2App a
-wrap action = do
-    tp <- get
-    (result, tp') <- liftIO $ action tp
-    put tp'
-    return result
-
-mkCallFitbitApi ::
-    OAuth2.ClientPair
-    -> (Url 'Https -> App' -> OAuth2.TokenPair -> IO (APIResult a, OAuth2.TokenPair))
-    -> OAuth2App a
-mkCallFitbitApi clientPair action =
-    exitOnFailure $ wrap (action fitbitApiUrl (App' updateTokenPair fitbitApp clientPair))
-    where
-        updateTokenPair = writeTokenConfig configDir . TokenConfig
-
-evalOAuth2App :: OAuth2.TokenPair -> OAuth2App a -> IO a
-evalOAuth2App = flip evalStateT
-
---runOAuth2App :: t -> StateT t IO a -> IO (a, t)
---runOAuth2App = flip runStateT
-
 main :: IO ()
 main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    let call = mkCallFitbitApi clientPair
+    let app = App'
+                (writeTokenConfig configDir . TokenConfig)
+                fitbitApp
+                clientPair
+        call = mkOAuth2Call exitOnFailure app fitbitApiUrl
 
     t <- getCurrentTime
     (weightGoal, weightTimeSeries) <- evalOAuth2App tp0 $ do
