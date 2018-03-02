@@ -8,8 +8,8 @@ module FitbitDemoLib.OAuth2Helper
     ) where
 
 import           Control.Exception (catch, throwIO)
-import           Control.Monad.IO.Class (MonadIO, liftIO)
-import           Control.Monad.Trans.State.Strict (StateT, evalStateT, get, put, runStateT)
+import           Control.Monad.IO.Class (liftIO)
+import           Control.Monad.Trans.State.Strict (evalStateT, get, put, runStateT)
 import           Data.Aeson (Value)
 import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Default.Class (def)
@@ -39,7 +39,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
 import           Network.HTTP.Types (unauthorized401)
 
 mkOAuth2Call ::
-    (StateT OAuth2.TokenPair IO (APIResult a) -> (StateT OAuth2.TokenPair IO a))
+    (OAuth2App (APIResult a) -> OAuth2App a)
     -> App'
     -> Url 'Https
     -> (Url 'Https -> App' -> OAuth2.TokenPair -> IO (APIResult a, OAuth2.TokenPair))
