@@ -36,12 +36,10 @@ import           Network.HTTP.Types (unauthorized401)
 oAuth2Get ::
     (Value -> Parser a)
     -> Url 'Https
-    -> UpdateTokenPair
-    -> OAuth2.App
-    -> OAuth2.ClientPair
+    -> App'
     -> OAuth2.TokenPair
     -> IO (Either String a, OAuth2.TokenPair)
-oAuth2Get p apiUrl u app clientPair tokenPair@(OAuth2.TokenPair accessToken _) = do
+oAuth2Get p apiUrl (App' u app clientPair) tokenPair@(OAuth2.TokenPair accessToken _) = do
     (temp, tokenPair') <- catch (getHelper apiUrl accessToken >>= \value -> return (value, tokenPair)) $
                             \e -> if hasResponseStatus e unauthorized401
                                     then do

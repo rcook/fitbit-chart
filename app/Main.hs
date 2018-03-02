@@ -5,7 +5,7 @@
 module Main (main) where
 
 import           Control.Monad (forM_)
-import           Control.Monad.IO.Class (MonadIO, liftIO)
+import           Control.Monad.IO.Class (liftIO)
 import           Control.Monad.Trans.State.Strict (StateT, evalStateT, get, put)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
@@ -65,30 +65,25 @@ fitbitApiUrl = https "api.fitbit.com" /: "1"
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"
 
-wrap :: MonadIO m =>
-    (t -> IO (a, t))
-    -> StateT t m a
+type OAuth2App = StateT OAuth2.TokenPair IO
+
+wrap ::
+    (OAuth2.TokenPair -> IO (a, OAuth2.TokenPair))
+    -> OAuth2App a
 wrap action = do
     tp <- get
     (result, tp') <- liftIO $ action tp
     put tp'
     return result
 
-mkCallFitbitApi :: MonadIO m =>
-    c
-    -> (Url 'Https
-    -> (OAuth2.TokenPair -> IO ())
-    -> OAuth2.App
-    -> c
-    -> t
-    -> IO (Either String a, t))
-    -> StateT t m a
+mkCallFitbitApi ::
+    OAuth2.ClientPair
+    -> (Url 'Https -> App' -> OAuth2.TokenPair -> IO (Either String a, OAuth2.TokenPair))
+    -> OAuth2App a
 mkCallFitbitApi clientPair action =
-    exitOnFailure $ wrap (action fitbitApiUrl updateTokenPair fitbitApp clientPair)
+    exitOnFailure $ wrap (action fitbitApiUrl (App' updateTokenPair fitbitApp clientPair))
     where
         updateTokenPair = writeTokenConfig configDir . TokenConfig
-
-type OAuth2App = StateT OAuth2.TokenPair IO
 
 evalOAuth2App :: OAuth2.TokenPair -> OAuth2App a -> IO a
 evalOAuth2App = flip evalStateT
@@ -101,12 +96,12 @@ main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir fitbitApp clientPair promptForCallbackUri
 
-    let callFitbitApi = mkCallFitbitApi clientPair
+    let call = mkCallFitbitApi clientPair
 
     t <- getCurrentTime
     (weightGoal, weightTimeSeries) <- evalOAuth2App tp0 $ do
-        weightGoal' <- callFitbitApi getWeightGoal
-        weightTimeSeries' <- callFitbitApi $ getWeightTimeSeries (Ending (utctDay t) Max)
+        weightGoal' <- call getWeightGoal
+        weightTimeSeries' <- call $ getWeightTimeSeries (Ending (utctDay t) Max)
         return (weightGoal', weightTimeSeries')
 
     Text.putStrLn $ "Goal type: " <> goalType weightGoal

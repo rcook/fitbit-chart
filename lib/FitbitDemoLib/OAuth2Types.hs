@@ -3,6 +3,7 @@
 module FitbitDemoLib.OAuth2Types
     ( APIAction
     , APIResult
+    , App'(..)
     , UpdateTokenPair
     ) where
 
@@ -13,10 +14,10 @@ type UpdateTokenPair = OAuth2.TokenPair -> IO ()
 
 type APIResult a = Either String a
 
+data App' = App' UpdateTokenPair OAuth2.App OAuth2.ClientPair
+
 type APIAction a =
     Url 'Https
-    -> UpdateTokenPair
-    -> OAuth2.App
-    -> OAuth2.ClientPair
+    -> App'
     -> OAuth2.TokenPair
     -> IO (APIResult a, OAuth2.TokenPair)
