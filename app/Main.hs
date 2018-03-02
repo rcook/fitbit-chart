@@ -78,7 +78,7 @@ wrap action = do
 
 mkCallFitbitApi ::
     OAuth2.ClientPair
-    -> (Url 'Https -> App' -> OAuth2.TokenPair -> IO (Either String a, OAuth2.TokenPair))
+    -> (Url 'Https -> App' -> OAuth2.TokenPair -> IO (APIResult a, OAuth2.TokenPair))
     -> OAuth2App a
 mkCallFitbitApi clientPair action =
     exitOnFailure $ wrap (action fitbitApiUrl (App' updateTokenPair fitbitApp clientPair))

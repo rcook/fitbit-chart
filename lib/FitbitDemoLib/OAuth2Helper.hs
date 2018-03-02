@@ -38,7 +38,7 @@ oAuth2Get ::
     -> Url 'Https
     -> App'
     -> OAuth2.TokenPair
-    -> IO (Either String a, OAuth2.TokenPair)
+    -> IO (APIResult a, OAuth2.TokenPair)
 oAuth2Get p apiUrl (App' u app clientPair) tokenPair@(OAuth2.TokenPair accessToken _) = do
     (temp, tokenPair') <- catch (getHelper apiUrl accessToken >>= \value -> return (value, tokenPair)) $
                             \e -> if hasResponseStatus e unauthorized401
