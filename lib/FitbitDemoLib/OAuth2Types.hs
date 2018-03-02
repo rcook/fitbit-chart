@@ -4,7 +4,7 @@ module FitbitDemoLib.OAuth2Types
     ( APIAction
     , APIResult
     , App'(..)
-    , OAuth2App
+    , OAuth2
     , UpdateTokenPair
     ) where
 
@@ -12,7 +12,7 @@ import           Control.Monad.Trans.State.Strict (StateT)
 import           Network.HTTP.Req (Scheme(..), Url)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2 (App(..), ClientPair(..), TokenPair(..))
 
-type OAuth2App = StateT OAuth2.TokenPair IO
+type OAuth2 = StateT OAuth2.TokenPair IO
 
 type UpdateTokenPair = OAuth2.TokenPair -> IO ()
 

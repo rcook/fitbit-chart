@@ -2,9 +2,9 @@
 
 module FitbitDemoLib.OAuth2Helper
     ( oAuth2Get
-    , evalOAuth2App
+    , evalOAuth2
     , mkOAuth2Call
-    , runOAuth2App
+    , runOAuth2
     ) where
 
 import           Control.Exception (catch, throwIO)
@@ -39,11 +39,11 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
 import           Network.HTTP.Types (unauthorized401)
 
 mkOAuth2Call ::
-    (OAuth2App (APIResult a) -> OAuth2App a)
+    (OAuth2 (APIResult a) -> OAuth2 a)
     -> App'
     -> Url 'Https
     -> APIAction a
-    -> OAuth2App a
+    -> OAuth2 a
 mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
     where
         wrap a = do
@@ -52,11 +52,11 @@ mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
             put tp'
             return result
 
-evalOAuth2App :: OAuth2.TokenPair -> OAuth2App a -> IO a
-evalOAuth2App = flip evalStateT
+evalOAuth2 :: OAuth2.TokenPair -> OAuth2 a -> IO a
+evalOAuth2 = flip evalStateT
 
-runOAuth2App :: OAuth2.TokenPair -> OAuth2App a -> IO (a, OAuth2.TokenPair)
-runOAuth2App = flip runStateT
+runOAuth2 :: OAuth2.TokenPair -> OAuth2 a -> IO (a, OAuth2.TokenPair)
+runOAuth2 = flip runStateT
 
 oAuth2Get :: (Value -> Parser a) -> APIAction a
 oAuth2Get p apiUrl (App' u app clientPair) tokenPair@(OAuth2.TokenPair accessToken _) = do

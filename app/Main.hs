@@ -75,7 +75,7 @@ main = do
         call = mkOAuth2Call exitOnFailure app fitbitApiUrl
 
     t <- getCurrentTime
-    (weightGoal, weightTimeSeries) <- evalOAuth2App tp0 $ do
+    (weightGoal, weightTimeSeries) <- evalOAuth2 tp0 $ do
         weightGoal' <- call getWeightGoal
         weightTimeSeries' <- call $ getWeightTimeSeries (Ending (utctDay t) Max)
         return (weightGoal', weightTimeSeries')
