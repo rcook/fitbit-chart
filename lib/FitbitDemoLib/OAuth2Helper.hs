@@ -42,7 +42,7 @@ mkOAuth2Call ::
     (OAuth2App (APIResult a) -> OAuth2App a)
     -> App'
     -> Url 'Https
-    -> (Url 'Https -> App' -> OAuth2.TokenPair -> IO (APIResult a, OAuth2.TokenPair))
+    -> APIAction a
     -> OAuth2App a
 mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
     where
@@ -58,12 +58,7 @@ evalOAuth2App = flip evalStateT
 runOAuth2App :: OAuth2.TokenPair -> OAuth2App a -> IO (a, OAuth2.TokenPair)
 runOAuth2App = flip runStateT
 
-oAuth2Get ::
-    (Value -> Parser a)
-    -> Url 'Https
-    -> App'
-    -> OAuth2.TokenPair
-    -> IO (APIResult a, OAuth2.TokenPair)
+oAuth2Get :: (Value -> Parser a) -> APIAction a
 oAuth2Get p apiUrl (App' u app clientPair) tokenPair@(OAuth2.TokenPair accessToken _) = do
     (temp, tokenPair') <- catch (getHelper apiUrl accessToken >>= \value -> return (value, tokenPair)) $
                             \e -> if hasResponseStatus e unauthorized401
