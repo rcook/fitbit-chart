@@ -34,6 +34,7 @@ library
                                           , req-oauth2
                                           , text
                                           , time
+                                          , transformers
                                           , vector
                                           , yaml
   exposed-modules:                          FitbitDemoLib
@@ -71,7 +72,6 @@ executable fitbit-demo-app
                                           , req-oauth2
                                           , text
                                           , time
-                                          , transformers
   other-modules:                            FitbitDemoApp
                                           , FitbitDemoApp.AppConfig
                                           , FitbitDemoApp.TokenConfig
