@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module FitbitDemoLib.DateTime
     ( formatDay
     , mkDay

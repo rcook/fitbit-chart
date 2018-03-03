@@ -27,20 +27,15 @@ library
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
                                           , bytestring
-                                          , data-default-class
-                                          , http-client
-                                          , http-types
                                           , req
                                           , req-oauth2
                                           , text
                                           , time
-                                          , transformers
                                           , vector
                                           , yaml
   exposed-modules:                          FitbitDemoLib
                                           , FitbitDemoLib.DateTime
                                           , FitbitDemoLib.IO
-                                          , FitbitDemoLib.OAuth2Helper
                                           , FitbitDemoLib.Parser
                                           , FitbitDemoLib.Types
                                           , FitbitDemoLib.Util
@@ -90,6 +85,3 @@ test-suite fitbit-demo-test
                                             -fwarn-unused-imports
   other-modules:                            ConfigSpec
   build-depends:                            base >= 4.7 && < 5
-                                          , fitbit-demo
-                                          , hspec
-                                          , req-oauth2
