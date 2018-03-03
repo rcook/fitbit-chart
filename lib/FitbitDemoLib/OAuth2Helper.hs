@@ -12,8 +12,6 @@ import           Data.Aeson (Value)
 import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Default.Class (def)
 import           Data.Monoid ((<>))
-import           FitbitDemoLib.HttpUtil
-import           FitbitDemoLib.OAuth2Types
 import           Network.HTTP.Req
                     ( GET(..)
                     , NoReqBody(..)
@@ -26,21 +24,25 @@ import           Network.HTTP.Req
                     )
 import           Network.HTTP.Req.OAuth2 (OAuth2)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
-                    ( AccessToken
+                    ( APIAction
+                    , APIResult
+                    , AccessToken
                     , App(..)
                     , RefreshTokenRequest(..)
                     , RefreshTokenResponse(..)
                     , TokenPair(..)
+                    , acceptLanguage
                     , fetchRefreshToken
+                    , hasResponseStatus
                     , oAuth2BearerHeader
                     )
 import           Network.HTTP.Types (unauthorized401)
 
 mkOAuth2Call ::
-    (OAuth2 (APIResult a) -> OAuth2 a)
+    (OAuth2 (OAuth2.APIResult a) -> OAuth2 a)
     -> OAuth2.App
     -> Url 'Https
-    -> APIAction a
+    -> OAuth2.APIAction a
     -> OAuth2 a
 mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
     where
@@ -52,10 +54,10 @@ mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
 
 oAuth2Get ::
     (Value -> Parser a)
-    -> APIAction a
+    -> OAuth2.APIAction a
 oAuth2Get p apiUrl app tokenPair@(OAuth2.TokenPair accessToken _) = do
     (temp, tokenPair') <- catch (getHelper apiUrl accessToken >>= \value -> return (value, tokenPair)) $
-                            \e -> if hasResponseStatus e unauthorized401
+                            \e -> if OAuth2.hasResponseStatus e unauthorized401
                                     then do
                                         newTokenPair@(OAuth2.TokenPair newAccessToken _) <- refreshHelper app tokenPair
                                         result <- getHelper apiUrl newAccessToken
@@ -68,7 +70,7 @@ getHelper ::
     -> OAuth2.AccessToken
     -> IO Value
 getHelper url accessToken =
-    responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (OAuth2.oAuth2BearerHeader accessToken <> acceptLanguage))
+    responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (OAuth2.oAuth2BearerHeader accessToken <> OAuth2.acceptLanguage))
 
 refreshHelper ::
     OAuth2.App

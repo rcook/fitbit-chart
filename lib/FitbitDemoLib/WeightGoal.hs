@@ -8,11 +8,11 @@ module FitbitDemoLib.WeightGoal
 import           Data.Aeson ((.:), Value, withObject)
 import           Data.Aeson.Types (Parser)
 import           FitbitDemoLib.OAuth2Helper
-import           FitbitDemoLib.OAuth2Types
 import           FitbitDemoLib.Types
 import           Network.HTTP.Req ((/:))
+import qualified Network.HTTP.Req.OAuth2 as OAuth2 (APIAction)
 
-getWeightGoal :: APIAction WeightGoal
+getWeightGoal :: OAuth2.APIAction WeightGoal
 getWeightGoal apiUrl =
     oAuth2Get pResponse (apiUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json")
 

@@ -39,10 +39,8 @@ library
                                           , yaml
   exposed-modules:                          FitbitDemoLib
                                           , FitbitDemoLib.DateTime
-                                          , FitbitDemoLib.HttpUtil
                                           , FitbitDemoLib.IO
                                           , FitbitDemoLib.OAuth2Helper
-                                          , FitbitDemoLib.OAuth2Types
                                           , FitbitDemoLib.Parser
                                           , FitbitDemoLib.Types
                                           , FitbitDemoLib.Util

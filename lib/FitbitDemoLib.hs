@@ -1,9 +1,7 @@
 module FitbitDemoLib
     ( module FitbitDemoLib.DateTime
-    , module FitbitDemoLib.HttpUtil
     , module FitbitDemoLib.IO
     , module FitbitDemoLib.OAuth2Helper
-    , module FitbitDemoLib.OAuth2Types
     , module FitbitDemoLib.Parser
     , module FitbitDemoLib.Types
     , module FitbitDemoLib.Util
@@ -12,10 +10,8 @@ module FitbitDemoLib
     ) where
 
 import FitbitDemoLib.DateTime
-import FitbitDemoLib.HttpUtil
 import FitbitDemoLib.IO
 import FitbitDemoLib.OAuth2Helper
-import FitbitDemoLib.OAuth2Types
 import FitbitDemoLib.Parser
 import FitbitDemoLib.Types
 import FitbitDemoLib.Util

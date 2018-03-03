@@ -12,13 +12,13 @@ import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
 import           FitbitDemoLib.DateTime
 import           FitbitDemoLib.OAuth2Helper
-import           FitbitDemoLib.OAuth2Types
 import           FitbitDemoLib.Parser
 import           FitbitDemoLib.Types
 import           FitbitDemoLib.Util
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
+import qualified Network.HTTP.Req.OAuth2 as OAuth2 (APIAction)
 
-getWeightTimeSeries :: TimeSeriesRange -> APIAction [WeightSample]
+getWeightTimeSeries :: TimeSeriesRange -> OAuth2.APIAction [WeightSample]
 getWeightTimeSeries range apiUrl =
     oAuth2Get pResponse (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
 
