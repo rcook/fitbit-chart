@@ -17,8 +17,8 @@ import           FitbitDemoLib.Util
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
 import           Network.HTTP.Req.OAuth2 (APIAction, oAuth2Get)
 
-getWeightTimeSeries :: TimeSeriesRange -> APIAction [WeightSample]
-getWeightTimeSeries range apiUrl =
+getWeightTimeSeries :: Url 'Https -> TimeSeriesRange -> APIAction [WeightSample]
+getWeightTimeSeries apiUrl range =
     oAuth2Get pResponse (buildUrl range (apiUrl /: "user" /: "-" /: "body" /: "weight" /: "date"))
 
 buildUrl :: TimeSeriesRange -> Url 'Https -> Url 'Https
