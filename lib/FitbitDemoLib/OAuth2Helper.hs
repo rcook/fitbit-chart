@@ -1,48 +1,27 @@
 {-# LANGUAGE DataKinds #-}
 
 module FitbitDemoLib.OAuth2Helper
-    ( oAuth2Get
-    , mkOAuth2Call
+    ( mkOAuth2Call
     ) where
 
-import           Control.Exception (catch, throwIO)
 import           Control.Monad.IO.Class (liftIO)
 import           Control.Monad.Trans.State.Strict (get, put)
-import           Data.Aeson (Value)
-import           Data.Aeson.Types (Parser, parseEither)
-import           Data.Default.Class (def)
-import           Data.Monoid ((<>))
 import           Network.HTTP.Req
-                    ( GET(..)
-                    , NoReqBody(..)
-                    , Scheme(..)
+                    ( Scheme(..)
                     , Url
-                    , jsonResponse
-                    , req
-                    , responseBody
-                    , runReq
                     )
 import           Network.HTTP.Req.OAuth2 (OAuth2)
-import qualified Network.HTTP.Req.OAuth2 as OAuth2
+import           Network.HTTP.Req.OAuth2
                     ( APIAction
                     , APIResult
-                    , AccessToken
                     , App(..)
-                    , RefreshTokenRequest(..)
-                    , RefreshTokenResponse(..)
-                    , TokenPair(..)
-                    , acceptLanguage
-                    , fetchRefreshToken
-                    , hasResponseStatus
-                    , oAuth2BearerHeader
                     )
-import           Network.HTTP.Types (unauthorized401)
 
 mkOAuth2Call ::
-    (OAuth2 (OAuth2.APIResult a) -> OAuth2 a)
-    -> OAuth2.App
+    (OAuth2 (APIResult a) -> OAuth2 a)
+    -> App
     -> Url 'Https
-    -> OAuth2.APIAction a
+    -> APIAction a
     -> OAuth2 a
 mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
     where
@@ -51,35 +30,3 @@ mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
             (result, tp') <- liftIO $ a tp
             put tp'
             return result
-
-oAuth2Get ::
-    (Value -> Parser a)
-    -> OAuth2.APIAction a
-oAuth2Get p apiUrl app tokenPair@(OAuth2.TokenPair accessToken _) = do
-    (temp, tokenPair') <- catch (getHelper apiUrl accessToken >>= \value -> return (value, tokenPair)) $
-                            \e -> if OAuth2.hasResponseStatus e unauthorized401
-                                    then do
-                                        newTokenPair@(OAuth2.TokenPair newAccessToken _) <- refreshHelper app tokenPair
-                                        result <- getHelper apiUrl newAccessToken
-                                        return (result, newTokenPair)
-                                    else throwIO e
-    return (parseEither p temp, tokenPair')
-
-getHelper ::
-    Url 'Https
-    -> OAuth2.AccessToken
-    -> IO Value
-getHelper url accessToken =
-    responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (OAuth2.oAuth2BearerHeader accessToken <> OAuth2.acceptLanguage))
-
-refreshHelper ::
-    OAuth2.App
-    -> OAuth2.TokenPair
-    -> IO OAuth2.TokenPair
-refreshHelper app@(OAuth2.App _ _ u _) (OAuth2.TokenPair _ refreshToken) = do
-    result <- OAuth2.fetchRefreshToken app (OAuth2.RefreshTokenRequest refreshToken)
-    let (OAuth2.RefreshTokenResponse newTokenPair) = case result of
-                                                        Left e -> error e -- TODO: Error handling
-                                                        Right x -> x
-    u newTokenPair
-    return newTokenPair
