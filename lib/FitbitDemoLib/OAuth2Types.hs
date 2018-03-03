@@ -8,7 +8,6 @@ module FitbitDemoLib.OAuth2Types
 import           Network.HTTP.Req (Scheme(..), Url)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( App(..)
-                    , ClientPair(..)
                     , TokenPair(..)
                     )
 

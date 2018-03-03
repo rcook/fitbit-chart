@@ -28,11 +28,9 @@ import           Network.HTTP.Req.OAuth2 (OAuth2)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken
                     , App(..)
-                    , ClientPair(..)
                     , RefreshTokenRequest(..)
                     , RefreshTokenResponse(..)
                     , TokenPair(..)
-                    , UpdateTokenPair
                     , fetchRefreshToken
                     , oAuth2BearerHeader
                     )
@@ -55,7 +53,7 @@ mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
 oAuth2Get ::
     (Value -> Parser a)
     -> APIAction a
-oAuth2Get p apiUrl app@(OAuth2.App _ _ u clientPair) tokenPair@(OAuth2.TokenPair accessToken _) = do
+oAuth2Get p apiUrl app tokenPair@(OAuth2.TokenPair accessToken _) = do
     (temp, tokenPair') <- catch (getHelper apiUrl accessToken >>= \value -> return (value, tokenPair)) $
                             \e -> if hasResponseStatus e unauthorized401
                                     then do
@@ -76,7 +74,7 @@ refreshHelper ::
     OAuth2.App
     -> OAuth2.TokenPair
     -> IO OAuth2.TokenPair
-refreshHelper app@(OAuth2.App _ _ u clientPair) (OAuth2.TokenPair _ refreshToken) = do
+refreshHelper app@(OAuth2.App _ _ u _) (OAuth2.TokenPair _ refreshToken) = do
     result <- OAuth2.fetchRefreshToken app (OAuth2.RefreshTokenRequest refreshToken)
     let (OAuth2.RefreshTokenResponse newTokenPair) = case result of
                                                         Left e -> error e -- TODO: Error handling
