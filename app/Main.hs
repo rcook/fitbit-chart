@@ -77,13 +77,12 @@ main = do
 
     TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir app promptForCallbackUri
 
-    let call = mkOAuth2Call exitOnFailure app
-
     t <- getCurrentTime
-    (weightGoal, weightTimeSeries) <- OAuth2.evalOAuth2 tp0 $ do
-        weightGoal' <- call (getWeightGoal fitbitApiUrl)
-        weightTimeSeries' <- call $ getWeightTimeSeries fitbitApiUrl (Ending (utctDay t) Max)
-        return (weightGoal', weightTimeSeries')
+
+    (weightGoal, weightTimeSeries) <- OAuth2.evalOAuth2 app tp0 $ \call -> do
+        wg <- exitOnFailure $ call (getWeightGoal fitbitApiUrl)
+        wts <- exitOnFailure $ call (getWeightTimeSeries fitbitApiUrl (Ending (utctDay t) Max))
+        return (wg, wts)
 
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"

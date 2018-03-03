@@ -12,14 +12,11 @@ import           Network.HTTP.Req.OAuth2
                     )
 
 mkOAuth2Call ::
-    (OAuth2 (APIResult a) -> OAuth2 a)
-    -> App
+    App
     -> APIAction a
-    -> OAuth2 a
-mkOAuth2Call f app action = f $ wrap (action app)
-    where
-        wrap a = do
-            tp <- get
-            (result, tp') <- liftIO $ a tp
-            put tp'
-            return result
+    -> OAuth2 (APIResult a)
+mkOAuth2Call app action = do
+    tp <- get
+    (result, tp') <- liftIO $ action app tp
+    put tp'
+    return result
