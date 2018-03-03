@@ -2,14 +2,12 @@
 
 module FitbitDemoLib.OAuth2Helper
     ( oAuth2Get
-    , evalOAuth2
     , mkOAuth2Call
-    , runOAuth2
     ) where
 
 import           Control.Exception (catch, throwIO)
 import           Control.Monad.IO.Class (liftIO)
-import           Control.Monad.Trans.State.Strict (evalStateT, get, put, runStateT)
+import           Control.Monad.Trans.State.Strict (get, put)
 import           Data.Aeson (Value)
 import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Default.Class (def)
@@ -26,6 +24,7 @@ import           Network.HTTP.Req
                     , responseBody
                     , runReq
                     )
+import           Network.HTTP.Req.OAuth2 (OAuth2)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken
                     , App(..)
@@ -33,6 +32,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , RefreshTokenRequest(..)
                     , RefreshTokenResponse(..)
                     , TokenPair(..)
+                    , UpdateTokenPair
                     , fetchRefreshToken
                     , oAuth2BearerHeader
                     )
@@ -40,7 +40,7 @@ import           Network.HTTP.Types (unauthorized401)
 
 mkOAuth2Call ::
     (OAuth2 (APIResult a) -> OAuth2 a)
-    -> App'
+    -> OAuth2.App
     -> Url 'Https
     -> APIAction a
     -> OAuth2 a
@@ -52,30 +52,32 @@ mkOAuth2Call f app apiUrl action = f $ wrap (action apiUrl app)
             put tp'
             return result
 
-evalOAuth2 :: OAuth2.TokenPair -> OAuth2 a -> IO a
-evalOAuth2 = flip evalStateT
-
-runOAuth2 :: OAuth2.TokenPair -> OAuth2 a -> IO (a, OAuth2.TokenPair)
-runOAuth2 = flip runStateT
-
-oAuth2Get :: (Value -> Parser a) -> APIAction a
-oAuth2Get p apiUrl (App' u app clientPair) tokenPair@(OAuth2.TokenPair accessToken _) = do
+oAuth2Get ::
+    (Value -> Parser a)
+    -> APIAction a
+oAuth2Get p apiUrl app@(OAuth2.App _ _ u clientPair) tokenPair@(OAuth2.TokenPair accessToken _) = do
     (temp, tokenPair') <- catch (getHelper apiUrl accessToken >>= \value -> return (value, tokenPair)) $
                             \e -> if hasResponseStatus e unauthorized401
                                     then do
-                                        newTokenPair@(OAuth2.TokenPair newAccessToken _) <- refreshHelper u app clientPair tokenPair
+                                        newTokenPair@(OAuth2.TokenPair newAccessToken _) <- refreshHelper app tokenPair
                                         result <- getHelper apiUrl newAccessToken
                                         return (result, newTokenPair)
                                     else throwIO e
     return (parseEither p temp, tokenPair')
 
-getHelper :: Url 'Https -> OAuth2.AccessToken -> IO Value
+getHelper ::
+    Url 'Https
+    -> OAuth2.AccessToken
+    -> IO Value
 getHelper url accessToken =
     responseBody <$> (runReq def $ req GET url NoReqBody jsonResponse (OAuth2.oAuth2BearerHeader accessToken <> acceptLanguage))
 
-refreshHelper :: UpdateTokenPair -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.TokenPair -> IO OAuth2.TokenPair
-refreshHelper u app clientPair (OAuth2.TokenPair _ refreshToken) = do
-    result <- OAuth2.fetchRefreshToken app (OAuth2.RefreshTokenRequest clientPair refreshToken)
+refreshHelper ::
+    OAuth2.App
+    -> OAuth2.TokenPair
+    -> IO OAuth2.TokenPair
+refreshHelper app@(OAuth2.App _ _ u clientPair) (OAuth2.TokenPair _ refreshToken) = do
+    result <- OAuth2.fetchRefreshToken app (OAuth2.RefreshTokenRequest refreshToken)
     let (OAuth2.RefreshTokenResponse newTokenPair) = case result of
                                                         Left e -> error e -- TODO: Error handling
                                                         Right x -> x

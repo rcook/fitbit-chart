@@ -1,5 +1,4 @@
 resolver: lts-10.4
 extra-deps:
-- git: git@github.com:rcook/req-oauth2.git
-  commit: 6bc921d5021e1d0815882fb67ca49d215ea80b7d
+- /Users/ricook/src/req-oauth2
 - req-url-extra-0.1.0.0

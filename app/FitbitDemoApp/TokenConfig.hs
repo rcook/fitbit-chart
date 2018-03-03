@@ -20,7 +20,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
                     , AccessTokenRequest(..)
                     , AccessTokenResponse(..)
-                    , App
+                    , App(..)
                     , ClientPair(..)
                     , PromptForCallbackURI
                     , RefreshToken(..)
@@ -54,13 +54,13 @@ instance ToJSON TokenConfig where
 -- If a token pair exists in the token pair configuration file, read
 -- it from the file and return that. Otherwise perform authorization code
 -- workflow.
-getTokenConfig :: FilePath -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.PromptForCallbackURI -> IO (Either String TokenConfig)
-getTokenConfig configDir app clientPair prompt = do
+getTokenConfig :: FilePath -> OAuth2.App -> OAuth2.PromptForCallbackURI -> IO (Either String TokenConfig)
+getTokenConfig configDir app prompt = do
     path <- getTokenConfigPath configDir
     exists <- doesFileExist path
     if exists
         then note ("Could not read token configuration from " ++ path) <$> decodeYAMLFile path
-        else fetchTokenConfig configDir app clientPair prompt
+        else fetchTokenConfig configDir app prompt
 
 -- | Writes token configuration to configuration file
 writeTokenConfig :: FilePath -> TokenConfig -> IO ()
@@ -74,10 +74,10 @@ getTokenConfigPath configDir = do
     homeDir <- getHomeDirectory
     return $ homeDir </> configDir </> "token.yaml"
 
-fetchTokenConfig :: FilePath -> OAuth2.App -> OAuth2.ClientPair -> OAuth2.PromptForCallbackURI -> IO (Either String TokenConfig)
-fetchTokenConfig configDir app clientPair@(OAuth2.ClientPair clientId _) prompt = do
+fetchTokenConfig :: FilePath -> OAuth2.App -> OAuth2.PromptForCallbackURI -> IO (Either String TokenConfig)
+fetchTokenConfig configDir app@(OAuth2.App _ _ _ (OAuth2.ClientPair clientId _)) prompt = do
     authCode <- OAuth2.getAuthCode app clientId prompt
-    result <- OAuth2.fetchAccessToken app (OAuth2.AccessTokenRequest clientPair authCode)
+    result <- OAuth2.fetchAccessToken app (OAuth2.AccessTokenRequest authCode)
     case result of
         Right (OAuth2.AccessTokenResponse tokenPair) -> do
             let tokenConfig = TokenConfig tokenPair
