@@ -18,11 +18,14 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     )
 import           Options.Applicative
                     ( Parser
+                    , argument
                     , execParser
                     , fullDesc
                     , helper
                     , info
+                    , metavar
                     , progDesc
+                    , str
                     )
 import           System.IO (hFlush, stdout)
 import qualified Text.URI as URI (mkURI, render)
@@ -30,7 +33,7 @@ import qualified Text.URI as URI (mkURI, render)
 data Options = Options FilePath
 
 pOptions :: Parser Options
-pOptions = undefined
+pOptions = Options <$> argument str (metavar "OUTPUTPATH")
 
 configDir :: FilePath
 configDir = ".fitbit-demo"
