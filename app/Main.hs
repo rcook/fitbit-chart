@@ -16,8 +16,21 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , PromptForCallbackUri
                     , evalOAuth2
                     )
+import           Options.Applicative
+                    ( Parser
+                    , execParser
+                    , fullDesc
+                    , helper
+                    , info
+                    , progDesc
+                    )
 import           System.IO (hFlush, stdout)
 import qualified Text.URI as URI (mkURI, render)
+
+data Options = Options FilePath
+
+pOptions :: Parser Options
+pOptions = undefined
 
 configDir :: FilePath
 configDir = ".fitbit-demo"
@@ -42,7 +55,14 @@ promptForCallbackUri authUri' = do
     URI.mkURI =<< Text.getLine
 
 main :: IO ()
-main = do
+main = parseOptions >>= run
+    where
+        parseOptions = execParser $ info
+            (helper <*> pOptions)
+            (fullDesc <> progDesc "Dump Richard's Fitbit data into a CSV file")
+
+run :: Options -> IO ()
+run (Options outputPath) = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
 
     let app = mkApp
@@ -61,4 +81,6 @@ main = do
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
 
-    ByteString.writeFile "data.csv" $ Csv.encode weightTimeSeries
+    ByteString.writeFile
+        outputPath
+        (Csv.encode weightTimeSeries)

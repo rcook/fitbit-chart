@@ -27,6 +27,7 @@ library
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
                                           , bytestring
+                                          , cassava
                                           , req
                                           , req-oauth2
                                           , text
@@ -56,12 +57,14 @@ executable fitbit-demo-app
                                             -fwarn-unused-imports
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
+                                          , bytestring
                                           , cassava
                                           , directory
                                           , errors
                                           , filepath
                                           , fitbit-demo
                                           , modern-uri
+                                          , optparse-applicative
                                           , req
                                           , req-oauth2
                                           , text
