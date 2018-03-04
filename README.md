@@ -1,6 +1,6 @@
-# fitbit-demo by Richard Cook
+# fitbit-demo
 
-Haskell application with main executable only built using Stack
+Demonstrate Fitbit web API calls using Haskell via Req
 
 ## Clone repository
 
