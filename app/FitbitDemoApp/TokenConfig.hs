@@ -22,7 +22,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , AccessTokenResponse(..)
                     , App(..)
                     , ClientPair(..)
-                    , PromptForCallbackURI
+                    , PromptForCallbackUri
                     , RefreshToken(..)
                     , TokenPair(..)
                     , fetchAccessToken
@@ -54,7 +54,7 @@ instance ToJSON TokenConfig where
 -- If a token pair exists in the token pair configuration file, read
 -- it from the file and return that. Otherwise perform authorization code
 -- workflow.
-getTokenConfig :: FilePath -> OAuth2.App -> OAuth2.PromptForCallbackURI -> IO (Either String TokenConfig)
+getTokenConfig :: FilePath -> OAuth2.App -> OAuth2.PromptForCallbackUri -> IO (Either String TokenConfig)
 getTokenConfig configDir app prompt = do
     path <- getTokenConfigPath configDir
     exists <- doesFileExist path
@@ -74,7 +74,7 @@ getTokenConfigPath configDir = do
     homeDir <- getHomeDirectory
     return $ homeDir </> configDir </> "token.yaml"
 
-fetchTokenConfig :: FilePath -> OAuth2.App -> OAuth2.PromptForCallbackURI -> IO (Either String TokenConfig)
+fetchTokenConfig :: FilePath -> OAuth2.App -> OAuth2.PromptForCallbackUri -> IO (Either String TokenConfig)
 fetchTokenConfig configDir app@(OAuth2.App _ _ _ (OAuth2.ClientPair clientId _)) prompt = do
     authCode <- OAuth2.getAuthCode app clientId prompt
     result <- OAuth2.fetchAccessToken app (OAuth2.AccessTokenRequest authCode)

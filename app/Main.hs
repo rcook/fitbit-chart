@@ -22,7 +22,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , ClientId(..)
                     , ClientPair(..)
                     , ClientSecret(..)
-                    , PromptForCallbackURI
+                    , PromptForCallbackUri
                     , UpdateTokenPair
                     , evalOAuth2
                     )
@@ -42,7 +42,7 @@ promptForAppConfig = do
     clientSecret <- OAuth2.ClientSecret <$> Text.getLine
     return $ AppConfig (OAuth2.ClientPair clientId clientSecret)
 
-promptForCallbackUri :: OAuth2.PromptForCallbackURI
+promptForCallbackUri :: OAuth2.PromptForCallbackUri
 promptForCallbackUri authUri' = do
     putStrLn "Open following link in browser:"
     Text.putStrLn $ URI.render authUri'
@@ -79,10 +79,9 @@ main = do
 
     t <- getCurrentTime
 
-    (weightGoal, weightTimeSeries) <- OAuth2.evalOAuth2 app tp0 $ \call -> do
-        wg <- exitOnFailure $ call (getWeightGoal fitbitApiUrl)
-        wts <- exitOnFailure $ call (getWeightTimeSeries fitbitApiUrl (Ending (utctDay t) Max))
-        return (wg, wts)
+    (weightGoal, weightTimeSeries) <- OAuth2.evalOAuth2 tp0 $ (,)
+        <$> getWeightGoal app fitbitApiUrl
+        <*> getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
 
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"

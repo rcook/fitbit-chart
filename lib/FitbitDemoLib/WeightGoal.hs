@@ -9,11 +9,11 @@ import           Data.Aeson ((.:), Value, withObject)
 import           Data.Aeson.Types (Parser)
 import           FitbitDemoLib.Types
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
-import           Network.HTTP.Req.OAuth2 (APIAction, oAuth2Get)
+import           Network.HTTP.Req.OAuth2 (App, OAuth2, oAuth2Get)
 
-getWeightGoal :: Url 'Https -> APIAction WeightGoal
-getWeightGoal apiUrl =
-    oAuth2Get pResponse (apiUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json")
+getWeightGoal :: App -> Url 'Https -> OAuth2 WeightGoal
+getWeightGoal app apiUrl =
+    oAuth2Get pResponse (apiUrl /: "user" /: "-" /: "body" /: "log" /: "weight" /: "goal.json") app
 
 pResponse :: Value -> Parser WeightGoal
 pResponse = withObject "WeightGoalResponse" $ \v -> do
