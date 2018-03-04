@@ -1,6 +1,4 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
 
 module Main (main) where
 
@@ -11,25 +9,18 @@ import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           FitbitDemoApp
 import           FitbitDemoLib
-import           Network.HTTP.Req
-                    ( (/:)
-                    , Scheme(..)
-                    , Url
-                    , https
-                    )
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
-                    ( App(..)
-                    , ClientId(..)
+                    ( ClientId(..)
                     , ClientPair(..)
                     , ClientSecret(..)
                     , PromptForCallbackUri
-                    , UpdateTokenPair
                     , evalOAuth2
                     )
 import           System.IO (hFlush, stdout)
-import           Text.Printf (printf)
 import qualified Text.URI as URI (mkURI, render)
-import           Text.URI.QQ (uri)
+
+configDir :: FilePath
+configDir = ".fitbit-demo"
 
 promptForAppConfig :: AppConfigPrompt
 promptForAppConfig = do
@@ -50,23 +41,6 @@ promptForCallbackUri authUri' = do
     hFlush stdout
     URI.mkURI =<< Text.getLine
 
-configDir :: FilePath
-configDir = ".fitbit-demo"
-
-mkApp :: OAuth2.UpdateTokenPair -> OAuth2.ClientPair -> OAuth2.App
-mkApp updateTokenPair clientPair =
-    OAuth2.App
-        [uri|https://www.fitbit.com/oauth2/authorize|]  -- appAuthUri
-        [uri|https://api.fitbit.com/oauth2/token|]      -- appTokenUri
-        updateTokenPair
-        clientPair
-
-fitbitApiUrl :: Url 'Https
-fitbitApiUrl = https "api.fitbit.com" /: "1"
-
-formatDouble :: Double -> String
-formatDouble = printf "%.1f"
-
 main :: IO ()
 main = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
@@ -75,11 +49,11 @@ main = do
                 (writeTokenConfig configDir . TokenConfig)
                 clientPair
 
-    TokenConfig tp0 <- exitOnFailure $ getTokenConfig configDir app promptForCallbackUri
+    TokenConfig tp <- exitOnFailure $ getTokenConfig configDir app promptForCallbackUri
 
     t <- getCurrentTime
 
-    (weightGoal, weightTimeSeries) <- OAuth2.evalOAuth2 tp0 $ (,)
+    (weightGoal, weightTimeSeries) <- OAuth2.evalOAuth2 tp $ (,)
         <$> getWeightGoal app fitbitApiUrl
         <*> getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
 
