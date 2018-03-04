@@ -56,6 +56,7 @@ executable fitbit-demo-app
                                             -fwarn-unused-imports
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
+                                          , cassava
                                           , directory
                                           , errors
                                           , filepath

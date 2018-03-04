@@ -2,8 +2,8 @@
 
 module Main (main) where
 
-import           Control.Monad (forM_)
-import           Control.Monad.IO.Class (liftIO)
+import qualified Data.ByteString.Lazy as ByteString (writeFile)
+import qualified Data.Csv as Csv (encode)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -60,5 +60,5 @@ main = do
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
-    forM_ (take 5 weightTimeSeries) $ \(WeightSample day value) ->
-        liftIO $ putStrLn $ show day ++ ": " ++ formatDouble value ++ " lbs"
+
+    ByteString.writeFile "data.csv" $ Csv.encode weightTimeSeries
