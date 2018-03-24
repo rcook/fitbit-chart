@@ -4,11 +4,13 @@ module Main (main) where
 
 import qualified Data.ByteString.Lazy as ByteString (writeFile)
 import qualified Data.Csv as Csv (encode)
+import           Data.Foldable (for_)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           FitbitDemoApp
 import           FitbitDemoLib
+import           Network.AWS.Easy (Endpoint(..), awsConfig, connect)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( ClientId(..)
                     , ClientPair(..)
@@ -30,10 +32,10 @@ import           Options.Applicative
 import           System.IO (hFlush, stdout)
 import qualified Text.URI as URI (mkURI, render)
 
-data Options = Options FilePath
+data Options = Options
 
 pOptions :: Parser Options
-pOptions = Options <$> argument str (metavar "OUTPUTPATH")
+pOptions = pure Options
 
 configDir :: FilePath
 configDir = ".fitbit-demo"
@@ -65,7 +67,7 @@ main = parseOptions >>= run
             (fullDesc <> progDesc "Dump Richard's Fitbit data into a CSV file")
 
 run :: Options -> IO ()
-run (Options outputPath) = do
+run _ = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
 
     let app = mkApp
@@ -84,6 +86,9 @@ run (Options outputPath) = do
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
 
-    ByteString.writeFile
-        outputPath
-        (Csv.encode weightTimeSeries)
+    let conf = awsConfig (Local "localhost" 4569)
+    dynamoDBSession <- connect conf dynamoDBService
+
+    --putWeightSamples (TableName "weight-samples") weightTimeSeries dynamoDBSession
+    for_ weightTimeSeries $ \weightSample -> do
+        putWeightSample (TableName "weight-samples") weightSample dynamoDBSession

@@ -56,6 +56,8 @@ executable fitbit-demo-app
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
   build-depends:                            aeson
+                                          , amazonka-dynamodb
+                                          , aws-easy
                                           , base >= 4.7 && < 5
                                           , bytestring
                                           , cassava
@@ -68,10 +70,13 @@ executable fitbit-demo-app
                                           , req
                                           , req-oauth2
                                           , text
+                                          , text-format
                                           , time
+                                          , unordered-containers
   other-modules:                            FitbitDemoApp
                                           , FitbitDemoApp.AppConfig
                                           , FitbitDemoApp.TokenConfig
+                                          , FitbitDemoApp.Types
                                           , FitbitDemoApp.Util
 
 test-suite fitbit-demo-test
