@@ -9,7 +9,6 @@ import           Data.Csv (ToRecord(..), toField, record)
 import           Data.Text (Text)
 import           Data.Time.Calendar (Day)
 import           FitbitDemoLib.DateTime (formatDay)
-import           GHC.Generics (Generic)
 
 data Period = OneDay | SevenDays | ThirtyDays | OneWeek | OneMonth | ThreeMonths | SixMonths | OneYear | Max
 
