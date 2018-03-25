@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import           Data.Foldable (for_)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -60,8 +61,12 @@ main = parseOptions >>= run
             (helper <*> pOptions)
             (fullDesc <> progDesc "Dump Richard's Fitbit data into a CSV file")
 
+tableName :: TableName
+tableName = TableName "weight-samples"
+
 run :: Options -> IO ()
 run _ = do
+    {-
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
 
     let app = mkApp
@@ -79,11 +84,19 @@ run _ = do
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
+    -}
 
     let conf = awsConfig (Local "localhost" 4569)
     dynamoDBSession <- connect conf dynamoDBService
 
+    {-
     putWeightSamples
-        (TableName "weight-samples")
+        tableName
         weightTimeSeries
         dynamoDBSession
+    -}
+
+    weightSamples <- getWeightSamples tableName dynamoDBSession
+    print $ length weightSamples
+    --for_ weightSamples $ \weightSample ->
+    --    print weightSample
