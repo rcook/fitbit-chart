@@ -10,10 +10,10 @@ import           Data.Aeson.Types (Parser)
 import           Data.Either (fromRight)
 import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
-import           FitbitDemoLib.DateTime
+import           FitbitDemoLib.Format
 import           FitbitDemoLib.Parser
 import           FitbitDemoLib.Types
-import           FitbitDemoLib.Util
+import           FitbitDemoLib.WeightSample
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
 import           Network.HTTP.Req.OAuth2 (App, OAuth2, oAuth2Get)
 

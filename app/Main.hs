@@ -2,7 +2,6 @@
 
 module Main (main) where
 
-import           Data.Foldable (for_)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -66,7 +65,6 @@ tableName = TableName "weight-samples"
 
 run :: Options -> IO ()
 run _ = do
-    {-
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
 
     let app = mkApp
@@ -84,17 +82,14 @@ run _ = do
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
-    -}
 
     let conf = awsConfig (Local "localhost" 4569)
     dynamoDBSession <- connect conf dynamoDBService
 
-    {-
     putWeightSamples
         tableName
         weightTimeSeries
         dynamoDBSession
-    -}
 
     weightSamples <- getWeightSamples tableName dynamoDBSession
     print $ length weightSamples

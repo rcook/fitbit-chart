@@ -1,10 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoLib.Util
-    ( formatPeriod
+module FitbitDemoLib.Format
+    ( formatDay
+    , formatPeriod
     ) where
 
 import           Data.Text (Text)
+import qualified Data.Text as Text (pack)
+import           Data.Time.Calendar (Day)
 import           FitbitDemoLib.Types
 
 formatPeriod :: Period -> Text
@@ -17,3 +20,6 @@ formatPeriod ThreeMonths = "3m"
 formatPeriod SixMonths = "6m"
 formatPeriod OneYear = "1y"
 formatPeriod Max = "max"
+
+formatDay :: Day -> Text
+formatDay = Text.pack . show

@@ -35,12 +35,12 @@ library
                                           , vector
                                           , yaml
   exposed-modules:                          FitbitDemoLib
-                                          , FitbitDemoLib.DateTime
+                                          , FitbitDemoLib.Format
                                           , FitbitDemoLib.IO
                                           , FitbitDemoLib.Parser
                                           , FitbitDemoLib.Types
-                                          , FitbitDemoLib.Util
                                           , FitbitDemoLib.WeightGoal
+                                          , FitbitDemoLib.WeightSample
                                           , FitbitDemoLib.WeightTimeSeries
 
 executable fitbit-demo-app

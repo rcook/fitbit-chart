@@ -17,11 +17,7 @@ import qualified Data.HashMap.Strict as HashMap (fromList, lookup)
 import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty (fromList)
 import           Data.List.Split (chunksOf)
-import           Data.Maybe (fromJust)
 import           Data.Text (Text)
-import qualified Data.Text as Text (null, pack)
-import qualified Data.Text.Read as Text (decimal, double)
-import           Data.Time.Calendar (Day, toGregorian)
 import           FitbitDemoApp.Types
 import           FitbitDemoLib
 import           Network.AWS (send)
@@ -44,11 +40,10 @@ import           Network.AWS.DynamoDB
                     , writeRequest
                     )
 import           Network.AWS.Easy (withAWS)
-import           Text.Printf (printf)
 
 type Item = HashMap Text AttributeValue
 
-getWeightSamples :: TableName -> DynamoDBSession -> IO [Double]
+getWeightSamples :: TableName -> DynamoDBSession -> IO [WeightSample]
 getWeightSamples (TableName tableName) = withAWS $ do
     response <- send $ scan tableName
     case mapM deserializeWeightSample (response ^. srsItems) of
@@ -75,29 +70,19 @@ putWeightSamples (TableName tableName) ws session = for_ (chunksOf 25 ws) go
                                                 wrPutRequest .~ Just (putRequest & prItem .~ serializeWeightSample weightSample))
                                         weightSamples
 
-parseInt' :: Text -> Maybe Int
-parseInt' s = case Text.decimal s of
-    Left _ -> Nothing
-    Right (result, s') -> if Text.null s' then Just result else Nothing
-
-parseDouble' :: Text -> Maybe Double
-parseDouble' s = case Text.double s of
-    Left _ -> Nothing
-    Right (result, s') -> if Text.null s' then Just result else Nothing
-
-dayToText :: Day -> Text
-dayToText d =
-    let (year, month, day) = toGregorian d
-    in Text.pack $ printf "%04d-%02d-%02d" year month day
-
-deserializeWeightSample :: Item -> Either String Double
+deserializeWeightSample :: Item -> Either String WeightSample
 deserializeWeightSample item = do
+    dayAttr <- note "No \"date\" field" (HashMap.lookup "date" item)
+    dayStr <- note "\"date\" field does not have expected type" $ dayAttr ^. avS
+    day <- parseDay dayStr
+
     weightAttr <- note "No \"weight\" field" (HashMap.lookup "weight" item)
-    weightStr <- note "\"weight\" field not expected type" $ weightAttr ^. avN
-    parseDouble weightStr
+    weightStr <- note "\"weight\" field does not have expected type" $ weightAttr ^. avN
+    weight <- parseDouble weightStr
+    return $ WeightSample day weight
 
 serializeWeightSample :: WeightSample -> Item
 serializeWeightSample (WeightSample day weight) = HashMap.fromList
-    [ ("date", attributeValue & avS .~ Just (dayToText day))
+    [ ("date", attributeValue & avS .~ Just (formatDay day))
     , ("weight", attributeValue & avN .~ Just (toText weight))
     ]
