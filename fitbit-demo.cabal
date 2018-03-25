@@ -60,7 +60,6 @@ executable fitbit-demo-app
                                           , aws-easy
                                           , base >= 4.7 && < 5
                                           , bytestring
-                                          , cassava
                                           , directory
                                           , errors
                                           , filepath
@@ -69,12 +68,14 @@ executable fitbit-demo-app
                                           , optparse-applicative
                                           , req
                                           , req-oauth2
+                                          , split
                                           , text
                                           , text-format
                                           , time
                                           , unordered-containers
   other-modules:                            FitbitDemoApp
                                           , FitbitDemoApp.AppConfig
+                                          , FitbitDemoApp.DataAccess
                                           , FitbitDemoApp.TokenConfig
                                           , FitbitDemoApp.Types
                                           , FitbitDemoApp.Util

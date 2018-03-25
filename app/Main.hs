@@ -2,9 +2,6 @@
 
 module Main (main) where
 
-import qualified Data.ByteString.Lazy as ByteString (writeFile)
-import qualified Data.Csv as Csv (encode)
-import           Data.Foldable (for_)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -20,14 +17,11 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     )
 import           Options.Applicative
                     ( Parser
-                    , argument
                     , execParser
                     , fullDesc
                     , helper
                     , info
-                    , metavar
                     , progDesc
-                    , str
                     )
 import           System.IO (hFlush, stdout)
 import qualified Text.URI as URI (mkURI, render)
@@ -89,6 +83,7 @@ run _ = do
     let conf = awsConfig (Local "localhost" 4569)
     dynamoDBSession <- connect conf dynamoDBService
 
-    --putWeightSamples (TableName "weight-samples") weightTimeSeries dynamoDBSession
-    for_ weightTimeSeries $ \weightSample -> do
-        putWeightSample (TableName "weight-samples") weightSample dynamoDBSession
+    putWeightSamples
+        (TableName "weight-samples")
+        weightTimeSeries
+        dynamoDBSession
