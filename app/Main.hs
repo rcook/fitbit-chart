@@ -2,6 +2,8 @@
 
 module Main (main) where
 
+import qualified Data.Aeson as Aeson (encode)
+import qualified Data.ByteString.Lazy as ByteString (writeFile)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
@@ -65,6 +67,7 @@ tableName = TableName "weight-samples"
 
 run :: Options -> IO ()
 run _ = do
+    {-
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
 
     let app = mkApp
@@ -90,8 +93,9 @@ run _ = do
         tableName
         weightTimeSeries
         dynamoDBSession
+    -}
 
+    let conf = awsConfig (Local "localhost" 4569)
+    dynamoDBSession <- connect conf dynamoDBService
     weightSamples <- getWeightSamples tableName dynamoDBSession
-    print $ length weightSamples
-    --for_ weightSamples $ \weightSample ->
-    --    print weightSample
+    ByteString.writeFile "data.json" (Aeson.encode weightSamples)
