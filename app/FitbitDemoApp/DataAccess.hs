@@ -5,20 +5,36 @@ module FitbitDemoApp.DataAccess
     , putWeightSamples
     ) where
 
+import           Control.Lens ((&), (.~))
 import           Control.Monad (void)
 import           Data.Foldable (for_)
 import           Data.HashMap.Strict (HashMap)
-import qualified Data.HashMap.Strict as HashMap
+import qualified Data.HashMap.Strict as HashMap (fromList)
 import           Data.List.NonEmpty (NonEmpty)
-import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.List.NonEmpty as NonEmpty (fromList)
 import           Data.List.Split (chunksOf)
 import           Data.Text (Text)
 import qualified Data.Text as Text (pack)
 import           Data.Time.Calendar (Day, toGregorian)
 import           FitbitDemoApp.Types
 import           FitbitDemoLib
+import           Network.AWS (send)
+import           Network.AWS.Data (toText)
 import           Network.AWS.DynamoDB
-import           Network.AWS.Easy
+                    ( WriteRequest
+                    , attributeValue
+                    , avN
+                    , avS
+                    , batchWriteItem
+                    , bwiRequestItems
+                    , piItem
+                    , prItem
+                    , putItem
+                    , putRequest
+                    , wrPutRequest
+                    , writeRequest
+                    )
+import           Network.AWS.Easy (withAWS)
 import           Text.Printf (printf)
 
 putWeightSample :: TableName -> WeightSample -> DynamoDBSession -> IO ()

@@ -1,6 +1,6 @@
 resolver: lts-10.4
 extra-deps:
-- aws-easy-0.1.0.0
+- aws-easy-0.1.0.1
 - git: https://github.com/rcook/req-oauth2.git
   commit: 078460fca1621d9cb05d9b2284da0d6e3d194275
 - req-url-extra-0.1.0.0
