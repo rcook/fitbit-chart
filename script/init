@@ -5,9 +5,7 @@ this_dir=$(cd $(dirname $0); pwd -P)
 repo_dir=$(dirname $this_dir)
 
 cd $repo_dir
-
-export LOCALSTACK_HOST=localhost
-
+LOCALSTACK_HOST=localhost \
 awslocal \
   dynamodb \
   create-table \
@@ -16,4 +14,4 @@ awslocal \
   AttributeName=date,AttributeType=S \
   --key-schema \
   AttributeName=date,KeyType=HASH \
-  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \

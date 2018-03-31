@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+this_dir=$(cd $(dirname $0); pwd -P)
+repo_dir=$(dirname $this_dir)
+
+cd $repo_dir
+LOCALSTACK_HOST=localhost \
+awslocal \
+  dynamodb \
+  scan \
+  --table-name weight-samples \
