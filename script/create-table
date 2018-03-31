@@ -14,4 +14,4 @@ awslocal \
   AttributeName=date,AttributeType=S \
   --key-schema \
   AttributeName=date,KeyType=HASH \
-  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5

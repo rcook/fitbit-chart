@@ -9,4 +9,4 @@ LOCALSTACK_HOST=localhost \
 awslocal \
   dynamodb \
   delete-table \
-  --table-name weight-samples \
+  --table-name weight-samples

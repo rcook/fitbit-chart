@@ -9,4 +9,4 @@ LOCALSTACK_HOST=localhost \
 awslocal \
   dynamodb \
   scan \
-  --table-name weight-samples \
+  --table-name weight-samples
