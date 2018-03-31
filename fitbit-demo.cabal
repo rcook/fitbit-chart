@@ -79,6 +79,7 @@ executable fitbit-demo-app
                                           , unordered-containers
   other-modules:                            FitbitDemoApp
                                           , FitbitDemoApp.AppConfig
+                                          , FitbitDemoApp.Config
                                           , FitbitDemoApp.DataAccess
                                           , FitbitDemoApp.TokenConfig
                                           , FitbitDemoApp.Types

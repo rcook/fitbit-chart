@@ -136,9 +136,7 @@ run _ = do
     weightSamples <- getWeightSamples tableName dynamoDBSession
     --ByteString.writeFile "data.json" (Aeson.encode weightSamples)
 
-    profile <- getEnv "AWS_PROFILE"
-    let conf = awsConfig (AWSRegion Ohio)
-                & awscCredentials .~ FromProfile (Text.pack profile)
+    conf <- getAWSConfigFromEnv
     s3Session <- connect conf s3Service
     doPutObject bucketName objectKey (Aeson.encode weightSamples) s3Session
     putStrLn "DONE"
