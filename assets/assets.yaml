@@ -1,0 +1,11 @@
+items:
+- path: chart.html
+  source_path: ../assets/chart.html
+- path: chart.js
+  source_path: ../assets/chart.js
+- path: assets/jquery.flot.min.js
+  uri: https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js
+- path: assets/jquery.flot.time.min.js
+  uri: https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.min.js
+- path: assets/jquery.min.js
+  uri: https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js
