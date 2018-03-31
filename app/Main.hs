@@ -2,14 +2,35 @@
 
 module Main (main) where
 
+import           Control.Lens ((&), (.~))
+import           Control.Monad (void)
 import qualified Data.Aeson as Aeson (encode)
+import           Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as ByteString (writeFile)
 import           Data.Monoid ((<>))
+import qualified Data.Text as Text (pack)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           FitbitDemoApp
 import           FitbitDemoLib
-import           Network.AWS.Easy (Endpoint(..), awsConfig, connect)
+import           Network.AWS
+                    ( Credentials(..)
+                    , Region(..)
+                    , send
+                    )
+import           Network.AWS.Data.Body (RqBody(..), ToHashedBody(..))
+import           Network.AWS.Easy
+                    ( Endpoint(..)
+                    , awsConfig
+                    , awscCredentials
+                    , connect
+                    , withAWS
+                    )
+import           Network.AWS.S3
+                    ( BucketName(..)
+                    , ObjectKey(..)
+                    , putObject
+                    )
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( ClientId(..)
                     , ClientPair(..)
@@ -25,6 +46,7 @@ import           Options.Applicative
                     , info
                     , progDesc
                     )
+import           System.Environment (getEnv)
 import           System.IO (hFlush, stdout)
 import qualified Text.URI as URI (mkURI, render)
 
@@ -65,9 +87,8 @@ main = parseOptions >>= run
 tableName :: TableName
 tableName = TableName "weight-samples"
 
-run :: Options -> IO ()
-run _ = do
-    {-
+run' :: Options -> IO ()
+run' _ = do
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
 
     let app = mkApp
@@ -76,15 +97,19 @@ run _ = do
 
     TokenConfig tp <- exitOnFailure $ getTokenConfig configDir app promptForCallbackUri
 
+    {-
     t <- getCurrentTime
-
     (weightGoal, weightTimeSeries) <- OAuth2.evalOAuth2 tp $ (,)
         <$> getWeightGoal app fitbitApiUrl
         <*> getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
-
     Text.putStrLn $ "Goal type: " <> goalType weightGoal
     putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
     putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
+    -}
+
+    t <- getCurrentTime
+    weightTimeSeries <- OAuth2.evalOAuth2 tp $
+        getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
 
     let conf = awsConfig (Local "localhost" 4569)
     dynamoDBSession <- connect conf dynamoDBService
@@ -93,9 +118,27 @@ run _ = do
         tableName
         weightTimeSeries
         dynamoDBSession
-    -}
 
+bucketName :: BucketName
+bucketName = BucketName "fitbit-demo"
+
+objectKey :: ObjectKey
+objectKey = ObjectKey "data.json"
+
+doPutObject :: BucketName -> ObjectKey -> ByteString -> S3Session -> IO ()
+doPutObject bucketName objectKey bytes = withAWS $ do
+    void $ send $ putObject bucketName objectKey (Hashed $ toHashed bytes)
+
+run :: Options -> IO ()
+run _ = do
     let conf = awsConfig (Local "localhost" 4569)
     dynamoDBSession <- connect conf dynamoDBService
     weightSamples <- getWeightSamples tableName dynamoDBSession
-    ByteString.writeFile "data.json" (Aeson.encode weightSamples)
+    --ByteString.writeFile "data.json" (Aeson.encode weightSamples)
+
+    profile <- getEnv "AWS_PROFILE"
+    let conf = awsConfig (AWSRegion Ohio)
+                & awscCredentials .~ FromProfile (Text.pack profile)
+    s3Session <- connect conf s3Service
+    doPutObject bucketName objectKey (Aeson.encode weightSamples) s3Session
+    putStrLn "DONE"

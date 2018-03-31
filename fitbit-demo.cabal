@@ -57,7 +57,9 @@ executable fitbit-demo-app
                                             -fwarn-unused-imports
   build-depends:                            aeson
                                           , amazonka
+                                          , amazonka-core
                                           , amazonka-dynamodb
+                                          , amazonka-s3
                                           , aws-easy
                                           , base >= 4.7 && < 5
                                           , bytestring
