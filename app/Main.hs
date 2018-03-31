@@ -58,6 +58,12 @@ pOptions = pure Options
 configDir :: FilePath
 configDir = ".fitbit-demo"
 
+bucketName :: BucketName
+bucketName = BucketName "fitbit-demo"
+
+objectKey :: ObjectKey
+objectKey = ObjectKey "data.json"
+
 promptForAppConfig :: AppConfigPrompt
 promptForAppConfig = do
     putStrLn "No Fitbit API configuration was found."
@@ -82,13 +88,14 @@ main = parseOptions >>= run
     where
         parseOptions = execParser $ info
             (helper <*> pOptions)
-            (fullDesc <> progDesc "Dump Richard's Fitbit data into a CSV file")
+            (fullDesc <> progDesc "Dump Richard's Fitbit data into a JSON file stored on S3")
 
 tableName :: TableName
 tableName = TableName "weight-samples"
 
-run' :: Options -> IO ()
-run' _ = do
+populateDB :: [WeightSample] -> DynamoDBSession -> IO [WeightSample]
+populateDB oldWeightSamples dynamoDBSession = do
+    logInfo "Querying Fitbit"
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
 
     let app = mkApp
@@ -111,32 +118,36 @@ run' _ = do
     weightTimeSeries <- OAuth2.evalOAuth2 tp $
         getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
 
-    let conf = awsConfig (Local "localhost" 4569)
-    dynamoDBSession <- connect conf dynamoDBService
-
+    logInfo "Populating DynamoDB"
     putWeightSamples
         tableName
         weightTimeSeries
         dynamoDBSession
 
-bucketName :: BucketName
-bucketName = BucketName "fitbit-demo"
-
-objectKey :: ObjectKey
-objectKey = ObjectKey "data.json"
+    return weightTimeSeries
 
 doPutObject :: BucketName -> ObjectKey -> ByteString -> S3Session -> IO ()
 doPutObject bucketName objectKey bytes = withAWS $ do
     void $ send $ putObject bucketName objectKey (Hashed $ toHashed bytes)
 
+logInfo :: String -> IO ()
+logInfo s = do
+    putStrLn $ "[info] " ++ s
+    hFlush stdout
+
 run :: Options -> IO ()
 run _ = do
+    logInfo "Start"
+
+    logInfo "Reading from DynamoDB"
     let conf = awsConfig (Local "localhost" 4569)
     dynamoDBSession <- connect conf dynamoDBService
     weightSamples <- getWeightSamples tableName dynamoDBSession
-    --ByteString.writeFile "data.json" (Aeson.encode weightSamples)
 
-    conf <- getAWSConfigFromEnv
-    s3Session <- connect conf s3Service
-    doPutObject bucketName objectKey (Aeson.encode weightSamples) s3Session
-    putStrLn "DONE"
+    weightSamples' <- populateDB weightSamples dynamoDBSession
+
+    logInfo "Generate JSON file in S3"
+    conf2 <- getAWSConfigFromEnv
+    s3Session <- connect conf2 s3Service
+    doPutObject bucketName objectKey (Aeson.encode weightSamples') s3Session
+    logInfo "End"
