@@ -17,5 +17,8 @@ $(function() {
         min: 180
       }
     });
+  }).fail(function (e) {
+    console.dir(e);
+    alert("ERROR: " + e.status);
   });
 });
