@@ -7,6 +7,7 @@ import           Control.Monad (void)
 import qualified Data.Aeson as Aeson (encode)
 import           Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as ByteString (writeFile)
+import           Data.List (sortOn)
 import           Data.Monoid ((<>))
 import qualified Data.Text as Text (pack)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
@@ -93,8 +94,8 @@ main = parseOptions >>= run
 tableName :: TableName
 tableName = TableName "weight-samples"
 
-populateDB :: [WeightSample] -> DynamoDBSession -> IO [WeightSample]
-populateDB oldWeightSamples dynamoDBSession = do
+fetchWeightSamples :: [WeightSample] -> DynamoDBSession -> IO [WeightSample]
+fetchWeightSamples oldWeightSamples dynamoDBSession = do
     logInfo "Querying Fitbit"
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
 
@@ -118,13 +119,15 @@ populateDB oldWeightSamples dynamoDBSession = do
     weightTimeSeries <- OAuth2.evalOAuth2 tp $
         getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
 
+    {-
     logInfo "Populating DynamoDB"
     putWeightSamples
         tableName
         weightTimeSeries
         dynamoDBSession
+    -}
 
-    return weightTimeSeries
+    return $ sortOn (\(WeightSample day _) -> day) weightTimeSeries
 
 doPutObject :: BucketName -> ObjectKey -> ByteString -> S3Session -> IO ()
 doPutObject bucketName objectKey bytes = withAWS $ do
@@ -138,16 +141,15 @@ logInfo s = do
 run :: Options -> IO ()
 run _ = do
     logInfo "Start"
+    conf <- getAWSConfigFromEnv
 
     logInfo "Reading from DynamoDB"
-    let conf = awsConfig (Local "localhost" 4569)
     dynamoDBSession <- connect conf dynamoDBService
-    weightSamples <- getWeightSamples tableName dynamoDBSession
+    --weightSamples <- getWeightSamples tableName dynamoDBSession
 
-    weightSamples' <- populateDB weightSamples dynamoDBSession
+    weightSamples' <- fetchWeightSamples [] dynamoDBSession
 
     logInfo "Generate JSON file in S3"
-    conf2 <- getAWSConfigFromEnv
-    s3Session <- connect conf2 s3Service
+    s3Session <- connect conf s3Service
     doPutObject bucketName objectKey (Aeson.encode weightSamples') s3Session
     logInfo "End"
