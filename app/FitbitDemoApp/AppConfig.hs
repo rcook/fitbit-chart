@@ -8,7 +8,7 @@ module FitbitDemoApp.AppConfig
 
 import           Control.Error.Util (note)
 import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withObject)
-import           FitbitDemoLib.IO (decodeYAMLFile, encodeYAMLFile)
+import           FitbitAPI.IO (decodeYAMLFile, encodeYAMLFile)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( ClientId(..)
                     , ClientPair(..)

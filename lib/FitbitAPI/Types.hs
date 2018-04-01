@@ -1,4 +1,4 @@
-module FitbitDemoLib.Types
+module FitbitAPI.Types
     ( Period(..)
     , TimeSeriesRange(..)
     , WeightGoal(..)

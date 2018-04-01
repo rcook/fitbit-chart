@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoLib.Parser
+module FitbitAPI.Parser
     ( parseDay
     , parseDouble
     , parseInt

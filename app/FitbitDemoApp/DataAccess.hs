@@ -19,7 +19,7 @@ import qualified Data.List.NonEmpty as NonEmpty (fromList)
 import           Data.List.Split (chunksOf)
 import           Data.Text (Text)
 import           FitbitDemoApp.Types
-import           FitbitDemoLib
+import           FitbitAPI
 import           Network.AWS (send)
 import           Network.AWS.Data (toText)
 import           Network.AWS.DynamoDB

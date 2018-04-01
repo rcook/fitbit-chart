@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoLib.WeightTimeSeries
+module FitbitAPI.WeightTimeSeries
     ( getWeightTimeSeries
     ) where
 
@@ -10,10 +10,10 @@ import           Data.Aeson.Types (Parser)
 import           Data.Either (fromRight)
 import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
-import           FitbitDemoLib.Format
-import           FitbitDemoLib.Parser
-import           FitbitDemoLib.Types
-import           FitbitDemoLib.WeightSample
+import           FitbitAPI.Format
+import           FitbitAPI.Parser
+import           FitbitAPI.Types
+import           FitbitAPI.WeightSample
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
 import           Network.HTTP.Req.OAuth2 (App, OAuth2, oAuth2Get)
 

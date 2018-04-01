@@ -13,7 +13,7 @@ import qualified Data.Text as Text (pack)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           FitbitDemoApp
-import           FitbitDemoLib
+import           FitbitAPI
 import           Network.AWS
                     ( Credentials(..)
                     , Region(..)

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoLib.Format
+module FitbitAPI.Format
     ( formatDay
     , formatPeriod
     ) where
@@ -8,7 +8,7 @@ module FitbitDemoLib.Format
 import           Data.Text (Text)
 import qualified Data.Text as Text (pack)
 import           Data.Time.Calendar (Day)
-import           FitbitDemoLib.Types
+import           FitbitAPI.Types
 
 formatPeriod :: Period -> Text
 formatPeriod OneDay = "1d"

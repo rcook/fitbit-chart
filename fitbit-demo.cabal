@@ -34,14 +34,14 @@ library
                                           , time
                                           , vector
                                           , yaml
-  exposed-modules:                          FitbitDemoLib
-                                          , FitbitDemoLib.Format
-                                          , FitbitDemoLib.IO
-                                          , FitbitDemoLib.Parser
-                                          , FitbitDemoLib.Types
-                                          , FitbitDemoLib.WeightGoal
-                                          , FitbitDemoLib.WeightSample
-                                          , FitbitDemoLib.WeightTimeSeries
+  exposed-modules:                          FitbitAPI
+                                          , FitbitAPI.Format
+                                          , FitbitAPI.IO
+                                          , FitbitAPI.Parser
+                                          , FitbitAPI.Types
+                                          , FitbitAPI.WeightGoal
+                                          , FitbitAPI.WeightSample
+                                          , FitbitAPI.WeightTimeSeries
 
 executable fitbit-demo-app
   default-language:                         Haskell2010

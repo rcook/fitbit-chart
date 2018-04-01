@@ -1,13 +1,13 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoLib.WeightGoal
+module FitbitAPI.WeightGoal
     ( getWeightGoal
     ) where
 
 import           Data.Aeson ((.:), Value, withObject)
 import           Data.Aeson.Types (Parser)
-import           FitbitDemoLib.Types
+import           FitbitAPI.Types
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
 import           Network.HTTP.Req.OAuth2 (App, OAuth2, oAuth2Get)
 
