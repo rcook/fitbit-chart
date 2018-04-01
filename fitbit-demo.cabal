@@ -25,16 +25,30 @@ library
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
   build-depends:                            aeson
+                                          , amazonka
+                                          , amazonka-dynamodb
+                                          , amazonka-s3
+                                          , aws-easy
                                           , base >= 4.7 && < 5
                                           , bytestring
                                           , cassava
+                                          , errors
+                                          , lens
                                           , req
                                           , req-oauth2
+                                          , split
                                           , text
                                           , time
+                                          , unordered-containers
                                           , vector
                                           , yaml
-  exposed-modules:                          Lib.FitbitAPI
+  exposed-modules:                          Lib
+                                          , Lib.AWS
+                                          , Lib.DataAccess
+                                          , Lib.DataAccess.Commands
+                                          , Lib.DataAccess.Types
+                                          , Lib.Errors
+                                          , Lib.FitbitAPI
                                           , Lib.FitbitAPI.Period
                                           , Lib.FitbitAPI.TimeSeriesRange
                                           , Lib.FitbitAPI.WeightGoal
@@ -60,7 +74,6 @@ executable fitbit-demo-app
   build-depends:                            aeson
                                           , amazonka
                                           , amazonka-core
-                                          , amazonka-dynamodb
                                           , amazonka-s3
                                           , aws-easy
                                           , base >= 4.7 && < 5
@@ -74,17 +87,13 @@ executable fitbit-demo-app
                                           , optparse-applicative
                                           , req
                                           , req-oauth2
-                                          , split
                                           , text
                                           , text-format
                                           , time
-                                          , unordered-containers
   other-modules:                            App
                                           , App.AppConfig
                                           , App.Config
-                                          , App.DataAccess
                                           , App.TokenConfig
-                                          , App.Types
                                           , App.Util
 
 test-suite fitbit-demo-test

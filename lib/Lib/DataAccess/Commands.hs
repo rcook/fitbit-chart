@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module App.DataAccess
+module Lib.DataAccess.Commands
     ( getWeightSamples
     , putWeightSample
     , putWeightSamples
     ) where
 
-import           App.Types
 import           Control.Error.Util (note)
 import           Control.Exception (throwIO)
 import           Control.Lens ((&), (.~), (^.))
@@ -19,9 +18,11 @@ import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty (fromList)
 import           Data.List.Split (chunksOf)
 import           Data.Text (Text)
-import           Lib.FitbitAPI
-import           Lib.Util.Format (formatDay)
-import           Lib.Util.Parser (parseDay, parseDouble)
+import           Lib.AWS
+import           Lib.DataAccess.Types
+import           Lib.Errors
+import           Lib.FitbitAPI (WeightSample(..))
+import           Lib.Util (formatDay, parseDay, parseDouble)
 import           Network.AWS (send)
 import           Network.AWS.Data (toText)
 import           Network.AWS.DynamoDB

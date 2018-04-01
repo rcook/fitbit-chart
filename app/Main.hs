@@ -13,6 +13,8 @@ import           Data.Monoid ((<>))
 import qualified Data.Text as Text (pack)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
+import           Lib.AWS
+import           Lib.DataAccess
 import           Lib.FitbitAPI
 import           Network.AWS
                     ( Credentials(..)
