@@ -26,6 +26,7 @@ library
                                             -fwarn-unused-imports
   build-depends:                            aeson
                                           , amazonka
+                                          , amazonka-core
                                           , amazonka-dynamodb
                                           , amazonka-s3
                                           , aws-easy
@@ -54,6 +55,8 @@ library
                                           , Lib.FitbitAPI.WeightGoal
                                           , Lib.FitbitAPI.WeightSample
                                           , Lib.FitbitAPI.WeightTimeSeries
+                                          , Lib.Storage
+                                          , Lib.Storage.Commands
                                           , Lib.Util
                                           , Lib.Util.Format
                                           , Lib.Util.IO

@@ -16,6 +16,7 @@ import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           Lib.AWS
 import           Lib.DataAccess
 import           Lib.FitbitAPI
+import           Lib.Storage
 import           Network.AWS
                     ( Credentials(..)
                     , Region(..)
@@ -131,10 +132,6 @@ fetchWeightSamples oldWeightSamples dynamoDBSession = do
 
     return $ sortOn (\(WeightSample day _) -> day) weightTimeSeries
 
-doPutObject :: BucketName -> ObjectKey -> ByteString -> S3Session -> IO ()
-doPutObject bucketName objectKey bytes = withAWS $ do
-    void $ send $ putObject bucketName objectKey (Hashed $ toHashed bytes)
-
 logInfo :: String -> IO ()
 logInfo s = do
     putStrLn $ "[info] " ++ s
@@ -153,5 +150,5 @@ run _ = do
 
     logInfo "Generate JSON file in S3"
     s3Session <- connect conf s3Service
-    doPutObject bucketName objectKey (Aeson.encode weightSamples') s3Session
+    putBytes bucketName objectKey (Aeson.encode weightSamples') s3Session
     logInfo "End"
