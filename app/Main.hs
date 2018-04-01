@@ -3,38 +3,16 @@
 module Main (main) where
 
 import           App
-import           Control.Lens ((&), (.~))
-import           Control.Monad (void)
 import qualified Data.Aeson as Aeson (encode)
-import           Data.ByteString.Lazy (ByteString)
-import qualified Data.ByteString.Lazy as ByteString (writeFile)
 import           Data.List (sortOn)
 import           Data.Monoid ((<>))
-import qualified Data.Text as Text (pack)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           Lib.AWS
-import           Lib.DataAccess
 import           Lib.FitbitAPI
 import           Lib.Storage
-import           Network.AWS
-                    ( Credentials(..)
-                    , Region(..)
-                    , send
-                    )
-import           Network.AWS.Data.Body (RqBody(..), ToHashedBody(..))
-import           Network.AWS.Easy
-                    ( Endpoint(..)
-                    , awsConfig
-                    , awscCredentials
-                    , connect
-                    , withAWS
-                    )
-import           Network.AWS.S3
-                    ( BucketName(..)
-                    , ObjectKey(..)
-                    , putObject
-                    )
+import           Network.AWS.Easy (connect)
+import           Network.AWS.S3 (BucketName(..), ObjectKey(..))
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( ClientId(..)
                     , ClientPair(..)
@@ -50,7 +28,6 @@ import           Options.Applicative
                     , info
                     , progDesc
                     )
-import           System.Environment (getEnv)
 import           System.IO (hFlush, stdout)
 import qualified Text.URI as URI (mkURI, render)
 
@@ -94,11 +71,8 @@ main = parseOptions >>= run
             (helper <*> pOptions)
             (fullDesc <> progDesc "Dump Richard's Fitbit data into a JSON file stored on S3")
 
-tableName :: TableName
-tableName = TableName "weight-samples"
-
-fetchWeightSamples :: [WeightSample] -> DynamoDBSession -> IO [WeightSample]
-fetchWeightSamples oldWeightSamples dynamoDBSession = do
+fetchWeightSamples :: IO [WeightSample]
+fetchWeightSamples = do
     logInfo "Querying Fitbit"
     AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
 
@@ -108,34 +82,12 @@ fetchWeightSamples oldWeightSamples dynamoDBSession = do
 
     TokenConfig tp <- exitOnFailure $ getTokenConfig configDir app promptForCallbackUri
 
-    {-
-    t <- getCurrentTime
-    (weightGoal, weightTimeSeries) <- OAuth2.evalOAuth2 tp $ (,)
-        <$> getWeightGoal app fitbitApiUrl
-        <*> getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
-    Text.putStrLn $ "Goal type: " <> goalType weightGoal
-    putStrLn $ "Goal weight: " ++ formatDouble (goalWeight weightGoal) ++ " lbs"
-    putStrLn $ "Start weight: " ++ formatDouble (startWeight weightGoal) ++ " lbs"
-    -}
-
     t <- getCurrentTime
     weightTimeSeries <- OAuth2.evalOAuth2 tp $
         getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
 
-    {-
-    logInfo "Populating DynamoDB"
-    putWeightSamples
-        tableName
-        weightTimeSeries
-        dynamoDBSession
-    -}
 
     return $ sortOn (\(WeightSample day _) -> day) weightTimeSeries
-
-logInfo :: String -> IO ()
-logInfo s = do
-    putStrLn $ "[info] " ++ s
-    hFlush stdout
 
 run :: Options -> IO ()
 run _ = do
@@ -143,12 +95,9 @@ run _ = do
     conf <- getAWSConfigFromEnv
 
     logInfo "Reading from DynamoDB"
-    dynamoDBSession <- connect conf dynamoDBService
-    --weightSamples <- getWeightSamples tableName dynamoDBSession
-
-    weightSamples' <- fetchWeightSamples [] dynamoDBSession
+    weightSamples <- fetchWeightSamples
 
     logInfo "Generate JSON file in S3"
     s3Session <- connect conf s3Service
-    putBytes bucketName objectKey (Aeson.encode weightSamples') s3Session
+    putBytes bucketName objectKey (Aeson.encode weightSamples) s3Session
     logInfo "End"

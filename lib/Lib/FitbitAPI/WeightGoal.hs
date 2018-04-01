@@ -4,6 +4,9 @@
 module Lib.FitbitAPI.WeightGoal
     ( WeightGoal
     , getWeightGoal
+    , goalType
+    , goalWeight
+    , startWeight
     ) where
 
 import           Data.Aeson ((.:), Value, withObject)

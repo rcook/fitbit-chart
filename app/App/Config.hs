@@ -6,13 +6,7 @@ module App.Config
     , getAWSConfig
     ) where
 
-import           Control.Exception
-                    ( Exception
-                    , SomeException
-                    , bracket_
-                    , catch
-                    , throwIO
-                    )
+import           Control.Exception (Exception, throwIO)
 import           Control.Lens ((&), (.~))
 import           Control.Monad.IO.Class (MonadIO(..))
 import           Data.String (IsString)
