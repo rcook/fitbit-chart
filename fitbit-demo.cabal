@@ -29,6 +29,7 @@ library
                                           , amazonka-core
                                           , amazonka-dynamodb
                                           , amazonka-s3
+                                          , amazonka-ssm
                                           , aws-easy
                                           , base >= 4.7 && < 5
                                           , bytestring
@@ -57,12 +58,16 @@ library
                                           , Lib.FitbitAPI.WeightGoal
                                           , Lib.FitbitAPI.WeightSample
                                           , Lib.FitbitAPI.WeightTimeSeries
+                                          , Lib.Params
+                                          , Lib.Params.Commands
+                                          , Lib.Params.Types
                                           , Lib.Storage
                                           , Lib.Storage.Commands
                                           , Lib.Util
                                           , Lib.Util.FileSystem
                                           , Lib.Util.Format
                                           , Lib.Util.IO
+                                          , Lib.Util.Misc
                                           , Lib.Util.Parser
 
 executable fitbit-demo-app
