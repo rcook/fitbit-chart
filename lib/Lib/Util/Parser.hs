@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Util.Parser
+module Lib.Util.Parser
     ( parseDay
     , parseDouble
     , parseInt

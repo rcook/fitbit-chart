@@ -1,4 +1,4 @@
-module Util.IO
+module Lib.Util.IO
     ( decodeJSON
     , decodeYAML
     , decodeYAMLFile

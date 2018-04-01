@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import           App
 import           Control.Lens ((&), (.~))
 import           Control.Monad (void)
 import qualified Data.Aeson as Aeson (encode)
@@ -12,8 +13,7 @@ import           Data.Monoid ((<>))
 import qualified Data.Text as Text (pack)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
-import           FitbitDemoApp
-import           FitbitAPI
+import           Lib.FitbitAPI
 import           Network.AWS
                     ( Credentials(..)
                     , Region(..)

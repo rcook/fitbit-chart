@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module FitbitDemoApp.Util
+module App.Util
     ( exitOnFailure
     , fitbitApiUrl
     , formatDouble

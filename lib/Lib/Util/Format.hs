@@ -1,4 +1,4 @@
-module Util.Format
+module Lib.Util.Format
     ( formatDay
     ) where
 

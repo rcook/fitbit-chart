@@ -34,16 +34,16 @@ library
                                           , time
                                           , vector
                                           , yaml
-  exposed-modules:                          FitbitAPI
-                                          , FitbitAPI.Period
-                                          , FitbitAPI.TimeSeriesRange
-                                          , FitbitAPI.WeightGoal
-                                          , FitbitAPI.WeightSample
-                                          , FitbitAPI.WeightTimeSeries
-                                          , Util
-                                          , Util.Format
-                                          , Util.IO
-                                          , Util.Parser
+  exposed-modules:                          Lib.FitbitAPI
+                                          , Lib.FitbitAPI.Period
+                                          , Lib.FitbitAPI.TimeSeriesRange
+                                          , Lib.FitbitAPI.WeightGoal
+                                          , Lib.FitbitAPI.WeightSample
+                                          , Lib.FitbitAPI.WeightTimeSeries
+                                          , Lib.Util
+                                          , Lib.Util.Format
+                                          , Lib.Util.IO
+                                          , Lib.Util.Parser
 
 executable fitbit-demo-app
   default-language:                         Haskell2010
@@ -79,13 +79,13 @@ executable fitbit-demo-app
                                           , text-format
                                           , time
                                           , unordered-containers
-  other-modules:                            FitbitDemoApp
-                                          , FitbitDemoApp.AppConfig
-                                          , FitbitDemoApp.Config
-                                          , FitbitDemoApp.DataAccess
-                                          , FitbitDemoApp.TokenConfig
-                                          , FitbitDemoApp.Types
-                                          , FitbitDemoApp.Util
+  other-modules:                            App
+                                          , App.AppConfig
+                                          , App.Config
+                                          , App.DataAccess
+                                          , App.TokenConfig
+                                          , App.Types
+                                          , App.Util
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0

@@ -1,9 +1,9 @@
-module FitbitAPI.TimeSeriesRange
+module Lib.FitbitAPI.TimeSeriesRange
     ( TimeSeriesRange(..)
     ) where
 
 import           Data.Time.Calendar (Day)
-import           FitbitAPI.Period
+import           Lib.FitbitAPI.Period
 
 data TimeSeriesRange =
     Ending Day Period

@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module FitbitDemoApp.Types
+module App.Types
     ( DynamoDBService
     , DynamoDBSession
     , RuntimeError(..)

@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitAPI.WeightGoal
+module Lib.FitbitAPI.WeightGoal
     ( WeightGoal
     , getWeightGoal
     ) where

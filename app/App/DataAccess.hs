@@ -1,11 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoApp.DataAccess
+module App.DataAccess
     ( getWeightSamples
     , putWeightSample
     , putWeightSamples
     ) where
 
+import           App.Types
 import           Control.Error.Util (note)
 import           Control.Exception (throwIO)
 import           Control.Lens ((&), (.~), (^.))
@@ -18,8 +19,9 @@ import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty (fromList)
 import           Data.List.Split (chunksOf)
 import           Data.Text (Text)
-import           FitbitDemoApp.Types
-import           FitbitAPI
+import           Lib.FitbitAPI
+import           Lib.Util.Format (formatDay)
+import           Lib.Util.Parser (parseDay, parseDouble)
 import           Network.AWS (send)
 import           Network.AWS.Data (toText)
 import           Network.AWS.DynamoDB
@@ -40,8 +42,6 @@ import           Network.AWS.DynamoDB
                     , writeRequest
                     )
 import           Network.AWS.Easy (withAWS)
-import           Util.Format (formatDay)
-import           Util.Parser (parseDay, parseDouble)
 
 type Item = HashMap Text AttributeValue
 

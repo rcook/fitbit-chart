@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitDemoApp.Config
+module App.Config
     ( getAWSConfigFromEnv
     , getEnvRegion
     , getAWSConfig
