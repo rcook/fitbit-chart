@@ -74,7 +74,6 @@ executable fitbit-demo-app
   build-depends:                            aeson
                                           , amazonka
                                           , amazonka-core
-                                          , amazonka-dynamodb
                                           , amazonka-s3
                                           , aws-easy
                                           , base >= 4.7 && < 5
@@ -89,7 +88,6 @@ executable fitbit-demo-app
                                           , req
                                           , req-oauth2
                                           , text
-                                          , text-format
                                           , time
   other-modules:                            App
                                           , App.AppConfig
@@ -113,5 +111,3 @@ test-suite fitbit-demo-test
   other-modules:                            ConfigSpec
   build-depends:                            base >= 4.7 && < 5
                                           , hspec
-                                          , fitbit-demo
-                                          , req-oauth2
