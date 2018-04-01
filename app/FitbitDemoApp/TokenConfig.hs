@@ -15,7 +15,6 @@ import           Data.Aeson
                     , object
                     , withObject
                     )
-import           FitbitAPI.IO (decodeYAMLFile, encodeYAMLFile)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
                     , AccessTokenRequest(..)
@@ -30,6 +29,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     )
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
+import           Util.IO (decodeYAMLFile, encodeYAMLFile)
 
 -- | Token configuration
 data TokenConfig = TokenConfig OAuth2.TokenPair deriving Show

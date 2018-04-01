@@ -7,7 +7,7 @@ module FitbitAPI.WeightSample
 import           Data.Aeson (ToJSON)
 import           Data.Csv (ToRecord(..), record, toField)
 import           Data.Time.Calendar (Day)
-import           FitbitAPI.Format
+import           Util.Format (formatDay)
 import           GHC.Generics (Generic)
 
 data WeightSample = WeightSample Day Double deriving Generic

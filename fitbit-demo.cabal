@@ -35,13 +35,15 @@ library
                                           , vector
                                           , yaml
   exposed-modules:                          FitbitAPI
-                                          , FitbitAPI.Format
-                                          , FitbitAPI.IO
-                                          , FitbitAPI.Parser
-                                          , FitbitAPI.Types
+                                          , FitbitAPI.Period
+                                          , FitbitAPI.TimeSeriesRange
                                           , FitbitAPI.WeightGoal
                                           , FitbitAPI.WeightSample
                                           , FitbitAPI.WeightTimeSeries
+                                          , Util
+                                          , Util.Format
+                                          , Util.IO
+                                          , Util.Parser
 
 executable fitbit-demo-app
   default-language:                         Haskell2010

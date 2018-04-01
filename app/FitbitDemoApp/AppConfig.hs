@@ -8,7 +8,6 @@ module FitbitDemoApp.AppConfig
 
 import           Control.Error.Util (note)
 import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withObject)
-import           FitbitAPI.IO (decodeYAMLFile, encodeYAMLFile)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( ClientId(..)
                     , ClientPair(..)
@@ -16,6 +15,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     )
 import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
 import           System.FilePath ((</>), takeDirectory)
+import           Util.IO (decodeYAMLFile, encodeYAMLFile)
 
 -- | Action to prompt user to enter new app configuration
 type AppConfigPrompt = IO AppConfig

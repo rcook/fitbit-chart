@@ -10,12 +10,13 @@ import           Data.Aeson.Types (Parser)
 import           Data.Either (fromRight)
 import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
-import           FitbitAPI.Format
-import           FitbitAPI.Parser
-import           FitbitAPI.Types
+import           FitbitAPI.Period
+import           FitbitAPI.TimeSeriesRange
 import           FitbitAPI.WeightSample
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
 import           Network.HTTP.Req.OAuth2 (App, OAuth2, oAuth2Get)
+import           Util.Format (formatDay)
+import           Util.Parser (parseDay, parseDouble)
 
 getWeightTimeSeries :: App -> Url 'Https -> TimeSeriesRange -> OAuth2 [WeightSample]
 getWeightTimeSeries app apiUrl range =

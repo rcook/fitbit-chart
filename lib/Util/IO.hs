@@ -1,4 +1,4 @@
-module FitbitAPI.IO
+module Util.IO
     ( decodeJSON
     , decodeYAML
     , decodeYAMLFile

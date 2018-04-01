@@ -40,6 +40,8 @@ import           Network.AWS.DynamoDB
                     , writeRequest
                     )
 import           Network.AWS.Easy (withAWS)
+import           Util.Format (formatDay)
+import           Util.Parser (parseDay, parseDouble)
 
 type Item = HashMap Text AttributeValue
 

@@ -2,14 +2,21 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module FitbitAPI.WeightGoal
-    ( getWeightGoal
+    ( WeightGoal
+    , getWeightGoal
     ) where
 
 import           Data.Aeson ((.:), Value, withObject)
 import           Data.Aeson.Types (Parser)
-import           FitbitAPI.Types
+import           Data.Text (Text)
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
 import           Network.HTTP.Req.OAuth2 (App, OAuth2, oAuth2Get)
+
+data WeightGoal = WeightGoal
+    { goalType :: Text
+    , goalWeight :: Double
+    , startWeight :: Double
+    }
 
 getWeightGoal :: App -> Url 'Https -> OAuth2 WeightGoal
 getWeightGoal app apiUrl =

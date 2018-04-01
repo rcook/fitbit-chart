@@ -1,14 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitAPI.Format
-    ( formatDay
+module FitbitAPI.Period
+    ( Period(..)
     , formatPeriod
     ) where
 
 import           Data.Text (Text)
-import qualified Data.Text as Text (pack)
-import           Data.Time.Calendar (Day)
-import           FitbitAPI.Types
+
+data Period =
+    OneDay
+    | SevenDays
+    | ThirtyDays
+    | OneWeek
+    | OneMonth
+    | ThreeMonths
+    | SixMonths
+    | OneYear
+    | Max
 
 formatPeriod :: Period -> Text
 formatPeriod OneDay = "1d"
@@ -20,6 +28,3 @@ formatPeriod ThreeMonths = "3m"
 formatPeriod SixMonths = "6m"
 formatPeriod OneYear = "1y"
 formatPeriod Max = "max"
-
-formatDay :: Day -> Text
-formatDay = Text.pack . show
