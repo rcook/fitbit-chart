@@ -74,6 +74,7 @@ executable fitbit-demo-app
   build-depends:                            aeson
                                           , amazonka
                                           , amazonka-core
+                                          , amazonka-dynamodb
                                           , amazonka-s3
                                           , aws-easy
                                           , base >= 4.7 && < 5
@@ -111,3 +112,6 @@ test-suite fitbit-demo-test
                                             -fwarn-unused-imports
   other-modules:                            ConfigSpec
   build-depends:                            base >= 4.7 && < 5
+                                          , hspec
+                                          , fitbit-demo
+                                          , req-oauth2
