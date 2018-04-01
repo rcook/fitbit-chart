@@ -1,5 +1,6 @@
 module App
     ( module App.AppConfig
+    , module App.CommandLine
     , module App.Config
     , module App.Log
     , module App.TokenConfig
@@ -7,6 +8,7 @@ module App
     ) where
 
 import App.AppConfig
+import App.CommandLine
 import App.Config
 import App.Log
 import App.TokenConfig

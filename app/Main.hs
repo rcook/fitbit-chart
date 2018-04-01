@@ -11,18 +11,20 @@ import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           Lib.AWS
 import           Lib.FitbitAPI
 import           Lib.Storage
+import           Lib.Util
 import           Network.AWS.Easy (connect)
 import           Network.AWS.S3 (BucketName(..), ObjectKey(..))
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
-                    ( ClientId(..)
+                    ( App
+                    , ClientId(..)
                     , ClientPair(..)
                     , ClientSecret(..)
                     , PromptForCallbackUri
+                    , UpdateTokenPair
                     , evalOAuth2
                     )
 import           Options.Applicative
-                    ( Parser
-                    , execParser
+                    ( execParser
                     , fullDesc
                     , helper
                     , info
@@ -30,14 +32,6 @@ import           Options.Applicative
                     )
 import           System.IO (hFlush, stdout)
 import qualified Text.URI as URI (mkURI, render)
-
-data Options = Options
-
-pOptions :: Parser Options
-pOptions = pure Options
-
-configDir :: FilePath
-configDir = ".fitbit-demo"
 
 bucketName :: BucketName
 bucketName = BucketName "fitbit-demo"
@@ -68,36 +62,42 @@ main :: IO ()
 main = parseOptions >>= run
     where
         parseOptions = execParser $ info
-            (helper <*> pOptions)
+            (helper <*> optionsParser)
             (fullDesc <> progDesc "Dump Richard's Fitbit data into a JSON file stored on S3")
 
-fetchWeightSamples :: IO [WeightSample]
-fetchWeightSamples = do
-    logInfo "Querying Fitbit"
-    AppConfig clientPair <- exitOnFailure $ getAppConfig configDir promptForAppConfig
-
-    let app = mkApp
-                (writeTokenConfig configDir . TokenConfig)
-                clientPair
-
-    TokenConfig tp <- exitOnFailure $ getTokenConfig configDir app promptForCallbackUri
-
-    t <- getCurrentTime
-    weightTimeSeries <- OAuth2.evalOAuth2 tp $
-        getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
-
-
-    return $ sortOn (\(WeightSample day _) -> day) weightTimeSeries
-
 run :: Options -> IO ()
-run _ = do
+run options = do
     logInfo "Start"
     conf <- getAWSConfigFromEnv
 
     logInfo "Reading from DynamoDB"
-    weightSamples <- fetchWeightSamples
+    weightSamples <- fetchWeightSamples options
 
     logInfo "Generate JSON file in S3"
     s3Session <- connect conf s3Service
     putBytes bucketName objectKey (Aeson.encode weightSamples) s3Session
     logInfo "End"
+
+fetchWeightSamples :: Options -> IO [WeightSample]
+fetchWeightSamples options = do
+    logInfo "Querying Fitbit"
+    (AppConfig clientPair, updateTokenPair, getTokenConfigAction) <- getConfig options
+    let app = mkApp updateTokenPair clientPair
+    TokenConfig tp <- getTokenConfigAction app
+
+    t <- getCurrentTime
+    weightTimeSeries <- OAuth2.evalOAuth2 tp $
+        getWeightTimeSeries app fitbitApiUrl (Ending (utctDay t) Max)
+
+    return $ sortOn (\(WeightSample day _) -> day) weightTimeSeries
+
+getConfig :: Options -> IO (AppConfig, OAuth2.UpdateTokenPair, OAuth2.App -> IO TokenConfig)
+getConfig (ConfigDir configDir) = do
+    expandedConfigDir <- expandPath configDir
+    appConfig <- exitOnFailure $ getAppConfig expandedConfigDir promptForAppConfig
+    return
+        ( appConfig
+        , writeTokenConfig expandedConfigDir . TokenConfig
+        , \app -> exitOnFailure $ getTokenConfig expandedConfigDir app promptForCallbackUri
+        )
+getConfig SSMProperties = undefined

@@ -33,7 +33,9 @@ library
                                           , base >= 4.7 && < 5
                                           , bytestring
                                           , cassava
+                                          , directory
                                           , errors
+                                          , filepath
                                           , lens
                                           , req
                                           , req-oauth2
@@ -58,6 +60,7 @@ library
                                           , Lib.Storage
                                           , Lib.Storage.Commands
                                           , Lib.Util
+                                          , Lib.Util.FileSystem
                                           , Lib.Util.Format
                                           , Lib.Util.IO
                                           , Lib.Util.Parser
@@ -93,6 +96,7 @@ executable fitbit-demo-app
                                           , time
   other-modules:                            App
                                           , App.AppConfig
+                                          , App.CommandLine
                                           , App.Config
                                           , App.Log
                                           , App.TokenConfig

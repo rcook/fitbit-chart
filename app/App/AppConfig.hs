@@ -14,7 +14,7 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , ClientPair(..)
                     , ClientSecret(..)
                     )
-import           System.Directory (createDirectoryIfMissing, doesFileExist, getHomeDirectory)
+import           System.Directory (createDirectoryIfMissing, doesFileExist)
 import           System.FilePath ((</>), takeDirectory)
 
 -- | Action to prompt user to enter new app configuration
@@ -54,8 +54,7 @@ getAppConfig configDir prompt = do
 
 getAppConfigPath :: FilePath -> IO FilePath
 getAppConfigPath configDir = do
-    homeDir <- getHomeDirectory
-    return $ homeDir </> configDir </> "config.yaml"
+    return $ configDir </> "config.yaml"
 
 mkAppConfig :: AppConfigPrompt -> FilePath -> IO AppConfig
 mkAppConfig prompt path = do
