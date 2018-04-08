@@ -19,8 +19,9 @@ module Shell
 
     command = build(*args)
     puts "[COMMAND] #{command}" if options[:verbose]
-    output = `#{command}`
-    [output, $?]
+    output = `#{command} 2>&1`
+    status = $?
+    [output, status]
   end
 
   def self.run(*args)
@@ -33,6 +34,12 @@ module Shell
     command = build(*args)
     puts "[COMMAND] #{command}" if options[:verbose]
     system command
-    $?
+    status = $?
+  end
+
+  def self.check(*args)
+    output, status = capture(*args)
+    raise "Command #{command} failed: #{status} [#{output}]" unless status.success?
+    output
   end
 end

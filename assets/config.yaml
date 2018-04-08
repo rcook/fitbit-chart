@@ -1,0 +1,33 @@
+s3-web-site:
+  bucket: fitbit-demo2
+  bucket-policy: {
+    "Version": "2008-10-17",
+    "Id": "PolicyForPublicWebsiteContent",
+    "Statement": [
+      {
+        "Sid": "PublicReadGetObject",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "*"
+        },
+        "Action": "s3:GetObject",
+        "Resource": "arn:aws:s3:::%{bucket}/*"
+      }
+    ]
+  }
+  index-document: chart.html
+  error-document: error.html
+  source-dir: .
+  files:
+  - key: chart.html
+    local-path: chart.html
+    content-type: text/html
+  - key: chart.js
+    local-path: chart.js
+    content-type: application/javascript
+  - key: data.json
+    local-path: data.json
+    content-type: application/json
+  - key: error.html
+    local-path: error.html
+    content-type: text/html
