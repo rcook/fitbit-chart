@@ -108,20 +108,3 @@ executable fitbit-demo-app
                                           , text
                                           , time
   other-modules:                            CommandLine
-
-test-suite fitbit-demo-test
-  type:                                     exitcode-stdio-1.0
-  default-language:                         Haskell2010
-  hs-source-dirs:                           test
-  main-is:                                  Spec.hs
-  ghc-options:                              -threaded
-                                            -rtsopts
-                                            -with-rtsopts=-N
-                                            -W
-                                            -Wall
-                                            -Werror=incomplete-patterns
-                                            -Werror=missing-methods
-                                            -fwarn-unused-imports
-  other-modules:                            ConfigSpec
-  build-depends:                            base >= 4.7 && < 5
-                                          , hspec
