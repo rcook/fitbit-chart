@@ -32,9 +32,11 @@ def make_package(repo_dir)
   target_name = lambda_package.fetch('target-name')
   target_path = get_target_path(repo_dir, target_name)
   excluded_dependencies = Set.new(lambda_package.fetch('excluded-dependencies'))
+  extra_files_dir = lambda_package.fetch('extra-files-dir')
   extra_files = lambda_package
     .fetch('extra-files')
-    .map { |p| File.expand_path(p, config_yaml_dir) }
+    .map { |p| File.expand_path(File.join(extra_files_dir, p), config_yaml_dir) }
+
   dependencies = get_all_dependencies(target_path).reject { |f, _| excluded_dependencies.include?(f) }
 
   work_dir = File.expand_path('.package-work', repo_dir)

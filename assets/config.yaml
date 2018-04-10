@@ -17,7 +17,7 @@ s3-web-site:
   }
   index-document: chart.html
   error-document: error.html
-  source-dir: .
+  files-dir: .
   files:
   - key: chart.html
     local-path: chart.html
@@ -43,5 +43,6 @@ lambda-package:
   - libpthread.so.0
   - libgcc_s.so.1
   - libc.so.6
+  extra-files-dir: .
   extra-files:
   - index.js

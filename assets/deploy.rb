@@ -22,6 +22,7 @@ end
 def main
   this_dir = File.expand_path('..', __FILE__)
   config_yaml_path = File.expand_path('config.yaml', this_dir)
+  config_yaml_dir = File.dirname(config_yaml_path)
 
   config = YAML.load(File.read(config_yaml_path))
   s3_web_site = config.fetch('s3-web-site')
@@ -35,15 +36,14 @@ def main
 
   index_document = s3_web_site.fetch('index-document')
   error_document = s3_web_site.fetch('error-document')
-  source_dir = s3_web_site.fetch('source-dir')
+  files_dir = s3_web_site.fetch('files-dir')
 
   S3.create_bucket bucket_name
   S3.put_bucket_policy bucket_name, bucket_policy
   S3.website bucket_name, index_document, error_document
-  config_yaml_dir = File.dirname(config_yaml_path)
   s3_web_site.fetch('files').each do |file|
     key = file.fetch('key')
-    local_path = File.expand_path(File.join(source_dir, file.fetch('local-path')), config_yaml_dir)
+    local_path = File.expand_path(File.join(files_dir, file.fetch('local-path')), config_yaml_dir)
     content_type = file.fetch('content-type')
     S3.put_object bucket_name, key, local_path, content_type
   end
