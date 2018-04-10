@@ -78,7 +78,7 @@ main = parseOptions >>= run
 run :: Options -> IO ()
 run options = do
     logInfo "Start"
-    conf <- getAWSConfigFromEnv
+    let conf = awsConfigFromDefaultProfile
 
     logInfo "Reading from DynamoDB"
     weightSamples <- fetchWeightSamples conf options

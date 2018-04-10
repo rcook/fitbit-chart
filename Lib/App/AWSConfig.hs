@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module App.AWSConfig
-    ( getAWSConfigFromEnv
+    ( awsConfigFromDefaultProfile
+    , awsConfigFromKeys
+    , getAWSConfigFromEnv
     , getEnvRegion
-    , getAWSConfig
     ) where
 
 import           Control.Exception (Exception, throwIO)
@@ -11,7 +12,7 @@ import           Control.Lens ((&), (.~))
 import           Control.Monad.IO.Class (MonadIO(..))
 import           Data.String (IsString)
 import qualified Data.Text as Text (pack)
-import           Network.AWS (Region)
+import           Network.AWS (Region(..))
 import           Network.AWS.Auth (AccessKey, Credentials(..), SecretKey)
 import           Network.AWS.Data (fromText)
 import           Network.AWS.Easy (AWSConfig, Endpoint(..), awsConfig, awscCredentials)
@@ -26,8 +27,8 @@ awsAccessKeyIdName = "AWS_ACCESS_KEY_ID"
 awsSecretAccessKeyName :: IsString s => s
 awsSecretAccessKeyName = "AWS_SECRET_ACCESS_KEY"
 
---awsSessionTokenName :: IsString s => s
---awsSessionTokenName = "AWS_SESSION_TOKEN"
+awsSessionTokenName :: IsString s => s
+awsSessionTokenName = "AWS_SESSION_TOKEN"
 
 awsRegionName :: IsString s => s
 awsRegionName = "AWS_REGION"
@@ -50,9 +51,14 @@ getAWSConfigFromEnv = do
                 & awscCredentials .~ FromEnv
                                         awsAccessKeyIdName
                                         awsSecretAccessKeyName
-                                        Nothing --(Just awsSessionTokenName)
+                                        (Just awsSessionTokenName)
                                         (Just awsRegionName)
 
-getAWSConfig :: Region -> AccessKey -> SecretKey -> AWSConfig
-getAWSConfig region ak sk = awsConfig (AWSRegion region)
+awsConfigFromDefaultProfile :: AWSConfig
+awsConfigFromDefaultProfile = awsConfig (AWSRegion Ohio)
+                                & awscCredentials .~ FromProfile "default"
+
+
+awsConfigFromKeys :: Region -> AccessKey -> SecretKey -> AWSConfig
+awsConfigFromKeys region ak sk = awsConfig (AWSRegion region)
                                 & awscCredentials .~ FromKeys ak sk
