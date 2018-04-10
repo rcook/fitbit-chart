@@ -26,7 +26,7 @@ def deploy_assets(manifest, repo_dir)
   values = {
     bucket: bucket_name
   }
-  bucket_policy = transform(s3_web_site.bucket_policy)) do |v|
+  bucket_policy = transform(s3_web_site.bucket_policy.to_hash) do |v|
     v.is_a?(String) ? v % values : v
   end
 
