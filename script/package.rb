@@ -13,7 +13,7 @@ def get_target_path(repo_dir, target_name)
 end
 
 def get_all_dependencies(path)
-  output = Shell.capture('ldd', path)
+  output = Shell.check_capture('ldd', path)
   output
     .split(/\n+/)
     .map(&:strip)
@@ -23,11 +23,11 @@ def get_all_dependencies(path)
 end
 
 def make_package(repo_dir)
-  config_yaml_path = File.expand_path('assets/config.yaml', repo_dir)
-  config_yaml_dir = File.dirname(config_yaml_path)
+  manifest_yaml_path = File.expand_path('manifest.yaml', repo_dir)
+  manifest_yaml_dir = File.dirname(manifest_yaml_path)
 
-  config = YAML.load(File.read(config_yaml_path))
-  lambda_package = config.fetch('lambda-package')
+  manifest = YAML.load(File.read(manifest_yaml_path))
+  lambda_package = manifest.fetch('lambda-package')
 
   target_name = lambda_package.fetch('target-name')
   target_path = get_target_path(repo_dir, target_name)
@@ -35,7 +35,7 @@ def make_package(repo_dir)
   extra_files_dir = lambda_package.fetch('extra-files-dir')
   extra_files = lambda_package
     .fetch('extra-files')
-    .map { |p| File.expand_path(File.join(extra_files_dir, p), config_yaml_dir) }
+    .map { |p| File.expand_path(File.join(extra_files_dir, p), manifest_yaml_dir) }
 
   dependencies = get_all_dependencies(target_path).reject { |f, _| excluded_dependencies.include?(f) }
 
