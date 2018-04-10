@@ -100,9 +100,9 @@ executable fitbit-demo-app
                                           , text
                                           , time
   other-modules:                            App
+                                          , App.AWSConfig
                                           , App.AppConfig
                                           , App.CommandLine
-                                          , App.Config
                                           , App.Log
                                           , App.TokenConfig
                                           , App.Util

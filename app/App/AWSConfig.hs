@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module App.Config
+module App.AWSConfig
     ( getAWSConfigFromEnv
     , getEnvRegion
     , getAWSConfig
