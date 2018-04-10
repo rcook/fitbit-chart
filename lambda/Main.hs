@@ -4,5 +4,6 @@ import           App.Log (logInfo)
 import           Util
 
 main :: IO ()
-main = withLambda $ \_ -> do
+main = withLambda $ \event -> do
+    print event
     logInfo "Done"
