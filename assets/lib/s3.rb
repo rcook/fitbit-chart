@@ -4,7 +4,7 @@ require_relative 'shell'
 
 module S3
   def self.create_bucket(bucket_name)
-    Shell.check(
+    Shell.check_run(
       'aws',
       's3api',
       'create-bucket',
@@ -19,7 +19,7 @@ module S3
 
       File.write policy_json_path, JSON.pretty_generate(bucket_policy)
 
-      Shell.check(
+      Shell.check_run(
         'aws',
         's3api',
         'put-bucket-policy',
@@ -32,7 +32,7 @@ module S3
   end
 
   def self.put_object(bucket_name, key, path, content_type)
-    Shell.check(
+    Shell.check_run(
       'aws',
       's3api',
       'put-object',
@@ -43,7 +43,7 @@ module S3
   end
 
   def self.website(bucket_name, index_document, error_document)
-    Shell.check(
+    Shell.check_run(
       'aws',
       's3',
       'website',

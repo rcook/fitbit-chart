@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
+# -*-ruby-*-
+# vi:syntax=ruby
 require 'json'
 require 'yaml'
 require_relative 'lib/s3'
-require_relative 'lib/shell'
 
 def transform(obj, &block)
   if obj.is_a?(Hash)
