@@ -12,7 +12,6 @@ import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           Lib.AWS
 import           Lib.FitbitAPI
-import           Lib.Params
 import           Lib.Storage
 import           Lib.Util
 import           Network.AWS.Easy (AWSConfig, connect)
@@ -36,12 +35,6 @@ import           Options.Applicative
 import           System.Exit (exitFailure)
 import           System.IO (hFlush, stdout)
 import qualified Text.URI as URI (mkURI, render)
-
-clientInfoName :: ParameterName
-clientInfoName = ParameterName "/HLambda/FitbitAPI/ClientInfo"
-
-tokenPairName :: ParameterName
-tokenPairName = ParameterName "/HLambda/FitbitAPI/TokenPair"
 
 bucketName :: BucketName
 bucketName = BucketName "fitbit-chart"
@@ -109,19 +102,11 @@ fetchWeightSamples conf options = do
     return $ sortOn (\(WeightSample day _) -> day) weightTimeSeries
 
 getConfig :: AWSConfig -> Options -> IO (AppConfig, OAuth2.UpdateTokenPair, OAuth2.App -> IO TokenConfig)
-getConfig _ (ConfigDir configDir) = do
+getConfig _ (Options configDir) = do
     expandedConfigDir <- expandPath configDir
     appConfig <- exitOnFailure $ getAppConfig expandedConfigDir promptForAppConfig
     return
         ( appConfig
         , writeTokenConfig expandedConfigDir . TokenConfig
         , \app -> exitOnFailure $ getTokenConfig expandedConfigDir app promptForCallbackUri
-        )
-getConfig conf SSMProperties = do
-    ssmSession <- connect conf ssmService
-    cp <- getClientInfo clientInfoName ssmSession
-    return
-        ( AppConfig cp
-        , \tp -> setTokenPair tokenPairName tp ssmSession
-        , \_ -> TokenConfig <$> getTokenPair tokenPairName ssmSession
         )
