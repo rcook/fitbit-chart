@@ -114,7 +114,13 @@ executable fitbit-chart-lambda
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
   build-depends:                            aeson
+                                          , amazonka-s3
+                                          , aws-easy
                                           , base >= 4.7 && < 5
                                           , fitbit-chart
+                                          , modern-uri
+                                          , req-oauth2
                                           , serverless-haskell
+                                          , text
+                                          , time
   other-modules:                            Util
