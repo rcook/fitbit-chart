@@ -1,4 +1,8 @@
 module Main (main) where
 
+import           App.Log (logInfo)
+import           Util
+
 main :: IO ()
-main = putStrLn "AWS Lambda"
+main = withLambda $ \_ -> do
+    logInfo "Done"

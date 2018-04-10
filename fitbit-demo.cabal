@@ -114,4 +114,8 @@ executable fitbit-demo-lambda
                                             -Werror=incomplete-patterns
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
-  build-depends:                            base >= 4.7 && < 5
+  build-depends:                            aeson
+                                          , base >= 4.7 && < 5
+                                          , fitbit-demo
+                                          , serverless-haskell
+  other-modules:                            Util

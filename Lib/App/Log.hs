@@ -1,10 +1,16 @@
 module App.Log
-    ( logInfo
+    ( logError
+    , logInfo
     ) where
 
+import           Control.Monad.IO.Class (MonadIO(..))
 import           System.IO (hFlush, stdout)
 
-logInfo :: String -> IO ()
-logInfo s = do
-    putStrLn $ "[info] " ++ s
-    hFlush stdout
+logHelper :: MonadIO m => String -> String -> m ()
+logHelper t s = liftIO (putStrLn ("[" ++ t ++ "] " ++ s) >> hFlush stdout)
+
+logInfo :: MonadIO m => String -> m ()
+logInfo = logHelper "info"
+
+logError :: MonadIO m => String -> m ()
+logError = logHelper "error"
