@@ -3,16 +3,12 @@
 module Main (main) where
 
 import           App
-import           Control.Exception (throwIO)
 import qualified Data.Aeson as Aeson (encode)
 import           Data.List (sortOn)
 import           Data.Monoid ((<>))
-import           Data.Text (Text)
-import qualified Data.Text as Text (splitOn)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           Lib.AWS
-import           Lib.Errors
 import           Lib.FitbitAPI
 import           Lib.Params
 import           Lib.Storage
@@ -20,14 +16,11 @@ import           Lib.Util
 import           Network.AWS.Easy (AWSConfig, connect)
 import           Network.AWS.S3 (BucketName(..), ObjectKey(..))
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
-                    ( AccessToken(..)
-                    , App
+                    ( App
                     , ClientId(..)
                     , ClientPair(..)
                     , ClientSecret(..)
                     , PromptForCallbackUri
-                    , RefreshToken(..)
-                    , TokenPair(..)
                     , UpdateTokenPair
                     , evalOAuth2
                     )
@@ -116,45 +109,9 @@ getConfig _ (ConfigDir configDir) = do
         )
 getConfig conf SSMProperties = do
     ssmSession <- connect conf ssmService
-    cp <- getClientInfo ssmSession
+    cp <- getClientInfo clientInfoName ssmSession
     return
         ( AppConfig cp
-        , \tp -> setTokenPair tp ssmSession
-        , \_ -> TokenConfig <$> getTokenPair ssmSession
+        , \tp -> setTokenPair tokenPairName tp ssmSession
+        , \_ -> TokenConfig <$> getTokenPair tokenPairName ssmSession
         )
-
-------------------------
-
-pPair :: Text -> Maybe (Text, Text)
-pPair s =
-    case Text.splitOn ";" s of
-        s1 : s2 : [] -> return (s1, s2)
-        _ -> Nothing
-
-pHelper :: (a -> b -> c) -> (Text -> a) -> (Text -> b) -> Text -> Maybe c
-pHelper c0 c1 c2 s = (\(s1, s2) -> c0 (c1 s1) (c2 s2)) <$> (pPair s)
-
-pClientInfo :: Text -> Maybe OAuth2.ClientPair
-pClientInfo = pHelper OAuth2.ClientPair OAuth2.ClientId OAuth2.ClientSecret
-
-pTokenPair :: Text -> Maybe OAuth2.TokenPair
-pTokenPair = pHelper OAuth2.TokenPair OAuth2.AccessToken OAuth2.RefreshToken
-
-getPairHelper :: String -> ParameterName -> (Text -> Maybe a) -> SSMSession -> IO a
-getPairHelper label parameterName p ssmSession = do
-    s <- getSecureStringParameter parameterName ssmSession
-    case p s of
-        Nothing -> throwIO $ RuntimeError ("Could not parse " ++ label)
-        Just result -> return result
-
-getClientInfo :: SSMSession -> IO OAuth2.ClientPair
-getClientInfo = getPairHelper "Fitbit API info" clientInfoName pClientInfo
-
-getTokenPair :: SSMSession -> IO OAuth2.TokenPair
-getTokenPair = getPairHelper "token pair" tokenPairName pTokenPair
-
-setTokenPair :: OAuth2.TokenPair -> SSMSession -> IO ()
-setTokenPair (OAuth2.TokenPair (OAuth2.AccessToken at) (OAuth2.RefreshToken rt)) ssmSession =
-    let s = at <> ";" <> rt
-    in setSecureStringParameter tokenPairName s ssmSession
-
