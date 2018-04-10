@@ -10,7 +10,7 @@ import           Data.Aeson (Value)
 withLambda :: (Value -> IO ()) -> IO ()
 withLambda body =
     bracket_
-        (logInfo "fitbit-demo-lambda started")
-        (logInfo "fitbit-demo-lambda stopped")
+        (logInfo "fitbit-chart-lambda started")
+        (logInfo "fitbit-chart-lambda stopped")
         (lambdaMain body)
         `catch` (\e -> logError $ "Unhandled exception: " ++ show (e :: SomeException))

@@ -44,7 +44,7 @@ tokenPairName :: ParameterName
 tokenPairName = ParameterName "/HLambda/FitbitAPI/TokenPair"
 
 bucketName :: BucketName
-bucketName = BucketName "fitbit-demo"
+bucketName = BucketName "fitbit-chart"
 
 objectKey :: ObjectKey
 objectKey = ObjectKey "data.json"

@@ -23,7 +23,7 @@ configDirParser :: Parser Options
 configDirParser = ConfigDir <$> strOption
     (long "conf"
     <> short 'c'
---    <> value "~/.fitbit-demo"
+--    <> value "~/.fitbit-chart"
     <> metavar "CONF"
     <> help "Path to configuration directory")
 

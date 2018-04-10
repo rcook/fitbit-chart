@@ -1,7 +1,6 @@
-
-name:                                       fitbit-demo
+name:                                       fitbit-chart
 version:                                    0.1.0.0
-homepage:                                   https://github.com/rcook/fitbit-demo#readme
+homepage:                                   https://github.com/rcook/fitbit-chart#readme
 license:                                    MIT
 license-file:                               LICENSE
 author:                                     Richard Cook
@@ -14,7 +13,7 @@ extra-source-files:                         README.md
 
 source-repository head
   type:                                     git
-  location:                                 https://github.com/rcook/fitbit-demo.git
+  location:                                 https://github.com/rcook/fitbit-chart.git
 
 library
   default-language:                         Haskell2010
@@ -78,7 +77,7 @@ library
                                           , Lib.Util.Misc
                                           , Lib.Util.Parser
 
-executable fitbit-demo-cli
+executable fitbit-chart-cli
   default-language:                         Haskell2010
   hs-source-dirs:                           cli
   main-is:                                  Main.hs
@@ -94,7 +93,7 @@ executable fitbit-demo-cli
                                           , amazonka-s3
                                           , aws-easy
                                           , base >= 4.7 && < 5
-                                          , fitbit-demo
+                                          , fitbit-chart
                                           , modern-uri
                                           , optparse-applicative
                                           , req-oauth2
@@ -102,7 +101,7 @@ executable fitbit-demo-cli
                                           , time
   other-modules:                            CommandLine
 
-executable fitbit-demo-lambda
+executable fitbit-chart-lambda
   default-language:                         Haskell2010
   hs-source-dirs:                           lambda
   main-is:                                  Main.hs
@@ -116,6 +115,6 @@ executable fitbit-demo-lambda
                                             -fwarn-unused-imports
   build-depends:                            aeson
                                           , base >= 4.7 && < 5
-                                          , fitbit-demo
+                                          , fitbit-chart
                                           , serverless-haskell
   other-modules:                            Util

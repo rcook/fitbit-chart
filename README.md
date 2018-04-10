@@ -1,11 +1,11 @@
-# fitbit-demo
+# fitbit-chart
 
-Demonstrate Fitbit web API calls using Haskell via Req
+Generate Flot charts from Fitbit data in AWS Lambda
 
 ## Clone repository
 
 ```
-git clone https://github.com/rcook/fitbit-demo.git
+git clone https://github.com/rcook/fitbit-chart.git
 ```
 
 ## Install compiler
@@ -23,13 +23,13 @@ stack build --fast
 ## Run application
 
 ```
-stack exec fitbit-demo-app
+stack exec fitbit-chart-cli
 ```
 
-## Run tests
+or
 
 ```
-stack test
+stack exec fitbit-chart-lambda
 ```
 
 ## Licence

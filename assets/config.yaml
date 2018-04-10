@@ -1,5 +1,5 @@
 s3-web-site:
-  bucket: fitbit-demo2
+  bucket: fitbit-chart
   bucket-policy: {
     "Version": "2008-10-17",
     "Id": "PolicyForPublicWebsiteContent",
