@@ -23,14 +23,13 @@ def get_all_dependencies(path)
 end
 
 def make_package(manifest, repo_dir)
-  lambda_package = manifest.data.fetch('lambda-package')
-
-  target_name = lambda_package.fetch('target-name')
-  target_path = get_target_path(repo_dir, target_name)
-  excluded_dependencies = Set.new(lambda_package.fetch('excluded-dependencies'))
-  extra_files_dir = lambda_package.fetch('extra-files-dir')
+  lambda_package = manifest.lambda_package
+  target_name = lambda_package.target_name
+  target_path = get_target_path(repo_dir, lambda_package.target_name)
+  excluded_dependencies = Set.new(lambda_package.excluded_dependencies)
+  extra_files_dir = lambda_package.extra_files_dir
   extra_files = lambda_package
-    .fetch('extra-files')
+    .extra_files
     .map { |p| File.expand_path(File.join(extra_files_dir, p), manifest.dir) }
 
   dependencies = get_all_dependencies(target_path).reject { |f, _| excluded_dependencies.include?(f) }

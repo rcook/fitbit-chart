@@ -3,6 +3,7 @@
 # vi:syntax=ruby
 require 'json'
 require 'yaml'
+require_relative 'lib/manifest'
 require_relative 'lib/s3'
 
 def transform(obj, &block)
@@ -20,27 +21,25 @@ def transform(obj, &block)
 end
 
 def deploy_assets(manifest, repo_dir)
-  s3_web_site = manifest.data.fetch('s3-web-site')
-  bucket_name = s3_web_site.fetch('bucket')
+  s3_web_site = manifest.s3_web_site
+  bucket_name = s3_web_site.bucket
   values = {
     bucket: bucket_name
   }
-  bucket_policy = transform(s3_web_site.fetch('bucket-policy')) do |v|
+  bucket_policy = transform(s3_web_site.bucket_policy)) do |v|
     v.is_a?(String) ? v % values : v
   end
 
-  index_document = s3_web_site.fetch('index-document')
-  error_document = s3_web_site.fetch('error-document')
-  files_dir = s3_web_site.fetch('files-dir')
+  index_document = s3_web_site.index_document
+  error_document = s3_web_site.error_document
+  files_dir = s3_web_site.files_dir
 
   S3.create_bucket bucket_name
   S3.put_bucket_policy bucket_name, bucket_policy
   S3.website bucket_name, index_document, error_document
-  s3_web_site.fetch('files').each do |file|
-    key = file.fetch('key')
-    local_path = File.expand_path(File.join(files_dir, file.fetch('local-path')), manifest.dir)
-    content_type = file.fetch('content-type')
-    S3.put_object bucket_name, key, local_path, content_type
+  s3_web_site.files.each do |file|
+    local_path = File.expand_path(File.join(files_dir, file.local_path), manifest.dir)
+    S3.put_object bucket_name, file.key, local_path, file.content_type
   end
 end
 
