@@ -1,4 +1,4 @@
-module App.CommandLine
+module CommandLine
     ( Options(..)
     , optionsParser
     ) where

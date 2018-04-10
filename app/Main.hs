@@ -3,6 +3,8 @@
 module Main (main) where
 
 import           App
+import           CommandLine
+import           Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.Aeson as Aeson (encode)
 import           Data.List (sortOn)
 import           Data.Monoid ((<>))
@@ -31,6 +33,7 @@ import           Options.Applicative
                     , info
                     , progDesc
                     )
+import           System.Exit (exitFailure)
 import           System.IO (hFlush, stdout)
 import qualified Text.URI as URI (mkURI, render)
 
@@ -45,6 +48,13 @@ bucketName = BucketName "fitbit-demo"
 
 objectKey :: ObjectKey
 objectKey = ObjectKey "data.json"
+
+exitOnFailure :: (MonadIO m) => m (Either String a) -> m a
+exitOnFailure action = do
+    result <- action
+    case result of
+        Left e -> liftIO (putStrLn e >> exitFailure)
+        Right x -> return x
 
 promptForAppConfig :: AppConfigPrompt
 promptForAppConfig = do

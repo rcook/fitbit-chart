@@ -3,25 +3,15 @@
 {-# LANGUAGE QuasiQuotes #-}
 
 module App.Util
-    ( exitOnFailure
-    , fitbitApiUrl
+    ( fitbitApiUrl
     , formatDouble
     , mkApp
     ) where
 
-import           Control.Monad.IO.Class (MonadIO, liftIO)
 import           Network.HTTP.Req ((/:), Scheme(..), Url, https)
 import           Network.HTTP.Req.OAuth2 (App(..), ClientPair, UpdateTokenPair)
-import           System.Exit (exitFailure)
 import           Text.Printf (printf)
 import           Text.URI.QQ (uri)
-
-exitOnFailure :: (MonadIO m) => m (Either String a) -> m a
-exitOnFailure action = do
-    result <- action
-    case result of
-        Left e -> liftIO (putStrLn e >> exitFailure)
-        Right x -> return x
 
 formatDouble :: Double -> String
 formatDouble = printf "%.1f"

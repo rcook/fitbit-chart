@@ -38,6 +38,7 @@ library
                                           , errors
                                           , filepath
                                           , lens
+                                          , modern-uri
                                           , req
                                           , req-oauth2
                                           , split
@@ -46,7 +47,14 @@ library
                                           , unordered-containers
                                           , vector
                                           , yaml
-  exposed-modules:                          Lib
+  exposed-modules:                          App
+                                          , App.AWSConfig
+                                          , App.AppConfig
+                                          , App.FitbitConfig
+                                          , App.Log
+                                          , App.TokenConfig
+                                          , App.Util
+                                          , Lib
                                           , Lib.AWS
                                           , Lib.DataAccess
                                           , Lib.DataAccess.Commands
@@ -99,14 +107,7 @@ executable fitbit-demo-app
                                           , req-oauth2
                                           , text
                                           , time
-  other-modules:                            App
-                                          , App.AWSConfig
-                                          , App.AppConfig
-                                          , App.CommandLine
-                                          , App.FitbitConfig
-                                          , App.Log
-                                          , App.TokenConfig
-                                          , App.Util
+  other-modules:                            CommandLine
 
 test-suite fitbit-demo-test
   type:                                     exitcode-stdio-1.0
