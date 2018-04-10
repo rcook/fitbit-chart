@@ -3,7 +3,7 @@
 # vi:syntax=ruby
 require 'fileutils'
 require 'set'
-require 'yaml'
+require_relative 'lib/manifest'
 require_relative 'lib/shell'
 
 def get_target_path(repo_dir, target_name)
@@ -22,12 +22,8 @@ def get_all_dependencies(path)
     .map { |l| [l[0], l[2]] }
 end
 
-def make_package(repo_dir)
-  manifest_yaml_path = File.expand_path('manifest.yaml', repo_dir)
-  manifest_yaml_dir = File.dirname(manifest_yaml_path)
-
-  manifest = YAML.load(File.read(manifest_yaml_path))
-  lambda_package = manifest.fetch('lambda-package')
+def make_package(manifest, repo_dir)
+  lambda_package = manifest.data.fetch('lambda-package')
 
   target_name = lambda_package.fetch('target-name')
   target_path = get_target_path(repo_dir, target_name)
@@ -35,7 +31,7 @@ def make_package(repo_dir)
   extra_files_dir = lambda_package.fetch('extra-files-dir')
   extra_files = lambda_package
     .fetch('extra-files')
-    .map { |p| File.expand_path(File.join(extra_files_dir, p), manifest_yaml_dir) }
+    .map { |p| File.expand_path(File.join(extra_files_dir, p), manifest.dir) }
 
   dependencies = get_all_dependencies(target_path).reject { |f, _| excluded_dependencies.include?(f) }
 
@@ -67,6 +63,7 @@ end
 def main
   this_dir = File.expand_path('..', __FILE__)
   repo_dir = File.dirname(this_dir)
-  make_package repo_dir
+  manifest = Manifest.new(File.expand_path('manifest.yaml', repo_dir))
+  make_package manifest, repo_dir
 end
 main

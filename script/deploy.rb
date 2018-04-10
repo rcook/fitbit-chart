@@ -19,12 +19,8 @@ def transform(obj, &block)
   end
 end
 
-def deploy_assets(repo_dir)
-  manifest_yaml_path = File.expand_path('manifest.yaml', this_dir)
-  manifest_yaml_dir = File.dirname(manifest_yaml_path)
-
-  manifest = YAML.load(File.read(manifest_yaml_path))
-  s3_web_site = manifest.fetch('s3-web-site')
+def deploy_assets(manifest, repo_dir)
+  s3_web_site = manifest.data.fetch('s3-web-site')
   bucket_name = s3_web_site.fetch('bucket')
   values = {
     bucket: bucket_name
@@ -42,7 +38,7 @@ def deploy_assets(repo_dir)
   S3.website bucket_name, index_document, error_document
   s3_web_site.fetch('files').each do |file|
     key = file.fetch('key')
-    local_path = File.expand_path(File.join(files_dir, file.fetch('local-path')), manifest_yaml_dir)
+    local_path = File.expand_path(File.join(files_dir, file.fetch('local-path')), manifest.dir)
     content_type = file.fetch('content-type')
     S3.put_object bucket_name, key, local_path, content_type
   end
@@ -51,6 +47,7 @@ end
 def main
   this_dir = File.expand_path('..', __FILE__)
   repo_dir = File.dirname(this_dir)
-  deploy_assets repo_dir
+  manifest = Manifest.new(File.expand_path('manifest.yaml', repo_dir))
+  deploy_assets manifest, repo_dir
 end
 main
