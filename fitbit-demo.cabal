@@ -78,7 +78,7 @@ library
                                           , Lib.Util.Misc
                                           , Lib.Util.Parser
 
-executable fitbit-demo-app
+executable fitbit-demo-cli
   default-language:                         Haskell2010
   hs-source-dirs:                           app
   main-is:                                  Main.hs
@@ -91,19 +91,12 @@ executable fitbit-demo-app
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
   build-depends:                            aeson
-                                          , amazonka
-                                          , amazonka-core
                                           , amazonka-s3
                                           , aws-easy
                                           , base >= 4.7 && < 5
-                                          , directory
-                                          , errors
-                                          , filepath
                                           , fitbit-demo
-                                          , lens
                                           , modern-uri
                                           , optparse-applicative
-                                          , req
                                           , req-oauth2
                                           , text
                                           , time
