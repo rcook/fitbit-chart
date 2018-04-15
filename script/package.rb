@@ -6,15 +6,8 @@ require 'set'
 require_relative 'lib/manifest'
 require_relative 'lib/shell'
 
-def get_target_path(repo_dir, target_name)
-  Dir.chdir(repo_dir) do
-    Shell.check_capture('stack', 'exec', '--', 'which', target_name).chomp
-  end
-end
-
 def get_all_dependencies(path)
-  output = Shell.check_capture('ldd', path)
-  output
+  Shell.check_capture('stack', 'exec', '--', 'ldd', path)
     .split(/\n+/)
     .map(&:strip)
     .map(&:split)
@@ -25,7 +18,9 @@ end
 def make_package(manifest, repo_dir)
   lambda_package = manifest.lambda_package
   target_name = lambda_package.target_name
-  target_path = get_target_path(repo_dir, lambda_package.target_name)
+  local_install_root = Shell.check_capture('stack', 'path', '--local-install-root').chomp
+  target_dir = File.expand_path('bin', local_install_root)
+  target_path = File.expand_path(lambda_package.target_name, target_dir)
   excluded_dependencies = Set.new(lambda_package.excluded_dependencies)
   extra_files_dir = lambda_package.extra_files_dir
   extra_files = lambda_package
@@ -44,10 +39,13 @@ def make_package(manifest, repo_dir)
   FileUtils.mkpath output_dir
 
   dependencies.each do |f, p|
-    FileUtils.cp p, input_dir
+    dep_path = File.expand_path(f, target_dir)
+    Shell.check_capture('stack', 'exec', '--', 'cp', p, dep_path)
+    FileUtils.cp dep_path, input_dir
   end
 
   FileUtils.cp target_path, input_dir
+
   extra_files.each do |p|
     FileUtils.cp p, input_dir
   end
@@ -55,7 +53,7 @@ def make_package(manifest, repo_dir)
   FileUtils.chmod_R 0777, input_dir
 
   output_path = File.expand_path("#{target_name}.zip", output_dir)
-  Shell.check_run("zip -j #{output_path} #{input_dir}/*")
+  Shell.check_capture("zip -j #{output_path} #{input_dir}/*")
   FileUtils.cp output_path, repo_dir
 end
 
