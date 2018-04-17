@@ -3,13 +3,21 @@
 # vi:syntax=ruby
 require_relative 'lib/lambda'
 require_relative 'lib/manifest'
+require_relative 'lib/sts'
 
 def make_package(manifest, repo_dir)
   lambda_package = manifest.lambda_package
   function_name = lambda_package.function_name
   runtime = lambda_package.runtime
   zip_path = File.expand_path('.package-work/output/fitbit-chart-lambda.zip', repo_dir)
-  role = lambda_package.role
+
+  account_id = STS.get_account_id
+
+  values = {
+    account_id: account_id
+  }
+
+  role = lambda_package.role % values
   handler = lambda_package.handler
   Lambda.create_function function_name, zip_path, runtime, role, handler
 end

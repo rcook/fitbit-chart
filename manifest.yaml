@@ -34,7 +34,7 @@ s3-web-site:
 lambda-package:
   function-name: FitbitChart
   runtime: nodejs6.10
-  role: arn:aws:iam::920276524707:role/MyLambdaRole
+  role: arn:aws:iam::%{account_id}:role/MyLambdaRole
   handler: index.handler
   target-name: fitbit-chart-lambda
   excluded-dependencies:
