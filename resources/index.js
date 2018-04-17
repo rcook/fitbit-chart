@@ -51,5 +51,5 @@ function runCommand(event, callback, commandPath, commandArgs) {
 }
 
 exports.handler = (event, context, callback) => {
-  runCommand(event, callback, "hlambda", []);
+  runCommand(event, callback, "%{target_name}", []);
 };

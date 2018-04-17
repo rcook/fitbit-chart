@@ -46,8 +46,15 @@ def make_package(manifest, repo_dir)
 
   FileUtils.cp target_path, input_dir
 
+  values = {
+    target_name: target_name
+  }
+
   extra_files.each do |p|
-    FileUtils.cp p, input_dir
+    source_text = File.read(p)
+    output_text = source_text % values
+    output_path = File.expand_path(File.basename(p), input_dir)
+    File.write(output_path, output_text)
   end
 
   FileUtils.chmod_R 0777, input_dir
