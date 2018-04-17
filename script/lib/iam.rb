@@ -27,5 +27,8 @@ module IAM
         '--policy-name', "Permissions-#{role_name}",
         '--policy-document', role_policy_url)
     end
+
+    # Sleep until role and policies fully created and propagated
+    sleep 5
   end
 end
