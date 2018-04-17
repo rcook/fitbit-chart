@@ -32,6 +32,10 @@ s3-web-site:
     local-path: error.html
     content-type: text/html
 lambda-package:
+  function-name: FitbitChart
+  runtime: nodejs6.10
+  role: arn:aws:iam::920276524707:role/MyLambdaRole
+  handler: index.handler
   target-name: fitbit-chart-lambda
   excluded-dependencies:
   - libm.so.6
