@@ -1,5 +1,6 @@
-require 'JSON'
+require 'json'
 require 'tempfile'
+require_relative 'json_payload'
 require_relative 'shell'
 
 module S3
@@ -12,22 +13,13 @@ module S3
   end
 
   def self.put_bucket_policy(bucket_name, bucket_policy)
-    f = Tempfile.new
-    begin
-      policy_json_path = f.path
-      f.close
-
-      File.write policy_json_path, JSON.pretty_generate(bucket_policy)
-
+    JsonPayload.with_temp(bucket_policy) do |bucket_policy_url|
       Shell.check_run(
         'aws',
         's3api',
         'put-bucket-policy',
         '--bucket', bucket_name,
-        '--policy', 'file://' + policy_json_path)
-    ensure
-      f.close
-      f.unlink
+        '--policy', bucket_policy_url)
     end
   end
 

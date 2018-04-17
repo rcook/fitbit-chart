@@ -9,8 +9,8 @@ module Lambda
       'update-function-code',
       '--function-name', function_name,
       '--zip-file', zip_path)
-    return if status.success?
 
+    return if status.success?
     unless output.include?('ResourceNotFoundException')
       raise "update-function-code command failed: output=[#{output}] status=[#{status}]"
     end
