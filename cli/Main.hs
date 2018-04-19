@@ -80,7 +80,7 @@ run options = do
     logInfo "Start"
     let conf = awsConfigFromDefaultProfile
 
-    logInfo "Reading from DynamoDB"
+    logInfo "Reading from Fitbit API"
     weightSamples <- fetchWeightSamples conf options
 
     logInfo "Generate JSON file in S3"
