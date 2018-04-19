@@ -9,8 +9,16 @@ class BuildPackageTask < Task
     lambda_package = manifest.lambda_package
     target_name = lambda_package.target_name
 
+    trace 'Rebuilding code' do
+      Dir.chdir(repo_dir) do
+        Shell.check_run('stack', 'build')
+      end
+    end
+
     local_install_root = trace 'Determining Stack local install root' do
-      Shell.check_capture('stack', 'path', '--local-install-root').chomp
+      Dir.chdir(repo_dir) do
+        Shell.check_capture('stack', 'path', '--local-install-root').chomp
+      end
     end
     target_dir = File.expand_path('bin', local_install_root)
     target_path = File.expand_path(lambda_package.target_name, target_dir)
