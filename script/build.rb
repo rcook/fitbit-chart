@@ -6,16 +6,21 @@ require_relative 'lib/temp'
 require_relative 'tasks/deploy_assets_task'
 require_relative 'tasks/build_package_task'
 require_relative 'tasks/update_function_task'
+require_relative 'tasks/update_parameters_task'
 
 def update_assets(manifest, repo_dir, options = {})
   DeployAssetsTask.new(options).run manifest, repo_dir
 end
 
 def update_lambda(manifest, repo_dir, options = {})
+=begin
   Temp.with_temp('.zip') do |package_path|
-    BuildPackageTask.new(options).run manifest, repo_dir, package_path
-    UpdateFunctionTask.new(options).run manifest, repo_dir, package_path
+    [BuildPackageTask, UpdateFunctionTask].each do |cls|
+      cls.new(options).run manifest, repo_dir, package_path
+    end
   end
+=end
+  UpdateParametersTask.new(options).run manifest, repo_dir
 end
 
 def main(argv)

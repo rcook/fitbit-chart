@@ -20,10 +20,10 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
 import           Util
 
 clientInfoName :: ParameterName
-clientInfoName = ParameterName "/HLambda/FitbitAPI/ClientInfo"
+clientInfoName = ParameterName "/FitbitChart/FitbitAPI/ClientInfo"
 
 tokenPairName :: ParameterName
-tokenPairName = ParameterName "/HLambda/FitbitAPI/TokenPair"
+tokenPairName = ParameterName "/FitbitChart/FitbitAPI/TokenPair"
 
 bucketName :: BucketName
 bucketName = BucketName "fitbit-chart"

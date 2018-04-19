@@ -75,3 +75,8 @@ lambda-package:
   extra-files-dir: resources
   extra-files:
   - index.js
+ssm-parameters:
+  - private_store_file: .fitbit-api.yaml
+    parameters:
+    - /FitbitChart/FitbitAPI/ClientInfo
+    - /FitbitChart/FitbitAPI/TokenPair
