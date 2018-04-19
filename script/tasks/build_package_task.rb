@@ -6,6 +6,14 @@ require_relative 'task'
 
 class BuildPackageTask < Task
   def run(manifest, repo_dir, package_path)
+    trace 'BuildPackageTask' do
+      run_helper manifest, repo_dir, package_path
+    end
+  end
+
+  private
+
+  def run_helper(manifest, repo_dir, package_path)
     lambda_package = manifest.lambda_package
     target_name = lambda_package.target_name
 
@@ -72,8 +80,6 @@ class BuildPackageTask < Task
       Shell.check_capture("zip -j #{package_path} #{input_dir}/*")
     end
   end
-
-  private
 
   def get_all_dependencies(path)
     Shell.check_capture('stack', 'exec', '--', 'ldd', path)

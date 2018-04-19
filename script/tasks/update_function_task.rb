@@ -6,6 +6,14 @@ require_relative 'task'
 
 class UpdateFunctionTask < Task
   def run(manifest, repo_dir, package_path)
+    trace 'UpdateFunctionTask' do
+      run_helper manifest, repo_dir, package_path
+    end
+  end
+
+  private
+
+  def run_helper(manifest, repo_dir, package_path)
     lambda_package = manifest.lambda_package
     function_name = lambda_package.function_name
     runtime = lambda_package.runtime
