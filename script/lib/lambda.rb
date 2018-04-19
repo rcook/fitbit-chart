@@ -1,8 +1,8 @@
 require_relative 'shell'
 
 module Lambda
-  def self.create_function(function_name, zip_path, runtime, role, handler)
-    zip_path = "fileb://#{zip_path}"
+  def self.create_function(function_name, package_path, runtime, role, handler)
+    zip_path = "fileb://#{package_path}"
     status, output = Shell.capture(
       'aws',
       'lambda',
