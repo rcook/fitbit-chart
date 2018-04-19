@@ -1,9 +1,10 @@
 module Temp
-  def self.with_temp
-    f = Tempfile.new
+  def self.with_temp(ext = nil)
+    f = ext.nil? ? Tempfile.new : Tempfile.new(['', ext])
     begin
       temp_path = f.path
       f.close
+      f.unlink
       yield temp_path
     ensure
       f.close

@@ -12,7 +12,7 @@ def update_assets(manifest, repo_dir, options = {})
 end
 
 def update_lambda(manifest, repo_dir, options = {})
-  Temp.with_temp do |package_path|
+  Temp.with_temp('.zip') do |package_path|
     BuildPackageTask.new(options).run manifest, repo_dir, package_path
     UpdateFunctionTask.new(options).run manifest, repo_dir, package_path
   end
