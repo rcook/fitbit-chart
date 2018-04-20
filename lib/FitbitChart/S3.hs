@@ -1,3 +1,15 @@
+{-|
+Module      : FitbitChart.S3
+Description : S3 helpers
+Copyright   : (C) Richard Cook, 2018
+Licence     : MIT
+Maintainer  : rcook@rcook.org
+Stability   : stable
+Portability : portable
+
+S3 helpers
+-}
+
 module FitbitChart.S3
     ( putBytes
     ) where

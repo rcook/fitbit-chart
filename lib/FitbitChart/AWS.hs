@@ -1,3 +1,15 @@
+{-|
+Module      : FitbitChart.AWS
+Description : Helpers for Amazon Web Services
+Copyright   : (C) Richard Cook, 2018
+Licence     : MIT
+Maintainer  : rcook@rcook.org
+Stability   : stable
+Portability : portable
+
+Helpers for Amazon Web Services
+-}
+
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 

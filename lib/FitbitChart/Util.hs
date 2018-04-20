@@ -1,3 +1,15 @@
+{-|
+Module      : FitbitChart.Util
+Description : Umbrella module for general-purpose utility functions
+Copyright   : (C) Richard Cook, 2018
+Licence     : MIT
+Maintainer  : rcook@rcook.org
+Stability   : stable
+Portability : portable
+
+Umbrella module for general-purpose utility functions
+-}
+
 module FitbitChart.Util
     ( module FitbitChart.Util.Errors
     , module FitbitChart.Util.FileSystem

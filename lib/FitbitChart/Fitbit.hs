@@ -1,3 +1,15 @@
+{-|
+Module      : FitbitChart.Fitbit
+Description : Umbrella module for Fitbit API functions
+Copyright   : (C) Richard Cook, 2018
+Licence     : MIT
+Maintainer  : rcook@rcook.org
+Stability   : stable
+Portability : portable
+
+Umbrella module for Fitbit API functions
+-}
+
 module FitbitChart.Fitbit
     ( module FitbitChart.Fitbit.Period
     , module FitbitChart.Fitbit.TimeSeriesRange
