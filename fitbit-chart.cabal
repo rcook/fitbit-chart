@@ -143,4 +143,5 @@ executable fitbit-chart-token
                                           , optparse-applicative
                                           , req-oauth2
                                           , text
+                                          , unordered-containers
   other-modules:                            CommandLine

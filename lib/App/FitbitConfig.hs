@@ -3,6 +3,7 @@
 module App.FitbitConfig
     ( getClientInfo
     , getTokenPair
+    , mkPair
     , setTokenPair
     ) where
 
@@ -52,5 +53,8 @@ getTokenPair tokenPairName = getPairHelper "token pair" tokenPairName pTokenPair
 
 setTokenPair :: ParameterName -> OAuth2.TokenPair -> SSMSession -> IO ()
 setTokenPair tokenPairName (OAuth2.TokenPair (OAuth2.AccessToken at) (OAuth2.RefreshToken rt)) ssmSession =
-    let s = at <> ";" <> rt
+    let s = mkPair at rt
     in setSecureStringParameter tokenPairName s ssmSession
+
+mkPair :: Text -> Text -> Text
+mkPair a b = a <> ";" <> b

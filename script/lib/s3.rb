@@ -13,7 +13,7 @@ module S3
   end
 
   def self.put_bucket_policy(bucket_name, bucket_policy)
-    JsonPayload.with_temp(bucket_policy) do |bucket_policy_url|
+    JsonPayload.with_temp_file(bucket_policy) do |bucket_policy_url|
       Shell.check_run(
         'aws',
         's3api',

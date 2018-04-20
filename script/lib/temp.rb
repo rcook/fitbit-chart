@@ -1,5 +1,5 @@
 module Temp
-  def self.with_temp(ext = nil)
+  def self.with_temp_file(ext = nil)
     f = ext.nil? ? Tempfile.new : Tempfile.new(['', ext])
     begin
       temp_path = f.path

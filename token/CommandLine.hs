@@ -13,5 +13,5 @@ data Options = Options String String
 
 optionsParser :: Parser Options
 optionsParser = Options
-    <$> strArgument (metavar "CLIENTID")
-    <*> strArgument (metavar "CLIENTSECRET")
+    <$> strArgument (metavar "CONFPATH")
+    <*> strArgument (metavar "OUTPUTPATH")

@@ -4,14 +4,16 @@ require_relative 'task'
 class UpdateParametersTask < Task
   def run(manifest, repo_dir)
     trace 'UpdateParametersTask' do
-      ssm_parameters = manifest.ssm_parameters
-      ssm_parameters.each do |section|
-        private_store_path = File.expand_path(section.private_store_file, manifest.dir)
-        values = YAML.load(File.read(private_store_path))
-        section.parameters.each do |p|
-          #SSM.put_parameter p, values.fetch(p), :secure_string
-          puts get_parameter_value(values.fetch(p))
-        end
+      values = Temp.with_temp_file do |output_path|
+        command = manifest.ssm_parameters_command % {
+          repo_dir: repo_dir,
+          output_path: output_path
+        }
+        Shell.check_run command
+        YAML.load(File.read(output_path))
+      end
+      values.each do |k, v|
+        SSM.put_parameter k, v, :secure_string
       end
     end
   end
@@ -23,7 +25,7 @@ class UpdateParametersTask < Task
 
     if p.include?('command')
       command = p['command']
-      output = Shell.check_capture(command).chomp
+      output = Shell.check_run(command).chomp
       puts "output=#{output.inspect}"
       exit 1
     end

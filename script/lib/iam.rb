@@ -4,7 +4,7 @@ require_relative 'shell'
 
 module IAM
   def self.create_role(role_name, policy_document, role_policy)
-    status, output = JsonPayload.with_temp(policy_document) do |policy_document_url|
+    status, output = JsonPayload.with_temp_file(policy_document) do |policy_document_url|
       Shell.capture(
         'aws',
         'iam',
@@ -18,7 +18,7 @@ module IAM
       raise "create-role command failed: output=[#{output}] status=[#{status}]"
     end
 
-    JsonPayload.with_temp(role_policy) do |role_policy_url|
+    JsonPayload.with_temp_file(role_policy) do |role_policy_url|
       Shell.check_run(
         'aws',
         'iam',

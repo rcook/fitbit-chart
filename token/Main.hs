@@ -2,12 +2,16 @@
 
 module Main (main) where
 
+import           App.FitbitConfig
 import           App.Util
 import           CommandLine
+import           Data.HashMap.Strict (HashMap)
+import qualified Data.HashMap.Strict as HashMap
 import           Data.Monoid ((<>))
-import qualified Data.Text as Text (pack)
+import           Data.Text (Text)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
-
+import           App.AppConfig
+import           Lib.Util.IO
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
                     , AccessTokenRequest(..)
@@ -39,18 +43,21 @@ main = parseOptions >>= run
             (fullDesc <> progDesc "Get initial token pair")
 
 run :: Options -> IO ()
-run (Options cId cSecret) = do
-    let clientId = OAuth2.ClientId (Text.pack cId)
-        clientSecret = OAuth2.ClientSecret (Text.pack cSecret)
-        clientPair = OAuth2.ClientPair clientId clientSecret
-        app = mkApp (\_ -> return ()) clientPair
+run (Options configPath outputPath) = do
+    -- UGLY
+    -- I'm not proud of this code at all
+    Just (AppConfig clientPair@(OAuth2.ClientPair clientId@(OAuth2.ClientId cid) (OAuth2.ClientSecret cs))) <- decodeYAMLFile configPath
+    let app = mkApp (\_ -> return ()) clientPair
     authCode <- OAuth2.getAuthCode app clientId promptForCallbackUri
     result <- OAuth2.fetchAccessToken app (OAuth2.AccessTokenRequest authCode)
     case result of
         Left e -> putStrLn e
         Right (OAuth2.AccessTokenResponse (OAuth2.TokenPair (OAuth2.AccessToken accessToken) (OAuth2.RefreshToken refreshToken))) -> do
-            Text.putStrLn $ "accessToken=" <> accessToken
-            Text.putStrLn $ "refreshToken=" <> refreshToken
+            let obj = HashMap.fromList
+                        [ ("/FitbitChart/FitbitAPI/ClientInfo", mkPair cid cs)
+                        , ("/FitbitChart/FitbitAPI/TokenPair", mkPair accessToken refreshToken)
+                        ] :: HashMap Text Text
+            encodeYAMLFile outputPath obj
 
 promptForCallbackUri :: OAuth2.PromptForCallbackUri
 promptForCallbackUri authUri' = do
