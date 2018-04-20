@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Lib.AWS
+module FitbitChart.AWS
     ( DynamoDBService
     , DynamoDBSession
     , S3Service

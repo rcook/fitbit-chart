@@ -1,4 +1,4 @@
-module Lib.Util.Format
+module FitbitChart.Util.Format
     ( formatDay
     ) where
 

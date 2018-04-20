@@ -1,10 +1,10 @@
-module Lib.Storage.Commands
+module FitbitChart.Storage.Commands
     ( putBytes
     ) where
 
 import           Control.Monad (void)
 import           Data.ByteString.Lazy (ByteString)
-import           Lib.AWS
+import           FitbitChart.AWS
 import           Network.AWS (send)
 import           Network.AWS.Data.Body
                     ( RqBody(..)

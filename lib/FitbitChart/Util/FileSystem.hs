@@ -1,4 +1,4 @@
-module Lib.Util.FileSystem
+module FitbitChart.Util.FileSystem
     ( expandPath
     ) where
 

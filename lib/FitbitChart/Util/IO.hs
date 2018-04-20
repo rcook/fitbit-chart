@@ -1,4 +1,4 @@
-module Lib.Util.IO
+module FitbitChart.Util.IO
     ( decodeJSON
     , decodeYAML
     , decodeYAMLFile

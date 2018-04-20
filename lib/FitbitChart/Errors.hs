@@ -1,4 +1,4 @@
-module Lib.Errors
+module FitbitChart.Errors
     ( RuntimeError(..)
     ) where
 

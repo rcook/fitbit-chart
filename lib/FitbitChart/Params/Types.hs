@@ -1,4 +1,4 @@
-module Lib.Params.Types
+module FitbitChart.Params.Types
     ( ParameterName(..)
     ) where
 

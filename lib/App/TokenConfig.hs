@@ -15,7 +15,7 @@ import           Data.Aeson
                     , object
                     , withObject
                     )
-import           Lib.Util.IO (decodeYAMLFile, encodeYAMLFile)
+import           FitbitChart.Util.IO (decodeYAMLFile, encodeYAMLFile)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
                     , AccessTokenRequest(..)

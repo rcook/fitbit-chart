@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib.Util.Parser
+module FitbitChart.Util.Parser
     ( parseDay
     , parseDouble
     , parseInt

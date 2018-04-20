@@ -10,10 +10,10 @@ import           Data.List (sortOn)
 import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
-import           Lib.AWS
-import           Lib.FitbitAPI
-import           Lib.Storage
-import           Lib.Util
+import           FitbitChart.AWS
+import           FitbitChart.FitbitAPI
+import           FitbitChart.Storage
+import           FitbitChart.Util
 import           Network.AWS.Easy (AWSConfig, connect)
 import           Network.AWS.S3 (BucketName(..), ObjectKey(..))
 import qualified Network.HTTP.Req.OAuth2 as OAuth2

@@ -8,7 +8,7 @@ module App.AppConfig
 
 import           Control.Error.Util (note)
 import           Data.Aeson ((.:), (.=), FromJSON(..), ToJSON(..), object, withObject)
-import           Lib.Util.IO (decodeYAMLFile, encodeYAMLFile)
+import           FitbitChart.Util.IO (decodeYAMLFile, encodeYAMLFile)
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( ClientId(..)
                     , ClientPair(..)

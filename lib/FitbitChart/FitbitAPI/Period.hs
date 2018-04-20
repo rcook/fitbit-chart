@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib.FitbitAPI.Period
+module FitbitChart.FitbitAPI.Period
     ( Period(..)
     , formatPeriod
     ) where

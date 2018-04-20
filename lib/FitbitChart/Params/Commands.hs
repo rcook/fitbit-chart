@@ -1,4 +1,4 @@
-module Lib.Params.Commands
+module FitbitChart.Params.Commands
     ( getSecureStringParameter
     , getStringParameter
     , setSecureStringParameter
@@ -10,10 +10,10 @@ import           Control.Lens ((&), (.~), (^.))
 import           Control.Monad (void)
 import           Control.Monad.IO.Class (liftIO)
 import           Data.Text (Text)
-import           Lib.AWS
-import           Lib.Errors
-import           Lib.Params.Types
-import           Lib.Util.Misc
+import           FitbitChart.AWS
+import           FitbitChart.Errors
+import           FitbitChart.Params.Types
+import           FitbitChart.Util.Misc
 import           Network.AWS (send)
 import           Network.AWS.Easy (withAWS)
 import           Network.AWS.SSM

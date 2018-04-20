@@ -7,9 +7,9 @@ import qualified Data.Aeson as Aeson (encode)
 import           Data.List (sortOn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           Lambda
-import           Lib.AWS
-import           Lib.FitbitAPI
-import           Lib.Storage
+import           FitbitChart.AWS
+import           FitbitChart.FitbitAPI
+import           FitbitChart.Storage
 import           Network.AWS.Easy (AWSConfig, connect)
 import           Network.AWS.S3 (BucketName(..), ObjectKey(..))
 import qualified Network.HTTP.Req.OAuth2 as OAuth2

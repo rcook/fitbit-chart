@@ -1,4 +1,4 @@
-module Lib.DataAccess.Types
+module FitbitChart.DataAccess.Types
     ( TableName(..)
     ) where
 

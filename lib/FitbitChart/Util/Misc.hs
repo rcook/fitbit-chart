@@ -1,4 +1,4 @@
-module Lib.Util.Misc
+module FitbitChart.Util.Misc
     ( fromJustIO
     , fromRightIO
     ) where

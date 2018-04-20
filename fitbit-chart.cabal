@@ -54,29 +54,29 @@ library
                                           , App.TokenConfig
                                           , App.Util
                                           , Lambda
-                                          , Lib
-                                          , Lib.AWS
-                                          , Lib.DataAccess
-                                          , Lib.DataAccess.Commands
-                                          , Lib.DataAccess.Types
-                                          , Lib.Errors
-                                          , Lib.FitbitAPI
-                                          , Lib.FitbitAPI.Period
-                                          , Lib.FitbitAPI.TimeSeriesRange
-                                          , Lib.FitbitAPI.WeightGoal
-                                          , Lib.FitbitAPI.WeightSample
-                                          , Lib.FitbitAPI.WeightTimeSeries
-                                          , Lib.Params
-                                          , Lib.Params.Commands
-                                          , Lib.Params.Types
-                                          , Lib.Storage
-                                          , Lib.Storage.Commands
-                                          , Lib.Util
-                                          , Lib.Util.FileSystem
-                                          , Lib.Util.Format
-                                          , Lib.Util.IO
-                                          , Lib.Util.Misc
-                                          , Lib.Util.Parser
+                                          , FitbitChart
+                                          , FitbitChart.AWS
+                                          , FitbitChart.DataAccess
+                                          , FitbitChart.DataAccess.Commands
+                                          , FitbitChart.DataAccess.Types
+                                          , FitbitChart.Errors
+                                          , FitbitChart.FitbitAPI
+                                          , FitbitChart.FitbitAPI.Period
+                                          , FitbitChart.FitbitAPI.TimeSeriesRange
+                                          , FitbitChart.FitbitAPI.WeightGoal
+                                          , FitbitChart.FitbitAPI.WeightSample
+                                          , FitbitChart.FitbitAPI.WeightTimeSeries
+                                          , FitbitChart.Params
+                                          , FitbitChart.Params.Commands
+                                          , FitbitChart.Params.Types
+                                          , FitbitChart.Storage
+                                          , FitbitChart.Storage.Commands
+                                          , FitbitChart.Util
+                                          , FitbitChart.Util.FileSystem
+                                          , FitbitChart.Util.Format
+                                          , FitbitChart.Util.IO
+                                          , FitbitChart.Util.Misc
+                                          , FitbitChart.Util.Parser
 
 executable fitbit-chart-cli
   default-language:                         Haskell2010

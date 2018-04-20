@@ -12,8 +12,8 @@ import           Data.Text (Text)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           App.AppConfig
 import           Lambda
-import           Lib.Params
-import           Lib.Util.IO
+import           FitbitChart.Params
+import           FitbitChart.Util.IO
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
                     , AccessTokenRequest(..)

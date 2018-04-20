@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib.DataAccess.Commands
+module FitbitChart.DataAccess.Commands
     ( getWeightSamples
     , putWeightSample
     , putWeightSamples
@@ -18,11 +18,11 @@ import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty (fromList)
 import           Data.List.Split (chunksOf)
 import           Data.Text (Text)
-import           Lib.AWS
-import           Lib.DataAccess.Types
-import           Lib.Errors
-import           Lib.FitbitAPI (WeightSample(..))
-import           Lib.Util (formatDay, parseDay, parseDouble)
+import           FitbitChart.AWS
+import           FitbitChart.DataAccess.Types
+import           FitbitChart.Errors
+import           FitbitChart.FitbitAPI (WeightSample(..))
+import           FitbitChart.Util (formatDay, parseDay, parseDouble)
 import           Network.AWS (send)
 import           Network.AWS.Data (toText)
 import           Network.AWS.DynamoDB

@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 
-module Lib.FitbitAPI.WeightSample
+module FitbitChart.FitbitAPI.WeightSample
     ( WeightSample(..)
     ) where
 
@@ -8,7 +8,7 @@ import           Data.Aeson (ToJSON)
 import           Data.Csv (ToRecord(..), record, toField)
 import           Data.Time.Calendar (Day)
 import           GHC.Generics (Generic)
-import           Lib.Util.Format (formatDay)
+import           FitbitChart.Util.Format (formatDay)
 
 data WeightSample = WeightSample Day Double deriving Generic
 
