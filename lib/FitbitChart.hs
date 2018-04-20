@@ -1,6 +1,6 @@
 module FitbitChart
     ( module FitbitChart.AWS
-    , module FitbitChart.DataAccess
+    , module FitbitChart.App
     , module FitbitChart.DynamoDB
     , module FitbitChart.Errors
     , module FitbitChart.Fitbit
@@ -10,7 +10,7 @@ module FitbitChart
     ) where
 
 import FitbitChart.AWS
-import FitbitChart.DataAccess
+import FitbitChart.App
 import FitbitChart.DynamoDB
 import FitbitChart.Errors
 import FitbitChart.Fitbit

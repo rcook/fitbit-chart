@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitChart.DataAccess
+module FitbitChart.App.DataAccess
     ( getWeightSamples
     , putWeightSample
     , putWeightSamples
