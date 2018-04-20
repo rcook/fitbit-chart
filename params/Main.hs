@@ -11,9 +11,9 @@ import           Data.Monoid ((<>))
 import           Data.Text (Text)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           App.AppConfig
-import           Lambda
+import           FitbitChart.App
 import           FitbitChart.SSM
-import           FitbitChart.Util.IO
+import           FitbitChart.Util
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
                     , AccessTokenRequest(..)

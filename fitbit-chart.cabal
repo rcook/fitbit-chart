@@ -53,8 +53,9 @@ library
                                           , App.Log
                                           , App.TokenConfig
                                           , App.Util
-                                          , Lambda
                                           , FitbitChart.App
+                                          , FitbitChart.App.Config
+                                          , FitbitChart.App.Config.Lambda
                                           , FitbitChart.App.DataAccess
                                           , FitbitChart.AWS
                                           , FitbitChart.DynamoDB
