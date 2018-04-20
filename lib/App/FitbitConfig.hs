@@ -12,8 +12,8 @@ import           Data.Monoid ((<>))
 import           Data.Text (Text)
 import qualified Data.Text as Text (splitOn)
 import           FitbitChart.AWS
-import           FitbitChart.Errors
 import           FitbitChart.SSM
+import           FitbitChart.Util
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
                     , ClientId(..)

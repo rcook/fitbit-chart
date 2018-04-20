@@ -11,9 +11,8 @@ import           Control.Monad (void)
 import           Control.Monad.IO.Class (liftIO)
 import           Data.Text (Text)
 import           FitbitChart.AWS
-import           FitbitChart.Errors
 import           FitbitChart.SSM.Types
-import           FitbitChart.Util.Misc
+import           FitbitChart.Util
 import           Network.AWS (send)
 import           Network.AWS.Easy (withAWS)
 import           Network.AWS.SSM

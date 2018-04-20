@@ -20,9 +20,8 @@ import           Data.List.Split (chunksOf)
 import           Data.Text (Text)
 import           FitbitChart.AWS
 import           FitbitChart.DynamoDB
-import           FitbitChart.Errors
 import           FitbitChart.Fitbit (WeightSample(..))
-import           FitbitChart.Util (formatDay, parseDay, parseDouble)
+import           FitbitChart.Util (RuntimeError(..), formatDay, parseDay, parseDouble)
 import           Network.AWS (send)
 import           Network.AWS.Data (toText)
 import           Network.AWS.DynamoDB

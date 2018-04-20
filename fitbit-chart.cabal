@@ -59,7 +59,6 @@ library
                                           , FitbitChart.App.DataAccess
                                           , FitbitChart.AWS
                                           , FitbitChart.DynamoDB
-                                          , FitbitChart.Errors
                                           , FitbitChart.Fitbit
                                           , FitbitChart.Fitbit.Period
                                           , FitbitChart.Fitbit.TimeSeriesRange
@@ -71,6 +70,7 @@ library
                                           , FitbitChart.SSM.Commands
                                           , FitbitChart.SSM.Types
                                           , FitbitChart.Util
+                                          , FitbitChart.Util.Errors
                                           , FitbitChart.Util.FileSystem
                                           , FitbitChart.Util.Format
                                           , FitbitChart.Util.IO
