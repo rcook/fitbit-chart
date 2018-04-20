@@ -11,6 +11,8 @@ import           Data.Monoid ((<>))
 import           Data.Text (Text)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           App.AppConfig
+import           Lambda
+import           Lib.Params
 import           Lib.Util.IO
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
@@ -53,9 +55,11 @@ run (Options configPath outputPath) = do
     case result of
         Left e -> putStrLn e
         Right (OAuth2.AccessTokenResponse (OAuth2.TokenPair (OAuth2.AccessToken accessToken) (OAuth2.RefreshToken refreshToken))) -> do
+            let ParameterName cin = clientInfoName
+                ParameterName tpn = tokenPairName
             let obj = HashMap.fromList
-                        [ ("/FitbitChart/FitbitAPI/ClientInfo", mkPair cid cs)
-                        , ("/FitbitChart/FitbitAPI/TokenPair", mkPair accessToken refreshToken)
+                        [ (cin, mkPair cid cs)
+                        , (tpn, mkPair accessToken refreshToken)
                         ] :: HashMap Text Text
             encodeYAMLFile outputPath obj
 

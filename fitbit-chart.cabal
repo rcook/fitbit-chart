@@ -53,6 +53,7 @@ library
                                           , App.Log
                                           , App.TokenConfig
                                           , App.Util
+                                          , Lambda
                                           , Lib
                                           , Lib.AWS
                                           , Lib.DataAccess

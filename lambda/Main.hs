@@ -6,9 +6,9 @@ import           App
 import qualified Data.Aeson as Aeson (encode)
 import           Data.List (sortOn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
+import           Lambda
 import           Lib.AWS
 import           Lib.FitbitAPI
-import           Lib.Params
 import           Lib.Storage
 import           Network.AWS.Easy (AWSConfig, connect)
 import           Network.AWS.S3 (BucketName(..), ObjectKey(..))
@@ -18,12 +18,6 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , evalOAuth2
                     )
 import           Util
-
-clientInfoName :: ParameterName
-clientInfoName = ParameterName "/FitbitChart/FitbitAPI/ClientInfo"
-
-tokenPairName :: ParameterName
-tokenPairName = ParameterName "/FitbitChart/FitbitAPI/TokenPair"
 
 bucketName :: BucketName
 bucketName = BucketName "fitbit-chart"
