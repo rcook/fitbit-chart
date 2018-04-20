@@ -124,3 +124,23 @@ executable fitbit-chart-lambda
                                           , text
                                           , time
   other-modules:                            Util
+
+executable fitbit-chart-token
+  default-language:                         Haskell2010
+  hs-source-dirs:                           token
+  main-is:                                  Main.hs
+  ghc-options:                              -threaded
+                                            -rtsopts
+                                            -with-rtsopts=-N
+                                            -W
+                                            -Wall
+                                            -Werror=incomplete-patterns
+                                            -Werror=missing-methods
+                                            -fwarn-unused-imports
+  build-depends:                            base >= 4.7 && < 5
+                                          , fitbit-chart
+                                          , modern-uri
+                                          , optparse-applicative
+                                          , req-oauth2
+                                          , text
+  other-modules:                            CommandLine
