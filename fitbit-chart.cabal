@@ -118,10 +118,8 @@ executable fitbit-chart-lambda
                                           , aws-easy
                                           , base >= 4.7 && < 5
                                           , fitbit-chart
-                                          , modern-uri
                                           , req-oauth2
                                           , serverless-haskell
-                                          , text
                                           , time
   other-modules:                            FitbitChartLambda.Util
 
