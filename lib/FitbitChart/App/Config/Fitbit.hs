@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module App.FitbitConfig
+module FitbitChart.App.Config.Fitbit
     ( getClientInfo
     , getTokenPair
     , mkPair

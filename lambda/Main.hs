@@ -2,7 +2,6 @@
 
 module Main (main) where
 
-import           App
 import qualified Data.Aeson as Aeson (encode)
 import           Data.List (sortOn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)

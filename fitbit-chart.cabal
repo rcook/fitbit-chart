@@ -46,17 +46,17 @@ library
                                           , unordered-containers
                                           , vector
                                           , yaml
-  exposed-modules:                          App
-                                          , App.AWSConfig
-                                          , App.AppConfig
-                                          , App.FitbitConfig
-                                          , App.Log
-                                          , App.TokenConfig
-                                          , App.Util
-                                          , FitbitChart.App
+  exposed-modules:                          FitbitChart.App
                                           , FitbitChart.App.Config
+                                          , FitbitChart.App.Config.AWS
+                                          , FitbitChart.App.Config.App
+                                          , FitbitChart.App.Config.Fitbit
                                           , FitbitChart.App.Config.Lambda
+                                          , FitbitChart.App.Config.OAuth2
                                           , FitbitChart.App.DataAccess
+                                          , FitbitChart.App.Util
+                                          , FitbitChart.App.Util.Log
+                                          , FitbitChart.App.Util.Util
                                           , FitbitChart.AWS
                                           , FitbitChart.DynamoDB
                                           , FitbitChart.Fitbit

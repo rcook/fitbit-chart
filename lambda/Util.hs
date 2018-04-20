@@ -3,7 +3,7 @@ module Util
     ) where
 
 import           AWSLambda (lambdaMain)
-import           App.Log (logError, logInfo)
+import           FitbitChart.App (logError, logInfo)
 import           Control.Exception (SomeException, bracket_, catch)
 import           Data.Aeson (Value)
 

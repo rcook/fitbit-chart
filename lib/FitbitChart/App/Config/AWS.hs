@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module App.AWSConfig
+module FitbitChart.App.Config.AWS
     ( awsConfigFromDefaultProfile
     , awsConfigFromKeys
     , getAWSConfigFromEnv

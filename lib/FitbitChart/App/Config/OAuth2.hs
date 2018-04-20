@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module App.TokenConfig
+module FitbitChart.App.Config.OAuth2
     ( TokenConfig(..)
     , getTokenConfig
     , writeTokenConfig

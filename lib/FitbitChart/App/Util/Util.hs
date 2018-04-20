@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module App.Util
+module FitbitChart.App.Util.Util
     ( fitbitApiUrl
     , formatDouble
     , mkApp

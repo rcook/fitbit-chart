@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module App.AppConfig
+module FitbitChart.App.Config.App
     ( AppConfig(..)
     , AppConfigPrompt
     , getAppConfig

@@ -1,4 +1,4 @@
-module App.Log
+module FitbitChart.App.Util.Log
     ( logError
     , logInfo
     ) where

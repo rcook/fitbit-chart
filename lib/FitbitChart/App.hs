@@ -13,7 +13,9 @@ Umbrella module for application-specific functions
 module FitbitChart.App
     ( module FitbitChart.App.Config
     , module FitbitChart.App.DataAccess
+    , module FitbitChart.App.Util
     ) where
 
 import FitbitChart.App.Config
 import FitbitChart.App.DataAccess
+import FitbitChart.App.Util

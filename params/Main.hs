@@ -2,15 +2,12 @@
 
 module Main (main) where
 
-import           App.FitbitConfig
-import           App.Util
 import           CommandLine
 import           Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
-import           App.AppConfig
 import           FitbitChart.App
 import           FitbitChart.SSM
 import           FitbitChart.Util
