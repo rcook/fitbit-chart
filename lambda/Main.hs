@@ -9,7 +9,7 @@ import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           Lambda
 import           FitbitChart.AWS
 import           FitbitChart.FitbitAPI
-import           FitbitChart.Storage
+import           FitbitChart.S3
 import           Network.AWS.Easy (AWSConfig, connect)
 import           Network.AWS.S3 (BucketName(..), ObjectKey(..))
 import qualified Network.HTTP.Req.OAuth2 as OAuth2

@@ -1,4 +1,4 @@
-module FitbitChart.Storage.Commands
+module FitbitChart.S3
     ( putBytes
     ) where
 

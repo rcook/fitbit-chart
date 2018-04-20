@@ -57,8 +57,7 @@ library
                                           , FitbitChart
                                           , FitbitChart.AWS
                                           , FitbitChart.DataAccess
-                                          , FitbitChart.DataAccess.Commands
-                                          , FitbitChart.DataAccess.Types
+                                          , FitbitChart.DynamoDB
                                           , FitbitChart.Errors
                                           , FitbitChart.FitbitAPI
                                           , FitbitChart.FitbitAPI.Period
@@ -66,11 +65,10 @@ library
                                           , FitbitChart.FitbitAPI.WeightGoal
                                           , FitbitChart.FitbitAPI.WeightSample
                                           , FitbitChart.FitbitAPI.WeightTimeSeries
-                                          , FitbitChart.Params
-                                          , FitbitChart.Params.Commands
-                                          , FitbitChart.Params.Types
-                                          , FitbitChart.Storage
-                                          , FitbitChart.Storage.Commands
+                                          , FitbitChart.S3
+                                          , FitbitChart.SSM
+                                          , FitbitChart.SSM.Commands
+                                          , FitbitChart.SSM.Types
                                           , FitbitChart.Util
                                           , FitbitChart.Util.FileSystem
                                           , FitbitChart.Util.Format

@@ -1,4 +1,4 @@
-module FitbitChart.Params.Types
+module FitbitChart.SSM.Types
     ( ParameterName(..)
     ) where
 

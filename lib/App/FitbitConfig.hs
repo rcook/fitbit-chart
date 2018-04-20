@@ -13,7 +13,7 @@ import           Data.Text (Text)
 import qualified Data.Text as Text (splitOn)
 import           FitbitChart.AWS
 import           FitbitChart.Errors
-import           FitbitChart.Params
+import           FitbitChart.SSM
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
                     , ClientId(..)

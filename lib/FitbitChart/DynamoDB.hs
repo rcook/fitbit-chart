@@ -1,4 +1,4 @@
-module FitbitChart.DataAccess.Types
+module FitbitChart.DynamoDB
     ( TableName(..)
     ) where
 

@@ -5,7 +5,7 @@ module Lambda
     , tokenPairName
     ) where
 
-import           FitbitChart.Params
+import           FitbitChart.SSM
 
 clientInfoName :: ParameterName
 clientInfoName = ParameterName "/FitbitChart/FitbitAPI/ClientInfo"
