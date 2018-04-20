@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitChart.FitbitAPI.WeightTimeSeries
+module FitbitChart.Fitbit.WeightTimeSeries
     ( getWeightTimeSeries
     ) where
 
@@ -12,9 +12,9 @@ import           Data.Monoid ((<>))
 import qualified Data.Vector as Vector (toList)
 import           Network.HTTP.Req ((/:), Scheme(..), Url)
 import           Network.HTTP.Req.OAuth2 (App, OAuth2, oAuth2Get)
-import           FitbitChart.FitbitAPI.Period
-import           FitbitChart.FitbitAPI.TimeSeriesRange
-import           FitbitChart.FitbitAPI.WeightSample
+import           FitbitChart.Fitbit.Period
+import           FitbitChart.Fitbit.TimeSeriesRange
+import           FitbitChart.Fitbit.WeightSample
 import           FitbitChart.Util.Format (formatDay)
 import           FitbitChart.Util.Parser (parseDay, parseDouble)
 

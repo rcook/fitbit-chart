@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module FitbitChart.FitbitAPI.WeightGoal
+module FitbitChart.Fitbit.WeightGoal
     ( WeightGoal
     , getWeightGoal
     , goalType

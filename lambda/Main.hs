@@ -8,7 +8,7 @@ import           Data.List (sortOn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           Lambda
 import           FitbitChart.AWS
-import           FitbitChart.FitbitAPI
+import           FitbitChart.Fitbit
 import           FitbitChart.S3
 import           Network.AWS.Easy (AWSConfig, connect)
 import           Network.AWS.S3 (BucketName(..), ObjectKey(..))

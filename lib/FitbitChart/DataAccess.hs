@@ -21,7 +21,7 @@ import           Data.Text (Text)
 import           FitbitChart.AWS
 import           FitbitChart.DynamoDB
 import           FitbitChart.Errors
-import           FitbitChart.FitbitAPI (WeightSample(..))
+import           FitbitChart.Fitbit (WeightSample(..))
 import           FitbitChart.Util (formatDay, parseDay, parseDouble)
 import           Network.AWS (send)
 import           Network.AWS.Data (toText)

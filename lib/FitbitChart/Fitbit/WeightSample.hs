@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 
-module FitbitChart.FitbitAPI.WeightSample
+module FitbitChart.Fitbit.WeightSample
     ( WeightSample(..)
     ) where
 

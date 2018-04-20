@@ -11,7 +11,7 @@ import           Data.Monoid ((<>))
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           Data.Time.Clock (UTCTime(..), getCurrentTime)
 import           FitbitChart.AWS
-import           FitbitChart.FitbitAPI
+import           FitbitChart.Fitbit
 import           FitbitChart.S3
 import           FitbitChart.Util
 import           Network.AWS.Easy (AWSConfig, connect)

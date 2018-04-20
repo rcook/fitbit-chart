@@ -59,12 +59,12 @@ library
                                           , FitbitChart.DataAccess
                                           , FitbitChart.DynamoDB
                                           , FitbitChart.Errors
-                                          , FitbitChart.FitbitAPI
-                                          , FitbitChart.FitbitAPI.Period
-                                          , FitbitChart.FitbitAPI.TimeSeriesRange
-                                          , FitbitChart.FitbitAPI.WeightGoal
-                                          , FitbitChart.FitbitAPI.WeightSample
-                                          , FitbitChart.FitbitAPI.WeightTimeSeries
+                                          , FitbitChart.Fitbit
+                                          , FitbitChart.Fitbit.Period
+                                          , FitbitChart.Fitbit.TimeSeriesRange
+                                          , FitbitChart.Fitbit.WeightGoal
+                                          , FitbitChart.Fitbit.WeightSample
+                                          , FitbitChart.Fitbit.WeightTimeSeries
                                           , FitbitChart.S3
                                           , FitbitChart.SSM
                                           , FitbitChart.SSM.Commands
