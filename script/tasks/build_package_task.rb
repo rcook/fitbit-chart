@@ -17,15 +17,21 @@ class BuildPackageTask < Task
     lambda_package = manifest.lambda_package
     target_name = lambda_package.target_name
 
-    trace 'Rebuilding code' do
+    trace 'Rebuilding code (native)' do
       Dir.chdir(repo_dir) do
-        Shell.check_run('stack', 'build')
+        Shell.check_run('stack', 'build', '--no-docker')
+      end
+    end
+
+    trace 'Rebuilding code (Docker)' do
+      Dir.chdir(repo_dir) do
+        Shell.check_run('stack', 'build', '--docker')
       end
     end
 
     local_install_root = trace 'Determining Stack local install root' do
       Dir.chdir(repo_dir) do
-        Shell.check_capture('stack', 'path', '--local-install-root').chomp
+        Shell.check_capture('stack', 'path', '--docker', '--local-install-root').chomp
       end
     end
     target_dir = File.expand_path('bin', local_install_root)
@@ -54,7 +60,7 @@ class BuildPackageTask < Task
     trace 'Copying dependencies' do
       dependencies.each do |f, p|
         dep_path = File.expand_path(f, target_dir)
-        Shell.check_capture('stack', 'exec', '--', 'cp', p, dep_path)
+        Shell.check_capture('stack', 'exec', '--docker', '--', 'cp', p, dep_path)
         FileUtils.cp dep_path, input_dir
       end
     end
@@ -82,7 +88,7 @@ class BuildPackageTask < Task
   end
 
   def get_all_dependencies(path)
-    Shell.check_capture('stack', 'exec', '--', 'ldd', path)
+    Shell.check_capture('stack', 'exec', '--docker', '--', 'ldd', path)
       .split(/\n+/)
       .map(&:strip)
       .map(&:split)

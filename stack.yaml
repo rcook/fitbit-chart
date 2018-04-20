@@ -5,5 +5,3 @@ extra-deps:
   commit: 078460fca1621d9cb05d9b2284da0d6e3d194275
 - req-url-extra-0.1.0.0
 - serverless-haskell-0.4.2
-docker:
-  enable: true
