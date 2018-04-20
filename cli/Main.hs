@@ -2,7 +2,6 @@
 
 module Main (main) where
 
-import           CommandLine
 import           Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.Aeson as Aeson (encode)
 import           Data.List (sortOn)
@@ -14,6 +13,7 @@ import           FitbitChart.App
 import           FitbitChart.Fitbit
 import           FitbitChart.S3
 import           FitbitChart.Util
+import           FitbitChartCLI.CommandLine
 import           Network.AWS.Easy (AWSConfig, connect)
 import           Network.AWS.S3 (BucketName(..), ObjectKey(..))
 import qualified Network.HTTP.Req.OAuth2 as OAuth2

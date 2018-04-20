@@ -2,7 +2,6 @@
 
 module Main (main) where
 
-import           CommandLine
 import           Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import           Data.Monoid ((<>))
@@ -11,6 +10,7 @@ import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           FitbitChart.App
 import           FitbitChart.SSM
 import           FitbitChart.Util
+import           FitbitChartParams.CommandLine
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     ( AccessToken(..)
                     , AccessTokenRequest(..)

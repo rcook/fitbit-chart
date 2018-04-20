@@ -9,6 +9,7 @@ import           FitbitChart.AWS
 import           FitbitChart.App
 import           FitbitChart.Fitbit
 import           FitbitChart.S3
+import           FitbitChartLambda.Util
 import           Network.AWS.Easy (AWSConfig, connect)
 import           Network.AWS.S3 (BucketName(..), ObjectKey(..))
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
@@ -16,7 +17,6 @@ import qualified Network.HTTP.Req.OAuth2 as OAuth2
                     , UpdateTokenPair
                     , evalOAuth2
                     )
-import           Util
 
 bucketName :: BucketName
 bucketName = BucketName "fitbit-chart"

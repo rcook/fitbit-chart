@@ -1,4 +1,4 @@
-module CommandLine
+module FitbitChartParams.CommandLine
     ( Options(..)
     , optionsParser
     ) where
