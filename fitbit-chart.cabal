@@ -54,7 +54,6 @@ library
                                           , App.TokenConfig
                                           , App.Util
                                           , Lambda
-                                          , FitbitChart
                                           , FitbitChart.App
                                           , FitbitChart.App.DataAccess
                                           , FitbitChart.AWS
