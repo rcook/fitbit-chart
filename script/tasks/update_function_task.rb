@@ -29,7 +29,7 @@ class UpdateFunctionTask < Task
       IAM.create_role function_name, lambda_package.policy_document.to_hash, lambda_package.role_policy.to_hash
     end
 
-    trace 'Creating Lambda function' do
+    trace 'Creating or updating Lambda function' do
       Lambda.create_function function_name, package_path, runtime, role, handler
     end
   end
