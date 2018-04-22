@@ -23,6 +23,7 @@ module Lambda
       '--zip-file', zip_path,
       '--runtime', runtime,
       '--role', role,
-      '--handler', handler)
+      '--handler', handler,
+      '--memory-size', 1024)
   end
 end
