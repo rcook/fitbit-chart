@@ -29,17 +29,18 @@ main = withLambda $ \_ -> do
     logInfo "Start"
     conf <- getAWSConfigFromEnv
 
-    logInfo "Reading from DynamoDB"
+    logInfo "Reading data from Fitbit API"
     weightSamples <- fetchWeightSamples conf
+    logInfo "Data read from Fitbit API"
 
-    logInfo "Generate JSON file in S3"
+    logInfo "Generating JSON file in S3"
     s3Session <- connect conf s3Service
     putBytes bucketName objectKey (Aeson.encode weightSamples) s3Session
+    logInfo "JSON file generated in S3"
     logInfo "End"
 
 fetchWeightSamples :: AWSConfig -> IO [WeightSample]
 fetchWeightSamples conf = do
-    logInfo "Querying Fitbit"
     (AppConfig clientPair, updateTokenPair, getTokenConfigAction) <- getConfig conf
     let app = mkApp updateTokenPair clientPair
     TokenConfig tp <- getTokenConfigAction app
