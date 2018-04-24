@@ -60,8 +60,12 @@ lambda-package:
       },
       {
         "Effect": "Allow",
-        "Action": "ssm:GetParameter",
-        "Resource": "*"
+        "Action": [
+          "ssm:PutParameter",
+          "ssm:GetParameters",
+          "ssm:GetParameter"
+        ],
+        "Resource": "arn:aws:ssm:*:*:parameter/FitbitChart/*"
       },
       {
         "Effect": "Allow",
