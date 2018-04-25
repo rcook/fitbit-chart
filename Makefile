@@ -1,7 +1,7 @@
-.PHONY: default
-default:
-	script/build.rb update-lambda --verbose
+.PHONY: lambda
+lambda:
+	script/deploy.rb update-lambda --verbose
 
 .PHONY: assets
 assets:
-	script/build.rb update-assets --verbose
+	script/deploy.rb update-assets --verbose
