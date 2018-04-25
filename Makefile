@@ -1,7 +1,7 @@
 .PHONY: lambda
 lambda:
-	script/deploy.rb update-lambda --verbose
+	script/deploy.rb --verbose --simulate lambda
 
 .PHONY: assets
 assets:
-	script/deploy.rb update-assets --verbose
+	script/deploy.rb --verbose --simulate assets
