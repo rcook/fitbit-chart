@@ -2,13 +2,16 @@
 
 module Main (main) where
 
+import           Control.Monad (void)
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as ByteString (lines, putStrLn)
+import           Data.Foldable (for_)
 import           Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import           Data.Monoid ((<>))
 import           Data.Text (Text)
 import qualified Data.Text.IO as Text (getLine, putStrLn)
 import           FitbitChart.App
-import           FitbitChart.SSM
 import           FitbitChart.Util
 import           FitbitChartParams.CommandLine
 import qualified Network.HTTP.Req.OAuth2 as OAuth2
@@ -42,7 +45,19 @@ main = parseOptions >>= run
             (fullDesc <> progDesc "Get initial token pair")
 
 run :: Options -> IO ()
-run (Options configPath outputPath) = do
+run (Options _ Simulate) = do
+    putStr "Type something: "
+    hFlush stdout
+    void getLine
+    putStrLn ""
+    hFlush stdout
+
+    let obj = HashMap.fromList
+                [ ("client-info", "TEST_CLIENT_INFO")
+                , ("token-pair", "TEST_TOKEN_PAIR")
+                ] :: HashMap Text Text
+    writeOutput $ encodeYAML obj
+run (Options configPath NoSimulate) = do
     -- UGLY
     -- I'm not proud of this code at all
     Just (AppConfig clientPair@(OAuth2.ClientPair clientId@(OAuth2.ClientId cid) (OAuth2.ClientSecret cs))) <- decodeYAMLFile configPath
@@ -52,13 +67,11 @@ run (Options configPath outputPath) = do
     case result of
         Left e -> putStrLn e
         Right (OAuth2.AccessTokenResponse (OAuth2.TokenPair (OAuth2.AccessToken accessToken) (OAuth2.RefreshToken refreshToken))) -> do
-            let ParameterName cin = clientInfoName
-                ParameterName tpn = tokenPairName
             let obj = HashMap.fromList
-                        [ (cin, mkPair cid cs)
-                        , (tpn, mkPair accessToken refreshToken)
+                        [ ("client-info", mkPair cid cs)
+                        , ("token-pair", mkPair accessToken refreshToken)
                         ] :: HashMap Text Text
-            encodeYAMLFile outputPath obj
+            writeOutput $ encodeYAML obj
 
 promptForCallbackUri :: OAuth2.PromptForCallbackUri
 promptForCallbackUri authUri' = do
@@ -66,4 +79,13 @@ promptForCallbackUri authUri' = do
     Text.putStrLn $ URI.render authUri'
     putStr "Enter callback URI including authorization code: "
     hFlush stdout
-    URI.mkURI =<< Text.getLine
+    line <- Text.getLine
+    putStrLn ""
+    hFlush stdout
+    URI.mkURI line
+
+writeOutput :: ByteString -> IO ()
+writeOutput s =
+    for_
+        (ByteString.lines s) $ \line ->
+            ByteString.putStrLn $ "> " <> line

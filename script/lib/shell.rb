@@ -1,5 +1,23 @@
 require 'shellwords'
 
+class ShellError < RuntimeError
+  attr_reader :command
+  attr_reader :output
+  attr_reader :status
+
+  def initialize(command, output, status)
+    if output.nil? || output.empty?
+      message = "Command #{command} failed: status=[#{status}]"
+    else
+      message "Command #{command} failed: output=[#{output}] status=[#{status}]"
+    end
+    super(message)
+    @command = command
+    @output = output
+    @status = status
+  end
+end
+
 module Shell
   def self.build_command(*args)
     if args.is_a?(Array) && args.size == 1
@@ -17,13 +35,7 @@ module Shell
 
   def self.check_capture(*args)
     status, output, command = capture_helper(*args)
-    unless status.success?
-      if output.empty?
-        raise "Command #{command} failed: status=[#{status}]"
-      else
-        raise "Command #{command} failed: output=[#{output}] status=[#{status}]"
-      end
-    end
+    raise ShellError.new(command, output, status) unless status.success?
     output
   end
 
@@ -34,7 +46,7 @@ module Shell
 
   def self.check_run(*args)
     status, command = run_helper(*args)
-    raise "Command #{command} failed: status=[#{status}]" unless status.success?
+    raise ShellError.new(command, nil, status) unless status.success?
   end
 
   def self.capture_helper(*args)

@@ -136,6 +136,7 @@ executable fitbit-chart-params
                                             -Werror=missing-methods
                                             -fwarn-unused-imports
   build-depends:                            base >= 4.7 && < 5
+                                          , bytestring
                                           , fitbit-chart
                                           , modern-uri
                                           , optparse-applicative

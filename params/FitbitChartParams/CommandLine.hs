@@ -1,17 +1,31 @@
 module FitbitChartParams.CommandLine
-    ( Options(..)
+    ( Mode(..)
+    , Options(..)
     , optionsParser
     ) where
 
+import           Control.Applicative ((<|>))
+import           Data.Monoid ((<>))
 import           Options.Applicative
                     ( Parser
+                    , flag
+                    , flag'
+                    , help
+                    , long
                     , metavar
                     , strArgument
                     )
 
-data Options = Options String String
+data Mode = Simulate | NoSimulate
+
+data Options = Options FilePath Mode
 
 optionsParser :: Parser Options
 optionsParser = Options
     <$> strArgument (metavar "CONFPATH")
-    <*> strArgument (metavar "OUTPUTPATH")
+    <*> pMode
+
+pMode :: Parser Mode
+pMode =
+    flag Simulate NoSimulate (long "no-simulate" <> help "Do not simulate parameter generation")
+    <|> flag' Simulate (long "simulate" <> help "Simulate parameter generation")

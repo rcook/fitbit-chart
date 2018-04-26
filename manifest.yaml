@@ -1,5 +1,14 @@
-s3-web-site:
-  bucket: fitbit-chart
+properties:
+  bucket-name: fitbit-chart
+  function-name: FitbitChart
+  parameter-root-path: FitbitChart/FitbitAPI
+  resource-path: resources
+
+assets:
+- task: s3::create-bucket
+  bucket-name: "%{bucket_name}"
+- task: s3::put-bucket-policy
+  bucket-name: "%{bucket_name}"
   bucket-policy: {
     "Version": "2008-10-17",
     "Id": "PolicyForPublicWebsiteContent",
@@ -11,29 +20,53 @@ s3-web-site:
           "AWS": "*"
         },
         "Action": "s3:GetObject",
-        "Resource": "arn:aws:s3:::%{bucket}/*"
+        "Resource": "arn:aws:s3:::%{bucket_name}/*"
       }
     ]
   }
-  index-document: chart.html
-  error-document: error.html
-  files-dir: resources
-  files:
-  - key: chart.html
-    local-path: chart.html
-    content-type: text/html
-  - key: chart.js
-    local-path: chart.js
-    content-type: application/javascript
-  - key: data.json
-    local-path: data.json
-    content-type: application/json
-  - key: error.html
-    local-path: error.html
-    content-type: text/html
-lambda-package:
-  function-name: FitbitChart
-  runtime: nodejs6.10
+- task: s3::website
+  bucket-name: "%{bucket_name}"
+  index-document: "%{resource_path}/chart.html"
+  error-document: "%{resource_path}/error.html"
+- task: s3::put-object
+  bucket-name: "%{bucket_name}"
+  key: chart.html
+  local-path: "%{resource_path}/chart.html"
+  content-type: text/html
+- task: s3::put-object
+  bucket-name: "%{bucket_name}"
+  key: chart.js
+  local-path: "%{resource_path}/chart.js"
+  content-type: application/javascript
+- task: s3::put-object
+  bucket-name: "%{bucket_name}"
+  key: data.json
+  local-path: "%{resource_path}/data.json"
+  content-type: application/json
+- task: s3::put-object
+  bucket-name: "%{bucket_name}"
+  key: error.html
+  local-path: "%{resource_path}/error.html"
+  content-type: text/html
+
+lambda:
+- task: package::build
+  target-name: fitbit-chart-lambda
+  excluded-dependencies:
+  - libm.so.6
+  - libz.so.1
+  - librt.so.1
+  - libutil.so.1
+  - libdl.so.2
+  - libgmp.so.10
+  - libpthread.so.0
+  - libgcc_s.so.1
+  - libc.so.6
+  extra-files:
+  - "%{resource_path}/index.js"
+  _: package-path
+- task: iam::create-role
+  role-name: "%{function_name}"
   policy-document: {
     "Version": "2012-10-17",
     "Statement": [
@@ -65,28 +98,32 @@ lambda-package:
           "ssm:GetParameters",
           "ssm:GetParameter"
         ],
-        "Resource": "arn:aws:ssm:*:*:parameter/FitbitChart/*"
+        "Resource": "arn:aws:ssm:*:*:parameter/%{parameter_root_path}/*"
       },
       {
         "Effect": "Allow",
         "Action": "s3:PutObject",
-        "Resource": "arn:aws:s3:::fitbit-chart/data.json"
+        "Resource": "arn:aws:s3:::%{bucket_name}/data.json"
       }
     ]
   }
+- task: sts::get-account-id
+  _: account-id
+- task: lambda::create-function
+  function-name: "%{function_name}"
+  package-path: "%{package_path}"
+  runtime: nodejs6.10
+  role-arn: "arn:aws:iam::%{account_id}:role/%{function_name}"
   handler: index.handler
-  target-name: fitbit-chart-lambda
-  excluded-dependencies:
-  - libm.so.6
-  - libz.so.1
-  - librt.so.1
-  - libutil.so.1
-  - libdl.so.2
-  - libgmp.so.10
-  - libpthread.so.0
-  - libgcc_s.so.1
-  - libc.so.6
-  extra-files-dir: resources
-  extra-files:
-  - index.js
-ssm-parameters-command: stack exec --no-docker fitbit-chart-params %{repo_dir}/.fitbit-api.yaml %{output_path}
+
+parameters:
+- task: command::parse-yaml
+  command: stack exec --no-docker fitbit-chart-params -- --no-simulate .fitbit-api.yaml
+- task: ssm::put-parameter
+  name: "/%{parameter_root_path}/ClientInfo"
+  value: "%{client_info}"
+  type: secure-string
+- task: ssm::put-parameter
+  name: "/%{parameter_root_path}/TokenPair"
+  value: "%{token_pair}"
+  type: secure-string

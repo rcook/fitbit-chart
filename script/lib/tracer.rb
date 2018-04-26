@@ -1,4 +1,4 @@
-class Task
+class Tracer
   def initialize(options = {})
     @verbose = options[:verbose] || false
     @trace_level = 0

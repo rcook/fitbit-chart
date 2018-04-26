@@ -1,22 +1,14 @@
 require 'fileutils'
 require 'set'
-require_relative '../lib/manifest'
-require_relative '../lib/shell'
-require_relative 'task'
+require_relative 'shell'
+require_relative 'tracer'
 
-class BuildPackageTask < Task
-  def run(manifest, repo_dir, package_path)
-    trace 'BuildPackageTask' do
-      run_helper manifest, repo_dir, package_path
-    end
+class PackageBuildTask < Tracer
+  def initialize
+    super verbose: true
   end
 
-  private
-
-  def run_helper(manifest, repo_dir, package_path)
-    lambda_package = manifest.lambda_package
-    target_name = lambda_package.target_name
-
+  def run(repo_dir, target_name, excluded_dependencies, extra_files, package_path)
     trace 'Rebuilding code (native)' do
       Dir.chdir(repo_dir) do
         Shell.check_run('stack', 'build', '--no-docker')
@@ -35,12 +27,8 @@ class BuildPackageTask < Task
       end
     end
     target_dir = File.expand_path('bin', local_install_root)
-    target_path = File.expand_path(lambda_package.target_name, target_dir)
-    excluded_dependencies = Set.new(lambda_package.excluded_dependencies)
-    extra_files_dir = lambda_package.extra_files_dir
-    extra_files = lambda_package
-      .extra_files
-      .map { |p| File.expand_path(File.join(extra_files_dir, p), manifest.dir) }
+    target_path = File.expand_path(target_name, target_dir)
+    excluded_dependencies = Set.new(excluded_dependencies)
 
     all_dependencies = trace 'Getting binary dependencies' do
       get_all_dependencies(target_path)
@@ -94,5 +82,14 @@ class BuildPackageTask < Task
       .map(&:split)
       .select { |l| l.size == 4 && l[1] == '=>' }
       .map { |l| [l[0], l[2]] }
+  end
+end
+
+module Package
+  def self.build(repo_dir, target_name, excluded_dependencies, extra_files)
+    Temp.with_temp_file('.zip') do |package_path|
+      PackageBuildTask.new.run repo_dir, target_name, excluded_dependencies, extra_files, package_path
+      package_path
+    end
   end
 end
